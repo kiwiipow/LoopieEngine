@@ -31,38 +31,39 @@ namespace Loopie {
 			JsonNode playerNode = root.Child("player");
 			JsonNode nameNode = root.Child("player.name");
 
+			Log::Info("{0}",data.GetValue<int>("player.stats.mana").Result);
+			Log::Info("{0}", root.GetValue<std::string>("player.name").Result);
+			Log::Info("{0}", playerNode.GetValue<std::string>("name").Result);
 
+			//playerNode.SetValue<std::string>("name","Lucia");
+			root.SetValue("player.name", "Carla");
 
-			Log::Info("{0}",data.Get<int>("player.stats.mana").Result);
-			Log::Info("{0}", root.Get<std::string>("player.name").Result);
-			Log::Info("{0}", playerNode.Get<std::string>("name").Result);
+			Log::Info("{0}", playerNode.GetValue<std::string>("name").Result);
+			Log::Info("{0}", root.GetValue<std::string>("player.name").Result);
 
-			//playerNode.Set<std::string>("name","Lucia");
-			root.Set("player.name", "Carla");
+			nameNode.SetValue("Manuel");
 
-			Log::Info("{0}", playerNode.Get<std::string>("name").Result);
-			Log::Info("{0}", root.Get<std::string>("player.name").Result);
-
-			nameNode.SetSelf("Manuel");
-
-			Log::Info("{0}", playerNode.Get<std::string>("name").Result);
-			Log::Info("{0}", root.Get<std::string>("player.name").Result);
-			Log::Info("{0}", nameNode.GetSelf<std::string>().Result);
+			Log::Info("{0}", playerNode.GetValue<std::string>("name").Result);
+			Log::Info("{0}", root.GetValue<std::string>("player.name").Result);
+			Log::Info("{0}", nameNode.GetValue<std::string>().Result);
 
 			Log::Info("{0}", playerNode.AddArrayElement("inventory", "potion"));
-			Log::Info("{0}", playerNode.Get<std::vector<std::string>>("inventory").Result[0]);
+			Log::Info("{0}", playerNode.GetValue<std::vector<std::string>>("inventory").Result[0]);
 
-			playerNode.AddField("testStats", 100);
+			playerNode.CreateField("testStats", 100);
 
-			JsonNode test = playerNode.AddObjectField("backpack");
-			Log::Info("{0}", test.AddField("potions", 3).Exists());
+			JsonNode test = playerNode.CreateObjectField("backpack");
+			Log::Info("{0}", test.CreateField("potions", 3).IsValid());
 
-			JsonNode test2 = playerNode.AddArrayField("titles");
-			Log::Info("{0}", test2.AddArrayElementSelf("baron"));
+			JsonNode test2 = playerNode.CreateArrayField("titles");
+			Log::Info("{0}", test2.AddArrayElement("baron"));
 
-			root.Child("player.inventory").ModifyArrayElementSelf(0, "camion");
+			root.Child("player.inventory").ModifyArrayElement(0, "camion");
 
-			Json::WriteToFile("test.json", data);
+			Log::Info("\n{0}", root.ToString());
+
+
+			data.ToFile("test.json");
 		}
 	};
 }
