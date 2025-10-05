@@ -149,37 +149,10 @@ namespace Loopie {
 			{
 				m_window->SetPosition(10, 10);
 			}
+			// TEST - F7 FOR CORRECT SHADER TESTING
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F7) == KeyState::DOWN)
 			{
-				m_window->SetWindowSize(1280, 720);
-			}
-			// TEST - F8 FOR CORRECT SHADER TESTING
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F8) == KeyState::DOWN)
-			{
-				/*m_window->SetWindowSize(1280, 720, true);*/
-
-				const char* vertexShaderSource = "\n"
-					"#version 460 core\n"
-					"layout (location = 0) in vec3 inPos;\n"
-					"layout (location = 1) in vec3 inColor;\n"
-					"out vec3 vertexColor;\n"
-					"uniform mat4 modelViewProj;\n"
-					"void main()\n"
-					"{\n"
-					"gl_Position = modelViewProj * vec4(inPos, 1.0);\n"
-					"vertexColor = inColor;\n"
-					"}\0";
-
-				const char* fragmentShaderSource = "\n"
-					"#version 460 core\n"
-					"in vec3 vertexColor;\n"
-					"out vec4 FragColor;\n"
-					"void main()\n"
-					"{\n"
-					"   FragColor = vec4(vertexColor, 1.0f);\n"
-					"}\0";
-
-				Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShader.shader");
 				if (!shader->GetIsValidShader())
 				{
 					delete shader;
@@ -187,27 +160,27 @@ namespace Loopie {
 				}
 				if (shader)
 				{
-					shader->PrintParsedVariables();
+					/*shader->PrintParsedVariables();*/
+				}
+			}
+			// TEST - F8 FOR INCORRECT SHADER PATH
+			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F8) == KeyState::DOWN)
+			{
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShaader.shader");
+				if (!shader->GetIsValidShader())
+				{
+					delete shader;
+					shader = nullptr;
+				}
+				if (shader)
+				{
+					/*shader->PrintParsedVariables();*/
 				}
 			}
 			// TEST - F9 FOR FAILING SHADER TESTING
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F9) == KeyState::DOWN)
 			{
-				/*m_window->SetWindowSize(1280, 720, true);*/
-
-				const char* vertexShaderSource = "\n"
-					"#2\n";
-
-				const char* fragmentShaderSource = "\n"
-					"#version 460 core\n"
-					"in vec3 vertexColor;\n"
-					"out vec4 FragColor;\n"
-					"void main()\n"
-					"{\n"
-					"   FragColor = vec4(vertexColor, 1.0f);\n"
-					"}\0";
-
-				Shader* shader = new Shader(vertexShaderSource, fragmentShaderSource);
+				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/WrongShader.shader");
 				if (!shader->GetIsValidShader())
 				{
 					delete shader;
@@ -215,7 +188,7 @@ namespace Loopie {
 				}
 				if (shader)
 				{
-					shader->PrintParsedVariables();
+					/*shader->PrintParsedVariables();*/
 				}
 			}
 			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_ESCAPE) == KeyState::DOWN)

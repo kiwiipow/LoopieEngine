@@ -2,34 +2,42 @@
 #include "Loopie/Core/Log.h"
 
 #include <regex>
+#include <fstream>
+#include <sstream>
 
 namespace Loopie {
-	// If the shader has errors, it won't be created.
-	// If so, the pointer has to be deleted from outside to prevent memory leaks. 
-	// Check if it's valid with GetIsValidShader()
-	Shader::Shader(const char* vertexPath, const char* fragmentPath)
+	// If shader compilation/linking fails, GetIsValidShader() will return false.
+	// The object is still valid but the shader program may not be usable.
+	Shader::Shader(const char* sourcePath)
 	{
-		// TODO: Read files once we have them
-		// m_vertexSource = ReadFile(vertexPath);
-		// m_fragmentSource = ReadFile(fragmentPath);
-		m_vertexSource = vertexPath;
-		m_fragmentSource = fragmentPath;
+		m_filePath = sourcePath;
 
-		ParseShaderSource(m_vertexSource);
-		ParseShaderSource(m_fragmentSource);
+		if (!ParseShaderSourcePath(m_filePath))
+		{
+			Loopie::Log::Critical("Shader file parsing failed. Aborting shader compilation.");
+			return;
+		}
 
 		m_vertexVersion = ParseGLSLVersion(m_vertexSource);
 		m_fragmentVersion = ParseGLSLVersion(m_fragmentSource);
 
-		GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexPath);
-		GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentPath);
+		GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, m_vertexSource.c_str());
+		GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, m_fragmentSource.c_str());
 
-		if (!vertexShader || !fragmentShader)
+		if (!CheckCompileErrors(vertexShader, "VERTEX"))
 		{
-			Loopie::Log::Critical("Shader compilation failed. Aborting program link.");
+			Loopie::Log::Critical("Vertex shader compilation failed. Aborting program link.");
 			glDeleteShader(vertexShader);
 			glDeleteShader(fragmentShader);
-			return; 
+			return;
+		}
+
+		if (!CheckCompileErrors(fragmentShader, "FRAGMENT"))
+		{
+			Loopie::Log::Critical("Fragment shader compilation failed. Aborting program link.");
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			return;
 		}
 
 		m_ID = glCreateProgram();
@@ -59,43 +67,156 @@ namespace Loopie {
 	}
 
 	void Shader::Unbind() const
-	{
+	{	
 		glUseProgram(0);
+	}
+
+	bool Shader::Reload()
+	{
+		m_isValidShader = true; // resetting the state so it can fail again if necessary
+
+		if (!ParseShaderSourcePath(m_filePath))
+		{
+			Loopie::Log::Critical("Shader file parsing failed. Aborting shader compilation.");
+			return false;
+		}
+
+		m_vertexVersion = ParseGLSLVersion(m_vertexSource);
+		m_fragmentVersion = ParseGLSLVersion(m_fragmentSource);
+
+		GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, m_vertexSource.c_str());
+		GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, m_fragmentSource.c_str());
+
+		if (!CheckCompileErrors(vertexShader, "VERTEX"))
+		{
+			Loopie::Log::Critical("Vertex shader compilation failed. Aborting program link.");
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			return false;
+		}
+
+		if (!CheckCompileErrors(fragmentShader, "FRAGMENT"))
+		{
+			Loopie::Log::Critical("Fragment shader compilation failed. Aborting program link.");
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			return false;
+		}
+
+		// Create new program
+		GLuint newProgram = glCreateProgram();
+		glAttachShader(newProgram, vertexShader);
+		glAttachShader(newProgram, fragmentShader);
+		glLinkProgram(newProgram);
+
+		if (!CheckCompileErrors(newProgram, "PROGRAM"))
+		{
+			Loopie::Log::Critical("Shader linking failed. Keeping old shader.");
+			glDeleteProgram(newProgram);
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			m_isValidShader = false;
+			return false;
+		}
+
+		// Delete old program and swap them
+		glDeleteProgram(m_ID);
+		m_ID = newProgram;
+
+		// Clear cache since uniform locations may have changed
+		m_uniformLocationCache.clear();
+		m_activeUniformsCache.clear();
+		m_activeAttributesCache.clear();
+		m_uniformsCached = false;
+		m_attributesCached = false;
+
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+		return true;
 	}
 
 	void Shader::SetUniformInt(const std::string& name, int value)
 	{
-		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniform1i(location, value);
 	}
 
 	void Shader::SetUniformFloat(const std::string& name, float value)
 	{
-		glUniform1f(glGetUniformLocation(m_ID, name.c_str()), value);
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniform1f(location, value);
+	}
+
+	void Shader::SetUniformMat3(const std::string& name, const Loopie::matrix3& matrix)
+	{
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]);
 	}
 
 	void Shader::SetUniformMat4(const std::string& name, const matrix4& matrix)
 	{
-		glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &matrix[0][0]);
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
 	}
 
 	void Shader::SetUniformVec2(const std::string& name, const Loopie::vec2& vector)
 	{
-		glUniform2fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vector[0]);
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniform2fv(location, 1, &vector[0]);
 	}
 
 	void Shader::SetUniformVec3(const std::string& name, const vec3& vector)
 	{
-		glUniform3fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vector[0]);
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniform3fv(location, 1, &vector[0]);
 	}
 
 	void Shader::SetUniformVec4(const std::string& name, const Loopie::vec4& vector)
 	{
-		glUniform4fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vector[0]);
-	}
-
-	const std::vector<ShaderVariable>& Shader::GetParsedVariables() const
-	{
-		return m_variables;
+		if (!CheckIfShaderIsBoundAndWarn()) return;
+		GLint location = GetUniformLocation(name);
+		if (location == -1)
+		{
+			Log::Warn("Uniform '{0}' not found in shader.", name);
+			return;
+		}
+		glUniform4fv(location, 1, &vector[0]);
 	}
 
 	const std::string& Shader::GetVertexVersion() const
@@ -113,25 +234,98 @@ namespace Loopie {
 		return m_ID;
 	}
 
+	GLint Shader::GetUniformLocation(const std::string& name)
+	{
+		if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
+		{
+			return m_uniformLocationCache[name];
+		}
+
+		GLint location = glGetUniformLocation(m_ID, name.c_str());
+		m_uniformLocationCache[name] = location;
+		return location;
+	}
+
 	bool Shader::GetIsValidShader() const
 	{
 		return m_isValidShader;
 	}
 
-	void Shader::PrintParsedVariables() const
+	const std::string& Shader::GetVertexSource() const
+	{ 
+		return m_vertexSource; 
+	}
+
+	const std::string& Shader::GetFragmentSource() const
+	{ 
+		return m_fragmentSource;
+	}
+
+	const std::string& Shader::GetFilePath() const
+	{ 
+		return m_filePath; 
+	}
+
+	bool Shader::GetIsBound() const
 	{
-		Log::Info("=== Parsed Shader Variables ===");
-		Log::Info("Vertex version: {0}", m_vertexVersion);
-		Log::Info("Fragment version: {0}", m_fragmentVersion);
-		for (const auto& var : m_variables)
+		GLint currentProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+		return currentProgram == static_cast<GLint>(m_ID);
+	}
+
+	const std::vector<std::string>& Shader::GetActiveUniforms() const
+	{
+		if (m_uniformsCached)
+			return m_activeUniformsCache;
+
+		m_activeUniformsCache.clear();
+
+		GLint count;
+		glGetProgramiv(m_ID, GL_ACTIVE_UNIFORMS, &count);
+
+		for (GLint i = 0; i < count; i++)
 		{
-			Log::Info("{0} {1} {2}", var.qualifier, var.type, var.name);
-			if (!var.arraySize.empty())
-			{
-				Log::Info("{0}", var.arraySize);
-			}
+			GLchar name[256];
+			GLsizei length;
+			GLint size;
+			GLenum type;
+
+			glGetActiveUniform(m_ID, i, sizeof(name), &length, &size, &type, name);
+			m_activeUniformsCache.push_back(std::string(name));
 		}
-		Log::Info("==============================");
+
+		m_uniformsCached = true;
+		return m_activeUniformsCache;
+	}
+
+	const std::vector<std::string>& Shader::GetActiveAttributes() const
+	{
+		if (m_attributesCached)
+			return m_activeAttributesCache;
+
+		m_activeAttributesCache.clear();
+
+		GLint count;
+		glGetProgramiv(m_ID, GL_ACTIVE_ATTRIBUTES, &count);
+
+		for (GLint i = 0; i < count; i++)
+		{
+			GLchar name[256];
+			GLsizei length;
+			GLint size;
+			GLenum type;
+
+			glGetActiveAttrib(m_ID, i, sizeof(name), &length, &size, &type, name);
+			m_activeAttributesCache.push_back(std::string(name));
+		}
+
+		m_attributesCached = true;
+		return m_activeAttributesCache;
+	}
+
+	void Shader::SetPath(const std::string& path)
+	{
+		m_filePath = path;
 	}
 
 	GLuint Shader::CompileShader(GLenum shaderType, const char* source)
@@ -139,7 +333,6 @@ namespace Loopie {
 		GLuint shader = glCreateShader(shaderType);
 		glShaderSource(shader, 1, &source, NULL);
 		glCompileShader(shader);
-		CheckCompileErrors(shader, shaderType == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
 		return shader;
 	}
 
@@ -153,7 +346,7 @@ namespace Loopie {
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				Loopie::Log::Critical("ERROR - SHADER_COMPILATION_ERROR of type {0}:\n{1}", type, infoLog);
+				Loopie::Log::Error("ERROR - SHADER_COMPILATION_ERROR of type {0}:\n{1}", type, infoLog);
 				m_isValidShader = false;
 				return false;
 			}
@@ -164,7 +357,7 @@ namespace Loopie {
 			if (!success)
 			{
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-				Loopie::Log::Critical("ERROR - PROGRAM_LINKING_ERROR:\n{0}", infoLog);
+				Loopie::Log::Error("ERROR - PROGRAM_LINKING_ERROR of type {0}:\n{1}", type, infoLog);
 				m_isValidShader = false;
 				return false;
 			}
@@ -187,23 +380,67 @@ namespace Loopie {
 		return "unknown";
 	}
 
-	void Shader::ParseShaderSource(const std::string& source)
+	bool Shader::ParseShaderSourcePath(const std::string& filePath)
 	{
-		std::regex varRE(
-			R"((?:layout\s*\([^)]*\)\s*)?(?:\w+\s+)*(in|out|uniform)\s+(\w+)\s+(\w+)(\[\s*\d+\s*\])?\s*;)",
-			std::regex::ECMAScript | std::regex::optimize);
-
-		auto begin = std::sregex_iterator(source.begin(), source.end(), varRE);
-		auto end = std::sregex_iterator();
-
-		for (auto it = begin; it != end; ++it)
+		// Read the entire file
+		std::ifstream file(filePath);
+		if (!file.is_open())
 		{
-			ShaderVariable var;
-			var.qualifier = (*it)[1].str();
-			var.type = (*it)[2].str();
-			var.name = (*it)[3].str();
-			var.arraySize = (*it)[4].matched ? (*it)[4].str() : "";
-			m_variables.push_back(var);
+			Log::Error("ERROR - SHADER PARSER - File not found: {0}", filePath);
+			m_isValidShader = false;
+			return false;
 		}
+
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string content = buffer.str();
+		file.close();
+
+		// Find [vertex] and [fragment] markers
+		size_t vertexPos = content.find("[vertex]");
+		size_t fragmentPos = content.find("[fragment]");
+
+		if (vertexPos == std::string::npos || fragmentPos == std::string::npos)
+		{
+			Log::Error("ERROR - SHADER PARSER - Could not find [vertex] or [fragment] markers in {0}", filePath);
+			m_isValidShader = false;
+			return false;
+		}
+
+		// Extract vertex shader (between [vertex] and [fragment])
+		size_t vertexStart = vertexPos + 8; // Skip "[vertex]"
+		m_vertexSource = content.substr(vertexStart, fragmentPos - vertexStart);
+
+		// Extract fragment shader (after [fragment] to end)
+		size_t fragmentStart = fragmentPos + 10; // Skip "[fragment]"
+		m_fragmentSource = content.substr(fragmentStart);
+
+		// Trim whitespace
+		auto trim = [](std::string& s)
+			{
+				size_t start = s.find_first_not_of(" \t\n\r");
+				if (start == std::string::npos) {
+					s.clear();
+					return;
+				}
+				size_t end = s.find_last_not_of(" \t\n\r");
+				s = s.substr(start, end - start + 1);
+			};
+
+		trim(m_vertexSource);
+		trim(m_fragmentSource);
+
+		m_isValidShader = !m_vertexSource.empty() && !m_fragmentSource.empty();
+		return true;
+	}
+
+	bool Shader::CheckIfShaderIsBoundAndWarn() 
+	{
+		bool isBound = GetIsBound();
+		if (!isBound)
+		{
+			Log::Warn("Shader is not bound. Cancelling operation.");
+		}
+		return isBound;
 	}
 }
