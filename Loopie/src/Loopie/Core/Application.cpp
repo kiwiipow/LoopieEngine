@@ -3,18 +3,11 @@
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Render/Renderer.h"
-#include "Loopie/Render/Shader.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/VertexArray.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/VertexBuffer.h" // TEMP INCLUDE FOR SHADER TESTING
-#include "Loopie/Render/IndexBuffer.h" // TEMP INCLUDE FOR SHADER TESTING
+#include "Loopie/Components/Mesh.h"
+#include "Loopie/Files/MeshImporter.h"
+
+
 #include "Loopie/Core/Math.h" // TEMP INCLUDE FOR SHADER TESTING
-
-#include <SDL3/SDL_init.h> // TEMP INCLUDE FOR POLLING EVENTS
-#include <SDL3/SDL.h>// TEMP INCLUDE FOR POLLING EVENTS
-#include <imgui.h>// TEMP INCLUDE FOR POLLING EVENTS
-
-
-#include "Loopie/Files/FileDialog.h"
 
 namespace Loopie {
 	Application* Application::s_Instance = nullptr;
@@ -83,9 +76,9 @@ namespace Loopie {
 		return *s_Instance;
 	}
 
-	Window* Application::GetWindow() const
+	Window& Application::GetWindow()
 	{
-		return m_window;
+		return *m_window;
 	}
 
 	InputEventManager& Application::GetInputEvent()
@@ -97,20 +90,20 @@ namespace Loopie {
 	{
 		////TESTING VARIABLES
 
-		float cubeVertices[]
+		std::vector<Vertex> cubeVertices
 		{
-			//  Position                Color
-				-0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,
-				0.5f, -0.5f, -0.5f,     0.0f, 1.0f, 0.0f,
-				0.5f, 0.5f, -0.5f,      0.0f, 0.0f, 1.0f,
-				-0.5f, 0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
-				-0.5f, -0.5f, 0.5f,     0.0f, 1.0f, 1.0f,
-				0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 0.0f,
-				0.5f, 0.5f, 0.5f,       1.0f, 0.0f, 1.0f,
-				-0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,
+			//Position                  Color
+			{{-0.5f, -0.5f, -0.5f},		{1.0f, 0.0f, 0.0f,}},
+			{{0.5f, -0.5f, -0.5f},		{0.0f, 1.0f, 0.0f,}},
+			{{0.5f, 0.5f, -0.5f},		{0.0f, 0.0f, 1.0f,}},
+			{{-0.5f, 0.5f, -0.5f},		{1.0f, 0.0f, 0.0f,}},
+			{{-0.5f, -0.5f, 0.5f},		{0.0f, 1.0f, 1.0f,}},
+			{{0.5f, -0.5f, 0.5f},		{1.0f, 1.0f, 0.0f,}},
+			{{0.5f, 0.5f, 0.5f},		{1.0f, 0.0f, 1.0f,}},
+			{{-0.5f, 0.5f, 0.5f},		{1.0f, 1.0f, 1.0f,}}
 		};
 
-		unsigned int cubeIndices[]
+		std::vector<unsigned int> cubeIndices
 		{
 			// Top face
 			3, 2, 6,
@@ -132,20 +125,7 @@ namespace Loopie {
 			6, 7, 4,
 		};
 
-
-
-		Shader shader = Shader("../../../Loopie/src/Loopie/Render/CorrectShader.shader");
-		VertexBuffer vb = VertexBuffer(cubeVertices,sizeof(cubeVertices));
-		IndexBuffer ib = IndexBuffer(cubeIndices,36);
-
-
-		vb.GetLayout().AddLayoutElement(GLVariableType::FLOAT, 3);
-		vb.GetLayout().AddLayoutElement(GLVariableType::FLOAT, 3);
-
-
-		VertexArray va;
-		va.AddBuffer(vb, ib);
-
+		Mesh mesh = Mesh(cubeVertices, cubeIndices);
 
 		glm::vec3 position(0.0f, 0.0f, -5.0f);
 		glm::vec3 forward(0.0f, 0.0f, 1.0f);
@@ -158,13 +138,11 @@ namespace Loopie {
 		const float NEAR_PLANE = 0.1f;
 		const float FAR_PLANE = 100.0f;
 
-		SDL_Time prevTime;
-		SDL_GetCurrentTime(&prevTime);
 		float rotation = 0.0f;
 		const float SPEED = 100.0f;
 
 
-		vec2 windowSize = m_window->GetSize();
+		ivec2 windowSize = m_window->GetSize();
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(FOV), static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
 
 		////
@@ -173,11 +151,14 @@ namespace Loopie {
 		{
 
 			Renderer::Clear();
-			
+
+			m_window->StartFrame();
 			m_imguiManager.StartFrame();
 
 			m_inputEvent.Update();
-			ProcessEvents();
+
+			m_window->ProcessEvents(m_inputEvent);
+			ProcessEvents(m_inputEvent);
 
 			for (Module* module : m_modules) {
 				if (module->IsActive()) {
@@ -195,28 +176,18 @@ namespace Loopie {
 
 			///// TEST AREA
 
-			if (m_inputEvent.HasEvent(SDL_EVENT_WINDOW_RESIZED)) {
-				windowSize = m_window->GetSize();
-				ivec2 windowPosition = m_window->GetPosition();
-				projectionMatrix = glm::perspective(glm::radians(FOV), static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
-				glViewport(0,0, windowSize.x, windowSize.y);
-			}
-
+			windowSize = m_window->GetSize();
+			projectionMatrix = glm::perspective(glm::radians(FOV), static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y), NEAR_PLANE, FAR_PLANE);
 			glm::mat4 modelMatrix(1.0f);
 			modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::mat4 modelViewProj = projectionMatrix * viewMatrix * modelMatrix;
 
-			SDL_Time currentTime;
-			SDL_GetCurrentTime(&currentTime);
+			rotation += SPEED * m_window->GetDeltaTime();
 
-			const float dt = (currentTime - prevTime) / 1000000000.0f;
-			rotation += SPEED * dt;
-			prevTime = currentTime;
-
-			shader.Bind();
-			shader.SetUniformMat4("modelViewProj", modelViewProj);
-			Renderer::Draw(va, shader);
-
+			mesh.GetShader().Bind();
+			mesh.GetShader().SetUniformMat4("modelViewProj", modelViewProj);
+			mesh.Render();
+			
 			/////
 
 
@@ -226,87 +197,24 @@ namespace Loopie {
 		}
 	}
 
-	void Application::ProcessEvents()
+	void Application::ProcessEvents(InputEventManager& eventController)
 	{
-		if (m_inputEvent.HasEvent(SDL_EVENT_QUIT))
+		if (eventController.HasEvent(SDL_EVENT_QUIT))
 		{
 			Close();
 			return;
 		}
-
-		if (m_inputEvent.HasEvent(SDL_EVENT_KEY_DOWN)) {
-			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F1) == KeyState::DOWN)
-			{
-				m_window->GetSize().y, m_window->GetPosition().x, m_window->GetPosition().y, m_window->IsFullscreen();
-			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F2) == KeyState::DOWN)
+		if (eventController.HasEvent(SDL_EVENT_KEY_DOWN)) {
+			if (eventController.GetKeyStatus(SDL_SCANCODE_F11) == KeyState::DOWN)
 			{
 				m_window->SetWindowFullscreen(!m_window->IsFullscreen());
 			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F3) == KeyState::DOWN)
-			{
-				m_window->SetResizable(true);
-			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F4) == KeyState::DOWN)
-			{
-				m_window->SetResizable(false);
-			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F5) == KeyState::DOWN)
-			{
-				m_window->SetTitle("Loopie!");
-			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F6) == KeyState::DOWN)
-			{
-				m_window->SetPosition(10, 10);
-			}
-			// TEST - F7 FOR CORRECT SHADER TESTING
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F7) == KeyState::DOWN)
-			{
-				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShader.shader");
-				if (!shader->GetIsValidShader())
-				{
-					delete shader;
-					shader = nullptr;
-				}
-				if (shader)
-				{
-					/*shader->PrintParsedVariables();*/
-				}
-			}
-			// TEST - F8 FOR INCORRECT SHADER PATH
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F8) == KeyState::DOWN)
-			{
-				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/CorrectShaader.shader");
-				if (!shader->GetIsValidShader())
-				{
-					delete shader;
-					shader = nullptr;
-				}
-				if (shader)
-				{
-					/*shader->PrintParsedVariables();*/
-				}
-			}
-			// TEST - F9 FOR FAILING SHADER TESTING
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_F9) == KeyState::DOWN)
-			{
-				Shader* shader = new Shader("../../../Loopie/src/Loopie/Render/WrongShader.shader");
-				if (!shader->GetIsValidShader())
-				{
-					delete shader;
-					shader = nullptr;
-				}
-				if (shader)
-				{
-					/*shader->PrintParsedVariables();*/
-				}
-			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_ESCAPE) == KeyState::DOWN)
+			else if (eventController.GetKeyStatus(SDL_SCANCODE_ESCAPE) == KeyState::DOWN)
 			{
 				Close();
 			}
-			else if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_I) == KeyState::DOWN){
-				m_renderInterface = !m_renderInterface;
+			else if (eventController.GetKeyStatus(SDL_SCANCODE_I) == KeyState::DOWN){
+				SetInterfaceState(!m_renderInterface);
 			}
 		}
 	}

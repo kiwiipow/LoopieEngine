@@ -21,11 +21,14 @@ namespace Loopie {
 		void Close();
 
 		static Application& GetInstance();
-		Window* GetWindow() const;
+		Window& GetWindow();
 		InputEventManager& GetInputEvent();
 
+		void SetInterfaceState(bool enabled) { m_renderInterface = enabled; }
+		bool IsInterfaceVisible() const{ return m_renderInterface; }
+
 	private:
-		void ProcessEvents();
+		void ProcessEvents(InputEventManager& eventController);
 
 	public:
 		Project m_activeProject;
