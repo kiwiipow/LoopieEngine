@@ -29,7 +29,7 @@ namespace Loopie {
 	void Renderer::Draw(const VertexArray& vao, const Shader& shader) {
 		vao.Bind();
 		shader.Bind();
-		//// Bind VAO
+
 		glDrawElements(GL_TRIANGLES, vao.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 }

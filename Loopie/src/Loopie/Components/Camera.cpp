@@ -28,8 +28,6 @@ namespace Loopie
 		return m_viewProjectionMatrix;
 	}
 
-	
-
 	void Camera::SetPosition(const vec3& position)
 	{
 		m_position = position;

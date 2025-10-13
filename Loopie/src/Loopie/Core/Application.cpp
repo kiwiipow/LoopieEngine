@@ -99,6 +99,8 @@ namespace Loopie {
 		float rotation = 0.0f;
 		const float SPEED = 100.0f;
 
+		vec3 cameraPosition = vec3(0, 0, -50);
+		vec3 cameraRotation = vec3(0, 0, 0);
 		////
 
 		while (m_running)
@@ -148,16 +150,23 @@ namespace Loopie {
 			}
 
 			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT)
-				camera.SetPosition(vec3(0, 0, camera.GetPosition().z + 10 * m_window->GetDeltaTime()));
+				cameraPosition.z += 10 * m_window->GetDeltaTime();
 
 			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT)
-				camera.SetPosition(vec3(0, 0, camera.GetPosition().z - 10 * m_window->GetDeltaTime()));
+				cameraPosition.z -= 10 * m_window->GetDeltaTime();
 
+			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT)
+				cameraPosition.x += 10 * m_window->GetDeltaTime();
+
+			if (m_inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT)
+				cameraPosition.x -= 10 * m_window->GetDeltaTime();
+
+			camera.SetPosition(cameraPosition);
+			camera.SetRotation(cameraRotation);
 
 			rotation += SPEED * m_window->GetDeltaTime();
 			vec3 rot = meshT.GetEulerAnglesDeg();
 			rot.y += rotation;
-
 			meshT.SetEulerAnglesDeg(rot);
 
 			glm::mat4 modelViewProj = camera.GetViewProjectionMatrix() * meshT.GetTransformMatrix();
@@ -175,7 +184,8 @@ namespace Loopie {
 
 			m_imguiManager.EndFrame();
 
-			m_window->Update();		
+			m_window->Update();	
+			
 		}
 
 		///// TEST AREA
