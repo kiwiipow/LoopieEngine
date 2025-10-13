@@ -32,10 +32,10 @@ namespace Loopie {
 		glViewport(x, y, width, height);
 	}
 
-	void Renderer::Draw(const VertexArray& vao, const Shader& shader) {
-		vao.Bind();
+	void Renderer::Draw(std::shared_ptr<VertexArray> vao, const Shader& shader) {
+		vao->Bind();
 		shader.Bind();
 		//// Bind VAO
-		glDrawElements(GL_TRIANGLES, vao.GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 }

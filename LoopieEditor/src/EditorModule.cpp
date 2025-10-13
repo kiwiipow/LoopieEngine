@@ -70,16 +70,25 @@ namespace Loopie
 				///// Generate MetaData
 				///// Generate MeshFromMetaData
 				///// Generate MeshRenderer
-				AssetMetadata metadata;
-				metadata.sourcePath = fileName;
-				metadata.cachePath = fileName;
 
-				MeshImporter::LoadModel(fileName); ///// dont return meshes, only create cacheFile, and fill AssetMetadata
-				AssetRegistry::RegisterAsset(metadata);
+				std::vector<std::string> cacheFiles = MeshImporter::LoadModel(fileName); ///// dont return meshes, only create cacheFile, and fill AssetMetadata
+				
+				for (size_t i = 0; i < cacheFiles.size(); i++)
+				{
+					std::filesystem::path path = cacheFiles[i];
 
-				//std::shared_ptr<Mesh> mesh = ResourceDatabase::LoadResource<Mesh>(metadata.uuid); /// change Mesh class constructor, and structure, make VAO, EBO ... sharedPtr
-				//if(mesh)
-					//meshRenderers.push_back(new MeshRenderer(mesh));
+					AssetMetadata metadata;
+					metadata.uuid = UUID(path.filename().string());
+					metadata.cachePath = cacheFiles[i];
+					metadata.sourcePath = fileName;
+					AssetRegistry::RegisterAsset(metadata);
+
+					std::shared_ptr<Mesh> mesh = ResourceDatabase::LoadResource<Mesh>(metadata.uuid); /// change Mesh class constructor, and structure, make VAO, EBO ... sharedPtr
+					if (mesh)
+						meshRenderers.push_back(new MeshRenderer(mesh));
+				}
+
+				
 			}
 		}
 

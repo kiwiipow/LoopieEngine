@@ -5,6 +5,7 @@
 #include "Loopie/Render/VertexBuffer.h"
 #include "Loopie/Render/VertexArray.h"
 #include <vector>
+#include <memory>
 
 namespace Loopie {
 
@@ -16,22 +17,22 @@ namespace Loopie {
 		bool Normal = false;
 	};
 
-	class Mesh /*: public Resource*/{
+	class Mesh : public Resource{
 		friend class MeshRenderer;
 	public :
-		Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const VertexComponents& components);
+		Mesh(const UUID& id);
 		~Mesh() = default;
 
-		/*void LoadFromFile(const std::string path) override;
-		void Reload() override;*/
+		void LoadFromFile(const std::string path) override;
+		void Reload() override;
 	private:
 		std::vector<float> m_vertices;
 		std::vector<unsigned int> m_indices;
 		VertexComponents m_components;
 
-		VertexArray m_vao;
-		VertexBuffer m_vbo;
-		IndexBuffer m_ebo;
+		std::shared_ptr<VertexArray> m_vao;
+		std::shared_ptr<VertexBuffer> m_vbo;
+		std::shared_ptr<IndexBuffer> m_ebo;
 
 	};
 }

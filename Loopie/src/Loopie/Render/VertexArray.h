@@ -19,7 +19,7 @@ namespace Loopie
         void Bind() const;
         void Unbind() const;
 
-        void AddBuffer(VertexBuffer& vbo, IndexBuffer& ebo);
+        void AddBuffer(VertexBuffer* vbo, IndexBuffer* ebo);
 
         const IndexBuffer& GetIndexBuffer() const;
     };

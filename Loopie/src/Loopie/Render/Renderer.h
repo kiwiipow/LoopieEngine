@@ -3,6 +3,8 @@
 #include "Loopie/Render/Shader.h"
 #include "Loopie/Render/VertexArray.h"
 
+#include <filesystem>
+
 namespace Loopie {
 	class Renderer {
 	public:
@@ -11,6 +13,6 @@ namespace Loopie {
 		static void Clear();
 		static void SetClearColor(vec4 color);
 		static void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
-		static void Draw(const VertexArray& vao, const Shader& shader);
+		static void Draw(std::shared_ptr<VertexArray> vao, const Shader& shader);
 	};
 }

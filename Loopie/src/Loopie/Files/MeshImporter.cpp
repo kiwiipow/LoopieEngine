@@ -1,27 +1,30 @@
 #include "MeshImporter.h"
 
 #include "Loopie/Core/Log.h"
+#include "Loopie/Core/Application.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <fstream>
+#include <iostream>
 #include <filesystem> // Used for checking the extension
 
 
 namespace Loopie {
-	std::vector<std::shared_ptr<Mesh>> MeshImporter::LoadModel(const std::string& filepath) {
-		std::vector<std::shared_ptr<Mesh>> meshes;
+	std::vector<std::string> MeshImporter::LoadModel(const std::string& filepath) {
+		std::vector<std::string> outputPaths;
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		if (!scene || !scene->mRootNode) {
 			Log::Error("Assimp Error: {0}", importer.GetErrorString());
-			return meshes;
+			return outputPaths;
 		}
 
-		ProcessNode(scene->mRootNode, scene, meshes);
-		return meshes;
+		ProcessNode(scene->mRootNode, scene, outputPaths);
+		return outputPaths;
 	}
 
 	bool MeshImporter::CheckIfIsModel(const char* path)
@@ -40,84 +43,126 @@ namespace Loopie {
 		return importer.IsExtensionSupported(extension);
 	}
 
-	void MeshImporter::ProcessNode(void* nodePtr, const void* scenePtr, std::vector<std::shared_ptr<Mesh>>& meshes) {
+	void MeshImporter::ProcessNode(void* nodePtr, const void* scenePtr, std::vector<std::string>& outputPaths) {
 		auto node = static_cast<const aiNode*>(nodePtr);
 		auto scene = static_cast<const aiScene*>(scenePtr);
 
 		for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(ProcessMesh(mesh, scene));
+			outputPaths.push_back(ProcessMesh(mesh, scene));
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; i++) {
-			ProcessNode(node->mChildren[i], scene, meshes);
+			ProcessNode(node->mChildren[i], scene, outputPaths);
 		}
 	}
 
-	std::shared_ptr<Mesh> MeshImporter::ProcessMesh(void* meshPtr, const void* scenePtr) {
+	std::string MeshImporter::ProcessMesh(void* meshPtr, const void* scenePtr) {
 
 		auto mesh = static_cast<const aiMesh*>(meshPtr);
 
-		std::vector<float> vertices;
-		std::vector<unsigned int> indices;
-		VertexComponents components;
+		struct MeshData
+		{
+			//const char* Name="";
+			unsigned int verticesAmount=0;
+			unsigned int vertexElements=0;
+			unsigned int indicesAmount=0;
+			VertexComponents components;
+		};
 
-		components.Position = mesh->mNumVertices > 0;
-		components.Normal = mesh->HasNormals();
-		components.TexCoord = mesh->mTextureCoords[0];
-		components.Tangent = mesh->HasTangentsAndBitangents();
-		components.Color = mesh->HasVertexColors(0);
+		MeshData data;
+		//data.Name = mesh->mName.C_Str();
+		data.verticesAmount = mesh->mNumVertices;
 
-		int totalComponents = components.Position ? 3 : 0;
-		totalComponents += components.Normal ? 3 : 0;
-		totalComponents += components.TexCoord ? 2 : 0;
-		totalComponents += components.Tangent ? 3 : 0;
-		totalComponents += components.Color ? 3 : 0;
+		data.components.Position = mesh->mNumVertices > 0;
+		data.components.Normal = mesh->HasNormals();
+		data.components.TexCoord = mesh->mTextureCoords[0];
+		data.components.Tangent = mesh->HasTangentsAndBitangents();
+		data.components.Color = mesh->HasVertexColors(0);
 
-		vertices.reserve(totalComponents * mesh->mNumVertices);
+		data.vertexElements = data.components.Position ? 3 : 0;
+		data.vertexElements += data.components.Normal ? 3 : 0;
+		data.vertexElements += data.components.TexCoord ? 2 : 0;
+		data.vertexElements += data.components.Tangent ? 3 : 0;
+		data.vertexElements += data.components.Color ? 3 : 0;
+
+
+
+		///// File Creation
+		Project project = Application::GetInstance().m_activeProject;
+		std::filesystem::path pathToWrite = project.GetChachePath();
+		UUID id;
+		pathToWrite /= id.Get() + ".mesh";
+
+		std::ofstream fs(pathToWrite, std::ios::out | std::ios::binary | std::ios::app);
+
+		//fs.write(data.Name, sizeof data.Name);
+		fs.write(reinterpret_cast<const char*>(&data.verticesAmount), sizeof data.verticesAmount);
+		fs.write(reinterpret_cast<const char*>(&data.vertexElements), sizeof data.vertexElements);
+
+
+		for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+			const aiFace& face = mesh->mFaces[i];
+			data.indicesAmount += face.mNumIndices;
+		}
+
+		fs.write(reinterpret_cast<const char*>(&data.indicesAmount), sizeof data.indicesAmount);
+
+		fs.write(reinterpret_cast<const char*>(&data.components.Position), sizeof data.components.Position);
+		fs.write(reinterpret_cast<const char*>(&data.components.Normal), sizeof data.components.Normal);
+		fs.write(reinterpret_cast<const char*>(&data.components.TexCoord), sizeof data.components.TexCoord);
+		fs.write(reinterpret_cast<const char*>(&data.components.Tangent), sizeof data.components.Tangent);
+		fs.write(reinterpret_cast<const char*>(&data.components.Color), sizeof data.components.Color);
+
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 			///Position
-			vertices.push_back(mesh->mVertices[i].x);
-			vertices.push_back(mesh->mVertices[i].y);
-			vertices.push_back(mesh->mVertices[i].z);
+			fs.write(reinterpret_cast<const char*>(&mesh->mVertices[i].x), sizeof mesh->mVertices[i].x);
+			fs.write(reinterpret_cast<const char*>(&mesh->mVertices[i].y), sizeof mesh->mVertices[i].y);
+			fs.write(reinterpret_cast<const char*>(&mesh->mVertices[i].z), sizeof mesh->mVertices[i].z);
 
 			///TexCoords
-			if (components.TexCoord) {
-				vertices.push_back(mesh->mTextureCoords[0][i].x);
-				vertices.push_back(mesh->mTextureCoords[0][i].y);
+			if (data.components.TexCoord) {
+				fs.write(reinterpret_cast<const char*>(&mesh->mTextureCoords[0][i].x), sizeof mesh->mTextureCoords[0][i].x);
+				fs.write(reinterpret_cast<const char*>(&mesh->mTextureCoords[0][i].y), sizeof mesh->mTextureCoords[0][i].y);
 			}
 
 			///Normals
-			if (components.Normal) {
-				vertices.push_back(mesh->mNormals[i].x);
-				vertices.push_back(mesh->mNormals[i].y);
-				vertices.push_back(mesh->mNormals[i].z);
+			if (data.components.Normal) {
+
+				fs.write(reinterpret_cast<const char*>(&mesh->mNormals[i].x), sizeof mesh->mNormals[i].x);
+				fs.write(reinterpret_cast<const char*>(&mesh->mNormals[i].y), sizeof mesh->mNormals[i].y);
+				fs.write(reinterpret_cast<const char*>(&mesh->mNormals[i].z), sizeof mesh->mNormals[i].z);
 			}
 
 			///Tangent
-			if (components.Tangent) {
-				vertices.push_back(mesh->mTangents[i].x);
-				vertices.push_back(mesh->mTangents[i].y);
-				vertices.push_back(mesh->mTangents[i].z);
+			if (data.components.Tangent) {
+
+				fs.write(reinterpret_cast<const char*>(&mesh->mTangents[i].x), sizeof mesh->mTangents[i].x);
+				fs.write(reinterpret_cast<const char*>(&mesh->mTangents[i].y), sizeof mesh->mTangents[i].y);
+				fs.write(reinterpret_cast<const char*>(&mesh->mTangents[i].z), sizeof mesh->mTangents[i].z);
 			}
 
 			///Color
-			if (components.Color) {
+			if (data.components.Color) {
 				const aiColor4D& c = mesh->mColors[0][i];
-				vertices.push_back(c.r);
-				vertices.push_back(c.g);
-				vertices.push_back(c.b);
+
+				fs.write(reinterpret_cast<const char*>(&c.r), sizeof c.r);
+				fs.write(reinterpret_cast<const char*>(&c.g), sizeof c.g);
+				fs.write(reinterpret_cast<const char*>(&c.b), sizeof c.b);
 			}
 
 		}
 
 		for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
 			const aiFace& face = mesh->mFaces[i];
-			for (unsigned int j = 0; j < face.mNumIndices; ++j)
-				indices.push_back(face.mIndices[j]);
+			for (unsigned int j = 0; j < face.mNumIndices; ++j) {
+				fs.write(reinterpret_cast<const char*>(&face.mIndices[j]), sizeof face.mIndices[j]);
+			}
 		}
+		fs.close();
 
-		return  std::make_shared<Mesh>(vertices, indices, components);
+
+		return pathToWrite.string();
 	}
 }

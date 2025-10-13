@@ -40,14 +40,14 @@ namespace Loopie
         glBindVertexArray(0);
     }
 
-    void VertexArray::AddBuffer(VertexBuffer& vbo, IndexBuffer& ebo)
+    void VertexArray::AddBuffer(VertexBuffer* vbo, IndexBuffer* ebo)
     {
         Bind();
 
-        ebo.Bind();
-        m_ebo = &ebo;
-        vbo.Bind();
-        m_vbo = &vbo;
+        ebo->Bind();
+        m_ebo = ebo;
+        vbo->Bind();
+        m_vbo = vbo;
 
         const BufferLayout& layout = m_vbo->GetLayout();
         for (const auto& element : layout.GetElements())
