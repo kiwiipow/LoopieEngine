@@ -35,6 +35,8 @@ namespace Loopie
 	
 		ivec2 windowSize = Application::GetInstance().GetWindow().GetSize();
 		camera->SetViewport(0, 0, windowSize.x, windowSize.y);
+
+		m_hierarchy.SetScene(scene);
 	}
 
 	void EditorModule::OnUnload()
