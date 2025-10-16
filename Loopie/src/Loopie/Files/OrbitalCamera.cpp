@@ -1,5 +1,7 @@
 #include "OrbitalCamera.h"
-#include "Transform.h"
+#include "Loopie/Scene/Entity.h"
+#include "Loopie/Components/Transform.h"
+#include "Loopie/Core/Log.h"
 
 namespace Loopie
 {
@@ -15,36 +17,44 @@ namespace Loopie
 	}
 	void OrbitalCamera::ProcessEvent(InputEventManager& inputEvent)
 	{
-		m_complexMovement = true;
 		if (inputEvent.GetMouseButtonStatus(1) == KeyState::REPEAT)
 		{
-			m_complexMovement = false;
-			m_inputDirection = vec3(inputEvent.GetMouseDelta().x, inputEvent.GetMouseDelta().y, 0);
-			m_inputDirection = normalize(m_inputDirection);
+			m_inputDirection = vec3(inputEvent.GetMouseDelta().x, -inputEvent.GetMouseDelta().y, 0);
 		}
-		if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
+		else if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
 		{
+			m_inputRotation = vec3(-inputEvent.GetMouseDelta().x, -inputEvent.GetMouseDelta().y, 0);
 			if (inputEvent.GetKeyStatus(SDL_SCANCODE_LSHIFT) == KeyState::REPEAT)
+			{
+				m_inputDirection = vec3(0);
 				m_speedMultiplier = 2.0f;
+			}
 			else
-				m_speedMultiplier = 2.0f;
+				m_speedMultiplier = 1.0f;
 		
-			if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT)
+			m_inputDirection = vec3(0);
+			if (inputEvent.GetKeyStatus(SDL_SCANCODE_W) == KeyState::REPEAT && m_inputDirection.z < 1)
 				m_inputDirection.z += 1;
-			if(inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT)
-				m_inputDirection.x -= 1;
-			if(inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT)
-				m_inputDirection.z -= 1;
-			if(inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT)
+			if (inputEvent.GetKeyStatus(SDL_SCANCODE_A) == KeyState::REPEAT && m_inputDirection.x < 1)
 				m_inputDirection.x += 1;
+			if(inputEvent.GetKeyStatus(SDL_SCANCODE_S) == KeyState::REPEAT && m_inputDirection.z > -1)
+				m_inputDirection.z -= 1;
+			if(inputEvent.GetKeyStatus(SDL_SCANCODE_D) == KeyState::REPEAT && m_inputDirection.x > -1)
+				m_inputDirection.x -= 1;
+			m_inputDirection *= 10;
+		}
+		else
+		{
+			m_inputDirection = vec3(0);
+			m_inputRotation = vec3(0);
 		}
 	}
+
 	void OrbitalCamera::Update(float dt)
 	{
-		std::shared_ptr<Transform>& transform = m_entity->GetTransform();
-		if (!m_complexMovement) {
-			transform->Translate
-
-		}
+		Transform* transform = m_entity->GetTransform();
+		transform->Translate(m_inputDirection * m_speedMultiplier * dt, false);
+		transform->Rotate(vec3(-m_inputRotation.y, -m_inputRotation.x, 0) * 10.0f * dt);
+		
 	}
 }

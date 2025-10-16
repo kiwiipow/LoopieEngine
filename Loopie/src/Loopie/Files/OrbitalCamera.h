@@ -12,8 +12,7 @@ namespace Loopie
 		void ProcessEvent(InputEventManager& inputEvent);
 		void Update(float dt);
 
-		void GetOrbitalCameraSettings()const;
-		void SetOrbitalCameraSettings();
+		Camera* GetCamera() { return m_camera; }
 	private:
 		float m_cameraMovementSpeed = 1.f;
 		float m_cameraRotationSpeed = 1.f;
@@ -24,6 +23,6 @@ namespace Loopie
 		bool m_complexMovement = false;
 
 		std::shared_ptr<Entity>m_entity;
-		std::shared_ptr<Camera>m_camera;
+		Camera* m_camera;
 	};
 }
