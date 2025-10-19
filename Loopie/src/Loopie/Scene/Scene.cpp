@@ -95,6 +95,11 @@ namespace Loopie {
 		m_entities.erase(uuid);
 	}
 
+	std::shared_ptr<Entity> Scene::GetRootEntity() const
+	{
+		return m_rootEntity;
+	}
+
 	std::shared_ptr<Entity> Scene::GetEntity(UUID uuid) const
 	{
 		auto it = m_entities.find(uuid);

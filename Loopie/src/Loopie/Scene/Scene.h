@@ -29,7 +29,8 @@ namespace Loopie {
 		
 		void RemoveEntity(UUID uuid);
 		// Name should be trimmed out of spaces for changename to work
-
+		
+		std::shared_ptr<Entity> GetRootEntity() const;
 		std::shared_ptr<Entity> GetEntity(UUID uuid) const;
 		std::shared_ptr<Entity> GetEntity(const std::string& name) const;
 		// Returns the unordered_map of the UUID and Entity ptrs

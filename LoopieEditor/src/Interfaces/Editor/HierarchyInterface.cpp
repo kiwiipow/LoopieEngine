@@ -17,16 +17,11 @@ namespace Loopie {
 				ImGui::End();
 				return;
 			}
-
-			for(const auto& entityData : m_scene->GetAllEntities())
+			for (const auto& entity : m_scene->GetRootEntity()->GetChildren())
 			{
-				const std::shared_ptr<Entity>& entity = entityData.second;
-				//// Maybe scene must store only RootEntities??????
-				if (entity->GetParent().lock() != nullptr)
-					continue;
 				DrawEntitySlot(entity);
 			}
-
+			
 		}
 		ImGui::End();
 	}
