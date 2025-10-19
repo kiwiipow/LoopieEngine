@@ -18,11 +18,12 @@ namespace Loopie {
 		// Getters
 		Transform* GetTransform() const;
 		std::shared_ptr<Entity> GetOwner() const { return m_owner.lock(); }
-		const UUID& GetUUID() const;
+		const UUID& GetUuid() const;
 		bool GetIsActive() const;
 
 		// Setters
 		void SetIsActive(bool active);
+		void SetUuid(const std::string newUuid);
 
 		virtual void Init() = 0;
 

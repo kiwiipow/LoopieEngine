@@ -11,7 +11,7 @@ namespace Loopie {
 		return GetOwner()->GetTransform();
 	}
 
-	const UUID& Component::GetUUID() const
+	const UUID& Component::GetUuid() const
 	{
 		return m_uuid;
 	}
@@ -24,5 +24,10 @@ namespace Loopie {
 	void Component::SetIsActive(bool active)
 	{
 		m_isActive = active;
+	}
+
+	void Component::SetUuid(const std::string newUuid)
+	{
+		m_uuid = UUID(newUuid);
 	}
 }
