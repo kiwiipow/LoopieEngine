@@ -117,12 +117,20 @@ namespace Loopie {
 		if (s_Data.DrawGrid) {
 			for (int i = -s_Data.GridHalfSize; i <= s_Data.GridHalfSize; i++)
 			{
-				float position = i * s_Data.GridSpacing;
-
-				Gizmo::DrawLine({ position, 0.0f, -s_Data.GridHalfSize * s_Data.GridSpacing }, { position, 0.0f, s_Data.GridHalfSize * s_Data.GridSpacing }, s_Data.GridColor);
-
-				Gizmo::DrawLine({ -s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, position }, { s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, position }, s_Data.GridColor);
+				if (i == 0) {
+					Gizmo::DrawLine({ 0.0f, 0.0f, -s_Data.GridHalfSize * s_Data.GridSpacing }, { 0.0f, 0.0f, 0.0f }, s_Data.GridColor);
+					Gizmo::DrawLine({ -s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, s_Data.GridColor);
+				}
+				else {
+					float position = i * s_Data.GridSpacing;
+					Gizmo::DrawLine({ position, 0.0f, -s_Data.GridHalfSize * s_Data.GridSpacing }, { position, 0.0f, s_Data.GridHalfSize * s_Data.GridSpacing }, s_Data.GridColor);
+					Gizmo::DrawLine({ -s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, position }, { s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, position }, s_Data.GridColor);
+				}	
 			}
+
+			Gizmo::DrawLine({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, s_Data.GridHalfSize * s_Data.GridSpacing }, {0,1,0,1});
+			Gizmo::DrawLine({ 0.0f, 0.0f, 0.0f }, { s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f, 0.0f }, {1,0,0,1});
+			Gizmo::DrawLine({ 0.0f, 0.0f, 0.0f }, {0.0f,  s_Data.GridHalfSize * s_Data.GridSpacing, 0.0f }, {0,0,1,1});
 		}
 	}
 }
