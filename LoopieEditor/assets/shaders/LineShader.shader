@@ -6,12 +6,12 @@ layout(location = 4) in vec4 a_Color;
 
 out vec4 v_Color;
 
-uniform mat4 u_ViewProjection;
+uniform mat4 lp_ViewProjection;
 
 void main()
 {
     v_Color = a_Color;
-    gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+    gl_Position = lp_ViewProjection * vec4(a_Position, 1.0);
 }
 
 [fragment]

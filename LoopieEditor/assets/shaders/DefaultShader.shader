@@ -7,15 +7,15 @@ layout (location = 2) in vec3 a_Normal;
 layout (location = 3) in vec3 a_Tangent;
 layout (location = 4) in vec4 a_Color;
 
-uniform mat4 u_ViewProjection;
-uniform mat4 u_Transform;
+uniform mat4 lp_ViewProjection;
+uniform mat4 lp_Transform;
 ///
 
 out vec2  v_TexCoord;
 
 void main()
 {
-	gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+	gl_Position = lp_ViewProjection * lp_Transform * vec4(a_Position, 1.0);
 	v_TexCoord = a_TexCoord;
 }
 

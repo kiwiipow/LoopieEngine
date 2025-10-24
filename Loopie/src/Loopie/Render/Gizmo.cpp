@@ -43,7 +43,7 @@ namespace Loopie {
 		s_Data.ViewProjection = viewProjectionMatrix;
 
 		s_Data.LineRender.Shader->Bind();
-		s_Data.LineRender.Shader->SetUniformMat4("u_ViewProjection", s_Data.ViewProjection);
+		s_Data.LineRender.Shader->SetUniformMat4("lp_ViewProjection", s_Data.ViewProjection);
 
 
 		StartBatch();

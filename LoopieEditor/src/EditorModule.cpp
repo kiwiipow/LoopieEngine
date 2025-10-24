@@ -60,7 +60,7 @@ namespace Loopie
 			ivec2 windowSize = Application::GetInstance().GetWindow().GetSize();
 			camera->GetCamera()->SetViewport(0, 0, windowSize.x, windowSize.y);
 		}
-		if (inputEvent.GetKeyStatus(SDL_SCANCODE_I) == KeyState::DOWN) {
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_I, KeyModifier::CTRL)) {
 			app.SetInterfaceState(!app.IsInterfaceVisible());
 		}
 
@@ -150,7 +150,7 @@ namespace Loopie
 			if (renderer) {
 				//renderer->GetTransform()->DegreesRotate({ 0,rotation,0 }); //// this should Propagete to its childs
 				renderer->GetMaterial()->GetShader().Bind();
-				renderer->GetMaterial()->GetShader().SetUniformMat4("u_ViewProjection", viewProj);
+				renderer->GetMaterial()->GetShader().SetUniformMat4("lp_ViewProjection", viewProj);
 				renderer->Render();
 			}
 		}

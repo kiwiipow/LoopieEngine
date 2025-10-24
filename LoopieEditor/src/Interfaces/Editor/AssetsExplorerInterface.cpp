@@ -361,7 +361,7 @@ namespace Loopie {
 				newPath /= fromPath.filename().string();
 				if (fromPath == m_currentDirectory) {
 					const Project& project = Application::GetInstance().m_activeProject;
-					GoToDirectory(project.GetAssetsPath());
+					GoToDirectory(newPath);
 				}
 
 				DirectoryManager::Move(fromPath, newPath);
