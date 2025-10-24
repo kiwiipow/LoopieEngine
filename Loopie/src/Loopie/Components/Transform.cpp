@@ -60,6 +60,15 @@ namespace Loopie
         Recalculate();
     }
 
+    void Transform::LookAt(const Transform* target, const vec3& up)
+    {
+        if (target == this)
+            return;
+        matrix4 lookAtMatrix = glm::lookAt(GetPosition(), target->GetPosition(), up);
+        lookAtMatrix = glm::inverse(lookAtMatrix);
+        SetQuaternion(lookAtMatrix);
+    }
+
     void Transform::Scale(const vec3& scaling, bool local)
     {
         if (local) {
@@ -131,7 +140,7 @@ namespace Loopie
     }
     vec3 Transform::GetLocalEulerAngles() const
     {
-        vec3 m_eulerAngles = glm::eulerAngles(m_localRotation);
+        vec3 m_eulerAngles = glm::degrees(glm::eulerAngles(m_localRotation));
         return m_eulerAngles;
     }
     vec3 Transform::GetScale() const

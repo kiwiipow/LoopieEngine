@@ -15,6 +15,7 @@ namespace Loopie
         void Translate(const vec3& translation, bool local = true);
         void RotateAxisAngle(const vec3& axis, float angle, bool local = true);
         void RotateEulerAngles(const vec3& eulerAngles, bool local = true);
+        void LookAt(const Transform* target, const vec3& up);
         void Scale(const vec3& scaling, bool local = true);
 #pragma endregion
 #pragma region Vectors
