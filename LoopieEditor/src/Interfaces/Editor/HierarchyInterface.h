@@ -15,6 +15,9 @@ namespace Loopie {
 
 	private:
 		void DrawEntitySlot(const std::shared_ptr<Entity>& entity);
+		void DrawContextMenu();
+		void DrawEntityContextMenu(const std::shared_ptr<Entity> entity);
+		void HotKeysSelectedEntiy();
 
 	public:
 		static std::shared_ptr<Entity> s_SelectedEntity;

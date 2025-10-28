@@ -22,6 +22,8 @@ namespace Loopie {
 				DrawEntitySlot(entity);
 			}
 			
+			DrawContextMenu();
+			HotKeysSelectedEntiy();
 		}
 		ImGui::End();
 	}
@@ -33,7 +35,8 @@ namespace Loopie {
 
 	void HierarchyInterface::DrawEntitySlot(const std::shared_ptr<Entity>& entity)
 	{
-
+		if (!entity)
+			return;
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		const auto& children = entity->GetChildren();
 		bool hasChildren = !children.empty();
@@ -51,6 +54,8 @@ namespace Loopie {
 			s_SelectedEntity = entity;
 		}
 
+		DrawEntityContextMenu(entity);
+
 		if (opened && hasChildren)
 		{
 			for (const auto& child : children)
@@ -59,7 +64,79 @@ namespace Loopie {
 			}
 			ImGui::TreePop();
 		}
+
+		
+		
 	}
 
+	void HierarchyInterface::DrawContextMenu()
+	{
+		if (ImGui::BeginPopupContextWindow("HierarchyBackgroundContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+			if (ImGui::MenuItem("Create Entity")) {
+				m_scene->CreateEntity("Entity");
+			}
+			ImGui::EndPopup();
+		}
+	}
 
+	void HierarchyInterface::DrawEntityContextMenu(const std::shared_ptr<Entity> entity)
+	{
+		if (ImGui::BeginPopupContextItem())
+		{
+
+			if (ImGui::MenuItem("Create Entity"))
+			{
+				m_scene->CreateEntity("Entity", entity);
+			}
+
+			/*if (ImGui::MenuItem("Copy"))
+			{
+
+			}
+
+			if (ImGui::MenuItem("Cut"))
+			{
+
+			}
+			
+			if (ImGui::MenuItem("Paste"))
+			{
+
+			}*/
+
+			if (ImGui::MenuItem("Delete"))
+			{
+				m_scene->RemoveEntity(entity->GetUUID());
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+
+	void HierarchyInterface::HotKeysSelectedEntiy()
+	{
+		if (!s_SelectedEntity) {
+			return;
+		}
+
+		const InputEventManager& input = Application::GetInstance().GetInputEvent();
+
+		if (input.GetKeyStatus(SDL_SCANCODE_DELETE) == KeyState::DOWN) {
+			m_scene->RemoveEntity(s_SelectedEntity->GetUUID());
+			s_SelectedEntity = nullptr;
+		}
+
+		if (input.GetKeyWithModifier(SDL_SCANCODE_C, KeyModifier::CTRL)) {
+			/// Copy
+		}
+
+		if (input.GetKeyWithModifier(SDL_SCANCODE_V, KeyModifier::CTRL)) {
+			/// Paste
+		}
+
+		if (input.GetKeyWithModifier(SDL_SCANCODE_X, KeyModifier::CTRL)) {
+			/// Cut
+		}
+
+	}
 }
