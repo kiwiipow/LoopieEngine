@@ -65,7 +65,10 @@ namespace Loopie {
 			return;
 
 		Transform* transform = GetTransform();
-		vec3 transformPos = +transform->GetPosition();
+		vec3 transformPos = transform->GetPosition();
+		vec3 transformScale = transform->GetScale();
+		quaternion transformRotation = transform->GetRotation();
+
 		for (unsigned int i = 0; i + 5 < data.Indices.size(); i += 6) {
 			unsigned int indices[6] = {
 				data.Indices[i + 0], data.Indices[i + 1], data.Indices[i + 2],
@@ -78,23 +81,22 @@ namespace Loopie {
 					skip = true;
 			if (skip) continue;
 
-			vec3 p0 = GetVertexVec3Data(data, indices[0], posElem.Offset);
-			vec3 p1 = GetVertexVec3Data(data, indices[1], posElem.Offset);
-			vec3 p2 = GetVertexVec3Data(data, indices[2], posElem.Offset);
-			vec3 p3 = GetVertexVec3Data(data, indices[3], posElem.Offset);
-			vec3 p4 = GetVertexVec3Data(data, indices[4], posElem.Offset);
-			vec3 p5 = GetVertexVec3Data(data, indices[5], posElem.Offset);
+			vec3 p[6];
+			for (int j = 0; j < 6; j++)
+				p[j] = GetVertexVec3Data(data, indices[j], posElem.Offset);
 
-			vec3 n1 = glm::normalize(glm::cross(p1 - p0, p2 - p0));
-			vec3 n2 = glm::normalize(glm::cross(p4 - p3, p5 - p3));
+			for (int j = 0; j < 6; j++)
+				p[j] = transformPos + transformRotation * (p[j] * transformScale);
 
+			vec3 n1 = glm::normalize(glm::cross(p[1] - p[0], p[2] - p[0]));
+			vec3 n2 = glm::normalize(glm::cross(p[4] - p[3], p[5] - p[3]));
 			vec3 faceNormal = glm::normalize((n1 + n2) * 0.5f);
 
-			vec3 centroid1 = (p0 + p1 + p2) / 3.0f;
-			vec3 centroid2 = (p3 + p4 + p5) / 3.0f;
+			vec3 centroid1 = (p[0] + p[1] + p[2]) / 3.0f;
+			vec3 centroid2 = (p[3] + p[4] + p[5]) / 3.0f;
 			vec3 faceCentroid = (centroid1 + centroid2) * 0.5f;
 
-			Gizmo::DrawLine(faceCentroid + transformPos, faceCentroid + transformPos + faceNormal * length, color);
+			Gizmo::DrawLine(faceCentroid, faceCentroid + faceNormal * length, color);
 		}
 	}
 
@@ -110,24 +112,31 @@ namespace Loopie {
 			return;
 
 		Transform* transform = GetTransform();
-		vec3 transformPos = +transform->GetPosition();
-		for (unsigned int i = 0; i + 2 < data.Indices.size(); i += 3) {
-			unsigned int index0 = data.Indices[i + 0];
-			unsigned int index1 = data.Indices[i + 1];
-			unsigned int index2 = data.Indices[i + 2];
+		vec3 transformPos = transform->GetPosition();
+		vec3 transformScale = transform->GetScale();
+		quaternion transformRotation = transform->GetRotation();
 
-			if (index0 >= data.VerticesAmount || index1 >= data.VerticesAmount || index2 >= data.VerticesAmount)
+		for (unsigned int i = 0; i + 2 < data.Indices.size(); i += 3) {
+			unsigned int i0 = data.Indices[i + 0];
+			unsigned int i1 = data.Indices[i + 1];
+			unsigned int i2 = data.Indices[i + 2];
+
+			if (i0 >= data.VerticesAmount || i1 >= data.VerticesAmount || i2 >= data.VerticesAmount)
 				continue;
 
-			vec3 p0 = GetVertexVec3Data(data, index0, posElem.Offset);
-			vec3 p1 = GetVertexVec3Data(data, index1, posElem.Offset);
-			vec3 p2 = GetVertexVec3Data(data, index2, posElem.Offset);
+			vec3 p0 = GetVertexVec3Data(data, i0, posElem.Offset);
+			vec3 p1 = GetVertexVec3Data(data, i1, posElem.Offset);
+			vec3 p2 = GetVertexVec3Data(data, i2, posElem.Offset);
+
+			p0 = transformPos + transformRotation * (p0 * transformScale);
+			p1 = transformPos + transformRotation * (p1 * transformScale);
+			p2 = transformPos + transformRotation * (p2 * transformScale);
 
 			vec3 n = glm::normalize(glm::cross(p1 - p0, p2 - p0));
 			vec3 centroid = (p0 + p1 + p2) / 3.0f;
 
-			Gizmo::DrawLine(centroid + transformPos, centroid + transformPos + n * length, color);
+			Gizmo::DrawLine(centroid, centroid + n * length, color);
 		}
 	}
-	///
+
 }
