@@ -129,7 +129,7 @@ namespace Loopie
             quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
-            transform->Translate(m_inputDirection*dt, ObjectSpace::Local);
+            transform->Translate(m_inputDirection, ObjectSpace::Local);
             transform->SetLocalRotation(orbitRotation);
         }
     }
