@@ -15,7 +15,7 @@
 
 namespace Loopie {
 	void MeshImporter::ImportModel(const std::string& filepath, Metadata& metadata) {
-		if (metadata.HasCache)
+		if (metadata.HasCache && !metadata.IsOutdated)
 			return;
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -29,6 +29,8 @@ namespace Loopie {
 
 		metadata.HasCache = true;
 		MetadataRegistry::SaveMetadata(filepath, metadata);
+
+		Log::Trace("Mesh Imported -> {0}", filepath);
 	}
 
 	void MeshImporter::LoadModel(const std::string& path ,Mesh& mesh)
@@ -100,6 +102,8 @@ namespace Loopie {
 
 		mesh.m_data = data;
 		mesh.m_vao->AddBuffer(mesh.m_vbo.get(), mesh.m_ebo.get());
+
+		Log::Trace("Mesh Loaded -> {0}", filepath.string());
 	}
 
 	bool MeshImporter::CheckIfIsModel(const char* path)
@@ -161,7 +165,7 @@ namespace Loopie {
 
 		std::filesystem::path pathToWrite = project.GetChachePath() / locationPath;
 
-		std::ofstream fs(pathToWrite, std::ios::out | std::ios::binary | std::ios::app);
+		std::ofstream fs(pathToWrite, std::ios::binary | std::ios::trunc);
 
 		//fs.write(data.Name, sizeof data.Name);
 		fs.write(reinterpret_cast<const char*>(&data.VerticesAmount), sizeof data.VerticesAmount);

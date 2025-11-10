@@ -23,6 +23,8 @@ namespace Loopie
     {
         m_inputDirection = vec3(0);
         m_inputRotation = vec3(0);
+        m_panDirection = vec3(0);
+        m_zoomInput = 0;
 
         vec2 mouseScroll = inputEvent.GetScrollDelta();
         vec2 mouseDelta = inputEvent.GetMouseDelta();
@@ -38,12 +40,12 @@ namespace Loopie
             if (inputEvent.GetMouseButtonStatus(1) == KeyState::REPEAT)
             {
                // Log::Info("Entering Alt + Mouse 1");
-                m_inputDirection = vec3(-mouseDelta.x, mouseDelta.y, 0);
+                m_panDirection = vec3(-mouseDelta.x, mouseDelta.y, 0);
             }
             if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
             {
                 //Log::Info("Entering Alt + Mouse 2");
-                m_inputDirection.z = -mouseScroll.y * m_cameraZoomSpeed;
+                m_zoomInput = -mouseScroll.y * m_cameraZoomSpeed;
             }
         }
         else
@@ -51,7 +53,7 @@ namespace Loopie
             if (inputEvent.GetMouseButtonStatus(1) == KeyState::REPEAT)
             {
                 m_entityToPivot = m_entity;
-                m_inputDirection = vec3(-mouseDelta.x, mouseDelta.y, 0);
+                m_panDirection = vec3(-mouseDelta.x, mouseDelta.y, 0);
             }
             if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
             {
@@ -73,11 +75,11 @@ namespace Loopie
             if(HierarchyInterface::s_SelectedEntity != nullptr)
                 m_entityToPivot = HierarchyInterface::s_SelectedEntity;
         }
+
+        if (mouseScroll.y != 0)
+            m_zoomInput = -mouseScroll.y * m_cameraZoomSpeed;
+
         m_inputDirection *= m_speedMultiplier;
-
-        if(mouseScroll.y!=0)
-            m_inputDirection.z = -mouseScroll.y * m_cameraZoomSpeed;
-
         m_inputRotation *= m_cameraRotationSpeed;
     }
 
@@ -91,15 +93,13 @@ namespace Loopie
         if (m_entityToPivot != m_entity)
         {
 
-            m_yaw = -m_inputRotation.x * dt;
-            m_pitch = -m_inputRotation.y * dt;
+            m_yaw = -m_inputRotation.x;
+            m_pitch = -m_inputRotation.y;
 
             quaternion yawRotation = glm::normalize(glm::angleAxis(m_yaw, glm::vec3(0, 1, 0)));
             quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
-
-            Log::Info("{0}  {1}  {2}", m_inputRotation.x, m_inputRotation.y, m_inputRotation.z);
             Transform* pivotTransform = m_entityToPivot->GetTransform();
             vec3 pivotPos = pivotTransform->GetPosition();
 
@@ -116,14 +116,20 @@ namespace Loopie
         else
         {
 
-            m_yaw += -m_inputRotation.x * dt;
-            m_pitch += -m_inputRotation.y * dt;
+            m_yaw += -m_inputRotation.x;
+            m_pitch += -m_inputRotation.y;
+
+            m_inputDirection.x *= dt;
+            m_inputDirection.z *= dt;
+
+            m_inputDirection += m_panDirection/10.f;
+            m_inputDirection.z += m_zoomInput;
 
             quaternion yawRotation = glm::normalize(glm::angleAxis(m_yaw, glm::vec3(0, 1, 0)));
             quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
-            transform->Translate(m_inputDirection*dt, ObjectSpace::Local);
+            transform->Translate(m_inputDirection, ObjectSpace::Local);
             transform->SetLocalRotation(orbitRotation);
         }
     }

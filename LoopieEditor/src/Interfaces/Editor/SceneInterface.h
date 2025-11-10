@@ -16,13 +16,21 @@ namespace Loopie {
 		void StartScene();
 		void EndScene();
 
-		Camera* GetCamera() { return m_camera->GetCamera(); }
+   		Camera* GetCamera() { return m_camera->GetCamera(); }
+
+		void ChargeModel(const std::string& modelPath);
+		void ChargeTexture(const std::string& texturePath);
+
+	private:
+		void Drop();
+
+
 
 	private:
 		std::shared_ptr<FrameBuffer> m_buffer;
 		std::shared_ptr<OrbitalCamera> m_camera;
 
-		bool m_focused = false;
+		bool m_interacted = false;
 		ImVec2 m_windowSize;
 	};
 }

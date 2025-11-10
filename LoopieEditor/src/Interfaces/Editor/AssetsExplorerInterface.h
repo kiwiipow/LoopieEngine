@@ -16,9 +16,12 @@ namespace Loopie {
 		~AssetsExplorerInterface() = default;
 
 		void Init() override;
+		void Update(float dt, const InputEventManager& inputEvent) override;
 		void Render() override;
 
 	private:
+		void HotKeysControls(const InputEventManager& inputEvent);
+
 		void GetExternalFile();
 		void GoToDirectory(const std::filesystem::path& directory, bool removeSearch = true);
 		void SelectFile(const std::filesystem::path& filePath);

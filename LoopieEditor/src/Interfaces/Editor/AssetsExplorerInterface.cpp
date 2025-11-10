@@ -1,8 +1,9 @@
 #include "AssetsExplorerInterface.h"
 
 #include "Loopie/Core/Application.h"
+#include "Loopie/Core/Log.h"
 #include "Loopie/Files/DirectoryManager.h"
-#include "Loopie/Resources/AssetRegistry.h"
+#include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Resources/Types/Texture.h"
 
 #include "Loopie/Importers/TextureImporter.h"
@@ -26,22 +27,30 @@ namespace Loopie {
 			"assets/icons/icon_folderFill.png"
 		};
 
+		std::vector<Metadata> iconsToLoadMetadatas;
 		for (size_t i = 0; i < iconsToLoad.size(); i++)
 		{
 			Metadata& meta = AssetRegistry::GetOrCreateMetadata(iconsToLoad[i]);
 			TextureImporter::ImportImage(iconsToLoad[i], meta);
+			iconsToLoadMetadatas.emplace_back(meta);
 		}
 		
-		m_fileIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[0])->UUID);
-		m_folderIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[1])->UUID);
-		m_emptyFolderIcon = std::make_shared<Texture>(AssetRegistry::GetMetadata(iconsToLoad[2])->UUID);
+		m_fileIcon = ResourceManager::GetTexture(iconsToLoadMetadatas[0]);
+		m_emptyFolderIcon = ResourceManager::GetTexture(iconsToLoadMetadatas[1]);
+		m_folderIcon = ResourceManager::GetTexture(iconsToLoadMetadatas[2]);
 
 		const Project& project = Application::GetInstance().m_activeProject;
 		GoToDirectory(project.GetAssetsPath());
 	}
 
+	void AssetsExplorerInterface::Update(float dt, const InputEventManager& inputEvent) {
+		if (m_focused)
+			HotKeysControls(inputEvent);
+	}
+
 	void AssetsExplorerInterface::Render() {
 		if (ImGui::Begin("Assets Explorer", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)){
+
 			const Project& project = Application::GetInstance().m_activeProject;
 			if (project.IsEmpty()) {
 				ImGui::End();
@@ -71,7 +80,8 @@ namespace Loopie {
 
 				float footerHeight = ImGui::GetFrameHeightWithSpacing();
 				if (ImGui::BeginChild("FilesScrollView", ImVec2(0, -footerHeight), 0, 0)) {
-					if(ImGui::IsWindowHovered(ImGuiHoveredFlags_None))
+					m_focused = ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
+					if (m_focused)
 						GetExternalFile();
 					DrawFolderContent();
 				}
@@ -87,6 +97,30 @@ namespace Loopie {
 
 	}
 
+	void AssetsExplorerInterface::HotKeysControls(const InputEventManager& inputEvent)
+	{
+		if (m_selectedFile.empty()) {
+			return;
+		}
+
+		if (inputEvent.GetKeyStatus(SDL_SCANCODE_DELETE) == KeyState::DOWN) {
+			DirectoryManager::Delete(m_selectedFile);
+			AssetRegistry::RefreshAssetRegistry();
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_C, KeyModifier::CTRL)) {
+			/// Copy
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_V, KeyModifier::CTRL)) {
+			/// Paste
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_X, KeyModifier::CTRL)) {
+			/// Cut
+		}
+	}
+
 	void AssetsExplorerInterface::GetExternalFile()
 	{
 		Application& app = Application::GetInstance();
@@ -96,27 +130,32 @@ namespace Loopie {
 
 		std::filesystem::path assetsPath = app.m_activeProject.GetAssetsPath();
 		std::filesystem::path currentPath = m_currentDirectory;
-		std::filesystem::path droppedPath = inputEvent.GetDroppedFile(0);
 
-		currentPath = std::filesystem::absolute(currentPath);
-		droppedPath = std::filesystem::absolute(droppedPath);
+		const std::vector<const char*>& droppedFiles = inputEvent.GetDroppedFiles();
+		for (size_t i = 0; i < droppedFiles.size(); i++)
+		{
+			std::filesystem::path droppedPath = droppedFiles[i];
 
-		std::filesystem::path targetPath = currentPath / droppedPath.filename();
+			currentPath = std::filesystem::absolute(currentPath);
+			droppedPath = std::filesystem::absolute(droppedPath);
 
-		bool isInAssetsFolder = droppedPath.string().rfind(assetsPath.string(), 0) == 0;
+			std::filesystem::path targetPath = currentPath / droppedPath.filename();
 
-		if (isInAssetsFolder) {
-			if (droppedPath == currentPath) {
-				const Project& project = Application::GetInstance().m_activeProject;
-				GoToDirectory(assetsPath);
+			bool isInAssetsFolder = droppedPath.string().rfind(assetsPath.string(), 0) == 0;
+
+			if (isInAssetsFolder) {
+				if (droppedPath == currentPath) {
+					const Project& project = Application::GetInstance().m_activeProject;
+					GoToDirectory(assetsPath);
+				}
+				DirectoryManager::Move(droppedPath, targetPath);
+				DirectoryManager::Move(droppedPath += ".meta", targetPath += ".meta");
 			}
-			DirectoryManager::Move(droppedPath, targetPath);
+			else {
+				DirectoryManager::Copy(droppedPath, targetPath);
+			}
 		}
-		else {
-			DirectoryManager::Copy(droppedPath, targetPath);
-		}
-
-		//AssetRegistry::Reload();
+		AssetRegistry::RefreshAssetRegistry();
 	}
 
 	void AssetsExplorerInterface::GoToDirectory(const std::filesystem::path& directory, bool removeSearch)
@@ -273,13 +312,14 @@ namespace Loopie {
 
 		int cellSize = thumbnailSize + padding;
 		float availX = ImGui::GetContentRegionAvail().x;
-		int columnCount = (int)(availX / cellSize);
-		if (columnCount < 1) 
-			columnCount = 1;
+		int columnCount = std::max(1, (int)(availX / cellSize));
 
-		ImGui::Columns(columnCount, 0, false);
+		ImVec2 iconSize = ImVec2((float)thumbnailSize, (float)thumbnailSize);
+
+		ImGui::Columns(columnCount, nullptr, false);
 
 		std::vector<std::filesystem::path> filesToShow;
+		
 		if (m_isSearching) {
 			filesToShow = GetFilteredFiles();
 
@@ -289,7 +329,7 @@ namespace Loopie {
 				return;
 			}
 		}
-		else {			
+		else {		
 			for (auto& entry : std::filesystem::directory_iterator(m_currentDirectory, std::filesystem::directory_options::skip_permission_denied)) {
 				if(MetadataRegistry::IsMetadataFile(entry.path()))
 					continue;
@@ -297,9 +337,12 @@ namespace Loopie {
 			}
 		}
 
-		for (auto& directory : filesToShow) {
-			ImGui::PushID(directory.string().c_str());
-			bool isDir = std::filesystem::is_directory(directory);
+		for (size_t i = 0; i < filesToShow.size(); ++i) {
+
+			const auto& directory = filesToShow[i];
+			const bool isDir = std::filesystem::is_directory(directory);
+
+			ImGui::PushID(i);
 
 			std::shared_ptr<Texture> icon = nullptr;
 			if (isDir) {
@@ -310,7 +353,7 @@ namespace Loopie {
 				icon = m_fileIcon;
 
 			ImVec2 cursor = ImGui::GetCursorScreenPos();
-			ImGui::Image((ImTextureID)icon->GetRenderId(), ImVec2((float)thumbnailSize, (float)thumbnailSize));
+			ImGui::Image((ImTextureID)icon->GetRendererId(), iconSize);
 
 			if (ImGui::IsItemHovered()) {
 				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
@@ -404,8 +447,9 @@ namespace Loopie {
 				}
 
 				DirectoryManager::Move(fromPath, newPath);
+				DirectoryManager::Move(fromPath += ".meta", newPath += ".meta");
 
-				//AssetRegistry::Reload();
+				AssetRegistry::RefreshAssetRegistry();
 			}
 			ImGui::EndDragDropTarget();
 		}

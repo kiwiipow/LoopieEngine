@@ -122,7 +122,7 @@ namespace Loopie {
 		ImGui::Text("Built using:");
 		ImGui::BulletText("SDL3 / OpenGl / Glm");
 		ImGui::BulletText("Dear ImGui / ImGuizmo");
-		ImGui::BulletText("Assimp / Spdlog");
+		ImGui::BulletText("Assimp / Spdlog / Devil");
 		ImGui::BulletText("Nativefiledialog-Extended");
 		ImGui::BulletText("nlohmann-json");
 
@@ -165,6 +165,10 @@ namespace Loopie {
 
 		if (ImGui::CollapsingHeader("Window")) {
 
+			bool windowFullscreen = window.IsFullscreen();
+			if (ImGui::Checkbox("Fullscreen", &windowFullscreen)) {
+				window.SetWindowFullscreen(windowFullscreen);
+			}
 			bool windowVsync = window.IsVsyncEnabled();
 			if (ImGui::Checkbox("VSync", &windowVsync)) {
 				window.SetVsync(windowVsync);
