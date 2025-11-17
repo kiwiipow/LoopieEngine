@@ -51,19 +51,19 @@ namespace Loopie {
 
 			entityObj["transform"] = json::object();
 			entityObj["transform"]["position"] = {
-				{"x", transform->GetPosition().x},
-				{"y", transform->GetPosition().y},
-				{"z", transform->GetPosition().z}
+				{"x", transform->GetLocalPosition().x},
+				{"y", transform->GetLocalPosition().y},
+				{"z", transform->GetLocalPosition().z}
 			};
 			entityObj["transform"]["rotation"] = {
-				{"x", transform->GetRotation().x},
-				{"y", transform->GetRotation().y},
-				{"z", transform->GetRotation().z}
+				{"x", transform->GetLocalRotation().x},
+				{"y", transform->GetLocalRotation().y},
+				{"z", transform->GetLocalRotation().z}
 			};
 			entityObj["transform"]["scale"] = {
-				{"x", transform->GetScale().x},
-				{"y", transform->GetScale().y},
-				{"z", transform->GetScale().z}
+				{"x", transform->GetLocalScale().x},
+				{"y", transform->GetLocalScale().y},
+				{"z", transform->GetLocalScale().z}
 			};
 
 			// Creates an array of components
@@ -81,19 +81,19 @@ namespace Loopie {
 				// index + uuid
 				componentObj["transform"] = json::object();
 				componentObj["transform"]["position"] = {
-					{"x", compTransform->GetPosition().x},
-					{"y", compTransform->GetPosition().y},
-					{"z", compTransform->GetPosition().z}
+					{"x", compTransform->GetLocalPosition().x},
+					{"y", compTransform->GetLocalPosition().y},
+					{"z", compTransform->GetLocalPosition().z}
 				};
 				componentObj["transform"]["rotation"] = {
-					{"x", compTransform->GetRotation().x},
-					{"y", compTransform->GetRotation().y},
-					{"z", compTransform->GetRotation().z}
+					{"x", compTransform->GetLocalRotation().x},
+					{"y", compTransform->GetLocalRotation().y},
+					{"z", compTransform->GetLocalRotation().z}
 				};
 				componentObj["transform"]["scale"] = {
-					{"x", compTransform->GetScale().x},
-					{"y", compTransform->GetScale().y},
-					{"z", compTransform->GetScale().z}
+					{"x", compTransform->GetLocalScale().x},
+					{"y", compTransform->GetLocalScale().y},
+					{"z", compTransform->GetLocalScale().z}
 				};
 				entityObj["components"].push_back(componentObj);
 			}

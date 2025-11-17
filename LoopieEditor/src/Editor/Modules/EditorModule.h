@@ -39,6 +39,6 @@ namespace Loopie {
 		EditorMenuInterface m_mainMenu;
 		AssetsExplorerInterface m_assetsExplorer;
 
-		Scene* scene;
+		Scene* scene = nullptr;
 	};
 }

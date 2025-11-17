@@ -9,7 +9,7 @@ namespace Loopie
 {
 	struct UniformValue
 	{
-		UniformType type;
+		UniformType type = UniformType::UniformType_Unknown;
 		std::variant<int, float, bool, unsigned int, vec2, vec3, vec4, matrix2, matrix3, matrix4> value;
 	};
 
