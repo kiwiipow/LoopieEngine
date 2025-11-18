@@ -2,7 +2,7 @@
 
 #include "Loopie/Core/UUID.h"
 #include "Loopie/Scene/Entity.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 
 #include <string>
 #include <unordered_map>

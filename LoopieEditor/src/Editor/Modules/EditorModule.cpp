@@ -7,7 +7,7 @@
 #include "Loopie/Render/Renderer.h"
 #include "Loopie/Render/Gizmo.h"
 
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/TextureImporter.h"
@@ -142,6 +142,7 @@ namespace Loopie
 			MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
 			if (!renderer || !renderer->GetIsActive())
 				continue;
+			renderer->Render();
 			Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
 		}
 	}

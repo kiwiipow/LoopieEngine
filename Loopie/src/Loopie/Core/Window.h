@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 
 #include <string>
 #include <SDL3/SDL_video.h>

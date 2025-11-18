@@ -119,8 +119,8 @@ namespace Loopie
             m_inputDirection += m_panDirection/10.f;
             m_inputDirection.z += m_zoomInput;
 
-            quaternion yawRotation = glm::normalize(glm::angleAxis(m_yaw, glm::vec3(0, 1, 0)));
-            quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
+            quaternion yawRotation = normalize(angleAxis(m_yaw, vec3(0, 1, 0)));
+            quaternion pitchRotation = normalize(angleAxis(m_pitch, vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
             transform->Translate(m_inputDirection, ObjectSpace::Local);

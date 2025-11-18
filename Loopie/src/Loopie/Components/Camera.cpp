@@ -1,6 +1,7 @@
 #include "Camera.h"
 
 #include "Loopie/Core/Log.h"
+#include "Loopie/Math/MathUtils.h"
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Render/Renderer.h"

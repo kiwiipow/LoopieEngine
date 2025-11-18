@@ -2,6 +2,7 @@
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
 
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Math/MathTypes.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
 

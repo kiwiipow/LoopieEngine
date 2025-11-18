@@ -79,6 +79,8 @@ namespace Loopie {
 				m_interacted = false;
 			ImGui::Image((ImTextureID)m_buffer->GetTextureId(), size, ImVec2(0,1), ImVec2(1,0));
 
+			Drop();
+
 			ImGui::SetCursorPos(cursorPos);
 			DrawHelperBar();
 
@@ -99,7 +101,7 @@ namespace Loopie {
 
 		}
 
-		Drop();
+		
 		ImGui::End();
 	}
 

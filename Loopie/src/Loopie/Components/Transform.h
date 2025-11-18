@@ -1,6 +1,6 @@
 #include "Loopie/Components/Component.h"
 #include "Loopie/Scene/Entity.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 #include <memory>
 namespace Loopie
 {

@@ -1,7 +1,7 @@
 #include "Transform.h"
 #include "Loopie/Components/Component.h"
 #include "Loopie/Scene/Entity.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathUtils.h"
 #include <memory>
 namespace Loopie
 {
@@ -116,17 +116,17 @@ namespace Loopie
 
     void Transform::SetWorldMatrix(const matrix4& worldMatrix)
     {
-        glm::vec3 position, scale;
-        glm::quat rotation;
+        vec3 position, scale;
+        quaternion rotation;
 
-        DecomposeMatrix(worldMatrix, position, rotation, scale);
+        Math::DecomposeMatrix(worldMatrix, position, rotation, scale);
 
         if (auto parent = GetOwner()->GetParent().lock())
         {
             Transform* parentTransform = parent->GetTransform();
 
-            SetLocalPosition(glm::vec3(parentTransform->GetWorldToLocalMatrix() * glm::vec4(position, 1.0f)));
-            SetLocalRotation(glm::inverse(parentTransform->GetWorldRotation()) * rotation);
+            SetLocalPosition(vec3(parentTransform->GetWorldToLocalMatrix() * vec4(position, 1.0f)));
+            SetLocalRotation(inverse(parentTransform->GetWorldRotation()) * rotation);
             SetLocalScale(scale / parentTransform->GetWorldScale());
         }
         else
@@ -165,7 +165,7 @@ namespace Loopie
         rotMat[1] /= scale.y;
         rotMat[2] /= scale.z;
 
-        return glm::quat_cast(rotMat);
+        return Math::ToQuaternion(rotMat);
     }
 
     vec3 Transform::GetWorldScale() const
@@ -266,7 +266,7 @@ namespace Loopie
         vec3 pos = GetWorldPosition();
         matrix4 look = lookAt(pos, worldTarget, worldUp);
         matrix4 rotMat = inverse(look);
-        quaternion quat = glm::quat_cast(matrix3(rotMat));
+        quaternion quat = Math::ToQuaternion(matrix3(rotMat));
         SetWorldRotation(quat);
     }
 

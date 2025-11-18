@@ -2,7 +2,7 @@
 
 #include "Loopie/Render/Renderer.h"
 #include "Loopie/Render/Gizmo.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 #include "Loopie/Components/Transform.h"
 
 namespace Loopie {
@@ -18,6 +18,15 @@ namespace Loopie {
 				RenderNormalsPerFace(0.5f,{0,1,1,1});
 			if(m_drawNormalsPerTriangle)
 				RenderNormalsPerTriangle(0.5f,{1,1,0,1});
+
+
+			AABB localAABB = m_mesh->GetData().BoundingBox;
+			OBB worldOBB = localAABB.ToOBB().Transform(GetTransform()->GetLocalToWorldMatrix());
+			AABB worldAABB = worldOBB.ToAABB();
+
+			Gizmo::DrawCube(worldAABB.minPoint, worldAABB.maxPoint);
+			Gizmo::DrawCube(worldOBB.GetCorners());
+
 		}
 		
 	}
@@ -64,7 +73,7 @@ namespace Loopie {
 
 		Transform* transform = GetTransform();
 		matrix4 modelMatrix = transform->GetLocalToWorldMatrix();
-		matrix3 normalMatrix = glm::transpose(glm::inverse(matrix3(modelMatrix)));
+		matrix3 normalMatrix = transpose(inverse(matrix3(modelMatrix)));
 
 		for (unsigned int i = 0; i + 5 < data.Indices.size(); i += 6) {
 			unsigned int indices[6] = {
@@ -110,7 +119,7 @@ namespace Loopie {
 
 		Transform* transform = GetTransform();
 		matrix4 modelMatrix = transform->GetLocalToWorldMatrix();
-		matrix3 normalMatrix = glm::transpose(glm::inverse(matrix3(modelMatrix)));
+		matrix3 normalMatrix = transpose(inverse(matrix3(modelMatrix)));
 
 		for (unsigned int i = 0; i + 2 < data.Indices.size(); i += 3) {
 			unsigned int i0 = data.Indices[i + 0];

@@ -1,5 +1,5 @@
 #pragma once
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 #include "Loopie/Components/Component.h"
 #include "Loopie/Render/FrameBuffer.h"
 
