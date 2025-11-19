@@ -52,6 +52,7 @@ namespace Loopie {
 		
 		if (!m_focused && !m_interacted)
 			return;
+		
 		m_camera->ProcessEvent(inputEvent);
 		m_camera->Update(dt);
 

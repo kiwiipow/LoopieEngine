@@ -59,6 +59,7 @@ namespace Loopie
 
 	void EditorModule::OnUpdate(float dt)
 	{
+
 		Application& app = Application::GetInstance();
 		InputEventManager& inputEvent = app.GetInputEvent();
 
@@ -123,8 +124,9 @@ namespace Loopie
 			Renderer::EndScene();
 		}
 		m_game.EndScene();
+	
 
-
+		m_scene.GetCamera()->GetTransform()->ResetHasChanged();
 		for (auto& [uuid, entity] : scene->GetAllEntities()) {
 			entity->GetTransform()->ResetHasChanged();  /// Temporary
 		}
@@ -132,7 +134,6 @@ namespace Loopie
 
 	void EditorModule::OnInterfaceRender()
 	{
-
 		ImGui::DockSpaceOverViewport();
 
 		m_mainMenu.Render();
