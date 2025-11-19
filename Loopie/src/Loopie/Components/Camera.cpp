@@ -98,19 +98,21 @@ namespace Loopie
 
 	void Camera::CalculateMatrices() const
 	{
-		if (!m_dirty && !GetTransform()->IsDirty())
+		if (!m_dirty && !GetTransform()->HasChanged())
 			return;
 		
 		auto transform = GetTransform();
 
 		const vec3 position = transform->GetPosition();
-		const vec3 forward = -transform->Forward();   // must exist in your Transform
-		const vec3 up = transform->Up();        // must exist in your Transform
+		const vec3 forward = -transform->Forward();
+		const vec3 up = transform->Up();
 
-		// Make camera look forward
 		m_viewMatrix = glm::lookAt(position, position + forward, up);
 		m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_viewport.z / m_viewport.w, m_nearPlane, m_farPlane);
 		m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+
+		m_frustum.FromMatrix(m_viewProjectionMatrix);
+		m_dirty = false;
 	}
 
 	void Camera::SetDirty() const{

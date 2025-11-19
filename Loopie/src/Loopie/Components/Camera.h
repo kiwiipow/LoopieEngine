@@ -1,5 +1,6 @@
 #pragma once
 #include "Loopie/Math/MathTypes.h"
+#include "Loopie/Math/Frustum.h"
 #include "Loopie/Components/Component.h"
 #include "Loopie/Render/FrameBuffer.h"
 
@@ -10,7 +11,7 @@ namespace Loopie
 	public:
 		DEFINE_TYPE(Camera)
 
-		Camera(float fov = 45.0f, float near_plane = 0.1f, float far_plane = 200.0f, bool canBeMainCamera = true);
+		Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
 		~Camera();
 
 		void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
@@ -28,6 +29,7 @@ namespace Loopie
 		void SetFarPlane(float farPlane);
 		float GetFarPlane() const;
 		vec4 GetViewport() const { return m_viewport; }
+		const Frustum& GetFrustum() const { CalculateMatrices(); return m_frustum; }
 
 		void SetDirty() const;
 
@@ -47,9 +49,10 @@ namespace Loopie
 		void CalculateMatrices() const;
 	private:
 		vec4 m_viewport = vec4(0,0,1,1);
+		mutable Frustum m_frustum;
 
-		float m_fov=45.0f;
-		float m_nearPlane = 0.1f;
+		float m_fov=60.0f;
+		float m_nearPlane = 0.3f;
 		float m_farPlane=200.0f;
 
 		mutable matrix4 m_viewMatrix = matrix4(1);

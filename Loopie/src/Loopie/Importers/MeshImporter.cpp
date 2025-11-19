@@ -64,8 +64,8 @@ namespace Loopie {
 		data.Name.resize(nameLength);
 		file.read(data.Name.data(), nameLength);
 
-		file.read(reinterpret_cast<char*>(&data.BoundingBox.minPoint), sizeof(data.BoundingBox.minPoint));
-		file.read(reinterpret_cast<char*>(&data.BoundingBox.maxPoint), sizeof(data.BoundingBox.maxPoint));
+		file.read(reinterpret_cast<char*>(&data.BoundingBox.MinPoint), sizeof(data.BoundingBox.MinPoint));
+		file.read(reinterpret_cast<char*>(&data.BoundingBox.MaxPoint), sizeof(data.BoundingBox.MaxPoint));
 
 		file.read(reinterpret_cast<char*>(&data.Matrix), sizeof(data.Matrix)); /// Still NotWorking
 
@@ -162,8 +162,8 @@ namespace Loopie {
 			transform.a4, transform.b4, transform.c4, transform.d4
 		);
 
-		data.BoundingBox.maxPoint = { mesh->mAABB.mMax.x,mesh->mAABB.mMax.y,mesh->mAABB.mMax.z };
-		data.BoundingBox.minPoint = { mesh->mAABB.mMin.x,mesh->mAABB.mMin.y,mesh->mAABB.mMin.z };
+		data.BoundingBox.MaxPoint = { mesh->mAABB.mMax.x,mesh->mAABB.mMax.y,mesh->mAABB.mMax.z };
+		data.BoundingBox.MinPoint = { mesh->mAABB.mMin.x,mesh->mAABB.mMin.y,mesh->mAABB.mMin.z };
 
 		data.VerticesAmount = mesh->mNumVertices;
 
@@ -194,8 +194,8 @@ namespace Loopie {
 		fs.write(reinterpret_cast<const char*>(&nameLength), sizeof(nameLength));
 		fs.write(data.Name.data(), nameLength);
 
-		fs.write(reinterpret_cast<const char*>(&data.BoundingBox.minPoint), sizeof(data.BoundingBox.minPoint));
-		fs.write(reinterpret_cast<const char*>(&data.BoundingBox.maxPoint), sizeof(data.BoundingBox.maxPoint));
+		fs.write(reinterpret_cast<const char*>(&data.BoundingBox.MinPoint), sizeof(data.BoundingBox.MinPoint));
+		fs.write(reinterpret_cast<const char*>(&data.BoundingBox.MaxPoint), sizeof(data.BoundingBox.MaxPoint));
 
 		fs.write(reinterpret_cast<const char*>(&matrix), sizeof(matrix));
 

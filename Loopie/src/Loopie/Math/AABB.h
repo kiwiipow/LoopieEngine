@@ -1,11 +1,12 @@
+#pragma once
 #include "Loopie/Math/MathTypes.h"
 
 namespace Loopie{
     struct OBB;
 
     struct AABB {
-        vec3 minPoint;
-        vec3 maxPoint;
+        vec3 MinPoint;
+        vec3 MaxPoint;
 
         void SetNegativeInfinity();
         void Enclose(const AABB& other);
@@ -20,5 +21,6 @@ namespace Loopie{
         float GetVolume() const;
 
         OBB ToOBB() const;
+        AABB Transform(const matrix4& localToWorld) const;
     };
 }

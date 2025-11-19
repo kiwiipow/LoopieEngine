@@ -23,6 +23,9 @@ namespace Loopie {
 		void SetMaterial(std::shared_ptr <Material> material);
 		void Init() override; //// From Component
 
+		void SetBoundingBoxesDirty() { m_boundingBoxesDirty = true; }
+		const AABB& GetWorldAABB() const { RecalculateBoundingBoxes(); return m_worldAABB; }
+		const OBB& GetWorldOBB() const { RecalculateBoundingBoxes(); return m_worldOBB; }
 
 		///TEST
 		void SetDrawNormalsPerFace(bool value) { m_drawNormalsPerFace = value; }
@@ -35,6 +38,8 @@ namespace Loopie {
 		bool GetDrawOBB() { return m_drawOBB; }
 		///TEST
 	private:
+		void RecalculateBoundingBoxes() const;
+
 		///TEST
 		vec3 GetVertexVec3Data(const MeshData& data, unsigned int vertexIndex, unsigned int offset);
 		void RenderNormalsPerFace(float length, const vec4& color);
@@ -46,8 +51,11 @@ namespace Loopie {
 		///TEST
 
 	private:
-
 		std::shared_ptr <Material> m_material;
 		std::shared_ptr<Mesh> m_mesh;
+
+		mutable AABB m_worldAABB;
+		mutable OBB m_worldOBB;
+		mutable bool m_boundingBoxesDirty = true;
 	};
 }

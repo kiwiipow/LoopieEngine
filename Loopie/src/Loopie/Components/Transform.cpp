@@ -330,7 +330,7 @@ namespace Loopie
 
     void Transform::RefreshMatrices() const
     {
-        if (!m_worldDirty) return;
+        if (!m_worldDirty && !m_localDirty) return;
 
         matrix4 localMat = translate(matrix4(1.0f), m_localPosition) * toMat4(m_localRotation) * scale(matrix4(1.0f), m_localScale);
 
@@ -349,5 +349,7 @@ namespace Loopie
 
         m_localDirty = false;
         m_worldDirty = false;
+
+        m_hasChanged = true;
     }
 };

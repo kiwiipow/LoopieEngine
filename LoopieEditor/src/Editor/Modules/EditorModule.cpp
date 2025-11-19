@@ -92,7 +92,7 @@ namespace Loopie
 			if (!buffer)
 				continue;
 
-			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix());
+			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix(), false);
 			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetWidth());
 			buffer->Bind();
 			RenderWorld(cam);
@@ -105,8 +105,13 @@ namespace Loopie
 
 		/// SceneWindowRender
 		m_scene.StartScene();
-		Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix());
+		Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
 		RenderWorld(m_scene.GetCamera());
+		if (HierarchyInterface::s_SelectedEntity) {
+			Camera* cam = HierarchyInterface::s_SelectedEntity->GetComponent<Camera>();
+			if (cam)
+				Gizmo::DrawFrustum(cam->GetFrustum());
+		}
 		Renderer::EndScene();
 		m_scene.EndScene();
 
@@ -118,6 +123,11 @@ namespace Loopie
 			Renderer::EndScene();
 		}
 		m_game.EndScene();
+
+
+		for (auto& [uuid, entity] : scene->GetAllEntities()) {
+			entity->GetTransform()->ResetHasChanged();  /// Temporary
+		}
 	}
 
 	void EditorModule::OnInterfaceRender()
@@ -135,13 +145,18 @@ namespace Loopie
 	}
 
 	void EditorModule::RenderWorld(Camera* camera)
-	{
+	{	
+
 		for (auto& [uuid, entity] : scene->GetAllEntities()) {
 			if (!entity->GetIsActive())
 				continue;
 			MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
 			if (!renderer || !renderer->GetIsActive())
 				continue;
+
+			if (!camera->GetFrustum().Intersects(renderer->GetWorldAABB()))
+				continue;
+
 			renderer->Render();
 			Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
 		}

@@ -121,6 +121,21 @@ namespace Loopie {
 		Gizmo::DrawLine(corners[3], corners[7], color);
 	}
 
+	void Gizmo::DrawCube(const OBB& obb, const vec4& color)
+	{
+		DrawCube(obb.GetCorners(), color);
+	}
+
+	void Gizmo::DrawCube(const AABB& aabb, const vec4& color)
+	{
+		DrawCube(aabb.MinPoint, aabb.MaxPoint, color);
+	}
+
+	void Gizmo::DrawFrustum(const Frustum& frustum, const vec4& color)
+	{
+		DrawCube(frustum.GetCorners(), color);
+	}
+
 	void Gizmo::SetGridSize(int size)
 	{
 		s_Data.GridHalfSize = size / 2;

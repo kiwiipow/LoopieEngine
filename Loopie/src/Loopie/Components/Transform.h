@@ -56,6 +56,8 @@ namespace Loopie
         void MarkLocalDirty();
         void MarkWorldDirty();
         bool IsDirty() const;
+        bool HasChanged() const { return m_hasChanged; }
+        void ResetHasChanged() const { m_hasChanged = false; };
 
         void ForceRefreshMatrices();
 
@@ -80,5 +82,7 @@ namespace Loopie
 
         mutable bool m_localDirty = true;
         mutable bool m_worldDirty = true;
+
+        mutable bool m_hasChanged = true;
     };
 }

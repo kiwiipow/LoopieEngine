@@ -85,6 +85,10 @@ namespace Loopie
 
     void OrbitalCamera::Update(float dt)
     {
+
+        if (m_inputRotation == vec3{ 0.f, 0.f ,0.f} && m_inputDirection == vec3{ 0.f, 0.f, 0.f } && m_panDirection == vec3{ 0.f, 0.f, 0.f } && m_zoomInput == 0.f)
+            return;
+
         Transform* transform = m_entity->GetTransform();
  
         if (m_entityToPivot != m_entity)

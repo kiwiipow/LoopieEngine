@@ -20,16 +20,12 @@ namespace Loopie {
 				RenderNormalsPerTriangle(0.5f,{1,1,0,1});
 
 			if (m_drawAABB || m_drawOBB) {
-				AABB localAABB = m_mesh->GetData().BoundingBox;
-				OBB worldOBB = localAABB.ToOBB().Transform(GetTransform()->GetLocalToWorldMatrix());
-				AABB worldAABB = worldOBB.ToAABB();
-
 				if(m_drawAABB)
-					Gizmo::DrawCube(worldAABB.minPoint, worldAABB.maxPoint);
+					Gizmo::DrawCube(m_worldAABB.MinPoint, m_worldAABB.MaxPoint);
 				if(m_drawOBB)
-					Gizmo::DrawCube(worldOBB.GetCorners());
+					Gizmo::DrawCube(m_worldOBB.GetCorners());
 			}
-			
+			///
 
 		}
 		
@@ -38,6 +34,7 @@ namespace Loopie {
 	void MeshRenderer::SetMesh(std::shared_ptr<Mesh> mesh)
 	{
 		m_mesh = mesh;
+		SetBoundingBoxesDirty();
 	}
 
 	void MeshRenderer::SetMaterial(std::shared_ptr<Material> material)
@@ -50,6 +47,18 @@ namespace Loopie {
 		m_material = std::make_shared<Material>();
 	}
 	
+
+	void MeshRenderer::RecalculateBoundingBoxes() const
+	{
+		if (!m_boundingBoxesDirty && !GetTransform()->HasChanged())
+			return;
+
+		m_worldOBB = m_mesh->GetData().BoundingBox.ToOBB();
+		m_worldOBB.ApplyTransform(GetTransform()->GetLocalToWorldMatrix());
+		m_worldAABB = m_mesh->GetData().BoundingBox.Transform(GetTransform()->GetLocalToWorldMatrix());
+		
+		m_boundingBoxesDirty = false;
+	}
 
 	///TEST
 	vec3 MeshRenderer::GetVertexVec3Data(const MeshData& data, unsigned int vertexIndex, unsigned int offset)
