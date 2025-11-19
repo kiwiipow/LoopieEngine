@@ -3,6 +3,7 @@
 #include "Loopie/Core/Assert.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Render/Renderer.h"
+#include "Loopie/Core/Time.h"
 
 namespace Loopie {
 	Application* Application::s_Instance = nullptr;
