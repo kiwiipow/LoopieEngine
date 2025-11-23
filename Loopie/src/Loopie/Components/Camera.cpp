@@ -1,6 +1,7 @@
 #include "Camera.h"
 
 #include "Loopie/Core/Log.h"
+#include "Loopie/Math/MathUtils.h"
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Render/Renderer.h"
@@ -22,6 +23,9 @@ namespace Loopie
 	Camera::~Camera() {
 		Renderer::UnregisterCamera(*this);
 
+		if (GetTransform())
+			GetTransform()->m_transformNotifier.RemoveObserver(this);
+
 		if (s_Main == this)
 		{
 			s_Main = nullptr;
@@ -35,6 +39,19 @@ namespace Loopie
 				}
 			}
 		}
+	}
+
+	void Camera::Init()
+	{
+		CalculateMatrices();
+
+		GetTransform()->m_transformNotifier.AddObserver(this);
+	}
+
+	void Camera::OnNotify(const TransformNotification& id)
+	{
+		if(id == TransformNotification::OnDirty)
+			SetDirty();
 	}
 
 	void Camera::SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
@@ -94,30 +111,33 @@ namespace Loopie
 		return m_farPlane;
 	}
 
+	const Frustum& Camera::GetFrustum() const {
+		CalculateMatrices(); 
+		return m_frustum;
+	}
+
 
 	void Camera::CalculateMatrices() const
 	{
-		if (!m_dirty && !GetTransform()->IsDirty())
+		if (!m_dirty)
 			return;
 		
 		auto transform = GetTransform();
 
 		const vec3 position = transform->GetPosition();
-		const vec3 forward = -transform->Forward();   // must exist in your Transform
-		const vec3 up = transform->Up();        // must exist in your Transform
+		const vec3 forward = -transform->Forward();
+		const vec3 up = transform->Up();
 
-		// Make camera look forward
 		m_viewMatrix = glm::lookAt(position, position + forward, up);
 		m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_viewport.z / m_viewport.w, m_nearPlane, m_farPlane);
 		m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+
+		m_frustum.FromMatrix(m_viewProjectionMatrix);
+		m_dirty = false;
 	}
 
 	void Camera::SetDirty() const{
 		m_dirty = true;
-	}
-	void Camera::Init()
-	{
-		CalculateMatrices();
 	}
 
 	bool Camera::SetMainCamera(Camera* camera) {

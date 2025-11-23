@@ -16,6 +16,6 @@ namespace Loopie {
 
 	private:
 		static void ProcessNode(void* node, const void* scene, std::vector<std::string>& outputPaths);
-		static std::string ProcessMesh(void* mesh, const void* scene);
+		static std::string ProcessMesh(void* nodePtr, void* mesh, const void* scene);
 	};
 }

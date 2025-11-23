@@ -3,6 +3,7 @@
 
 #include "Loopie/Core/Identificable.h"
 #include "Loopie/Core/UUID.h"
+#include "Loopie/Events/IObserver.h"
 
 namespace Loopie {
 	class Entity;

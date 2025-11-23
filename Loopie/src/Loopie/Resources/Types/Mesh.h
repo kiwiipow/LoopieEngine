@@ -1,5 +1,8 @@
 #pragma once
 #include "Loopie/Resources/Resource.h"
+#include "Loopie/Math/MathTypes.h"
+#include "Loopie/Math/AABB.h"
+#include "Loopie/Math/OBB.h"
 
 #include "Loopie/Render/IndexBuffer.h"
 #include "Loopie/Render/VertexBuffer.h"
@@ -11,6 +14,11 @@
 namespace Loopie {
 
 	struct MeshData {
+		std::string Name;
+
+		AABB BoundingBox;
+		matrix4 Matrix = matrix4(1); /// Still NotWorking
+
 		unsigned int VerticesAmount = 0;
 		unsigned int VertexElements = 0;
 		unsigned int IndicesAmount = 0;
@@ -23,6 +31,7 @@ namespace Loopie {
 
 		std::vector<float> Vertices;
 		std::vector<unsigned int> Indices;
+
 	};
 	
 	class Mesh : public Resource{

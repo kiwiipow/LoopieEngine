@@ -16,8 +16,10 @@ namespace Loopie {
 		~AssetsExplorerInterface() = default;
 
 		void Init() override;
-		void Update(float dt, const InputEventManager& inputEvent) override;
+		void Update(const InputEventManager& inputEvent) override;
 		void Render() override;
+
+		void Reload();
 
 	private:
 		struct CachedDirectoryNode

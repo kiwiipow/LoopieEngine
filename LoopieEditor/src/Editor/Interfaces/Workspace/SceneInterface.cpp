@@ -47,13 +47,14 @@ namespace Loopie {
 		m_gizmoMode = ImGuizmo::WORLD;
 	}
 
-	void SceneInterface::Update(float dt, const InputEventManager& inputEvent)
+	void SceneInterface::Update(const InputEventManager& inputEvent)
 	{
 		
 		if (!m_focused && !m_interacted)
 			return;
+		
 		m_camera->ProcessEvent(inputEvent);
-		m_camera->Update(dt);
+		m_camera->Update();
 
 	}
 
@@ -79,6 +80,8 @@ namespace Loopie {
 				m_interacted = false;
 			ImGui::Image((ImTextureID)m_buffer->GetTextureId(), size, ImVec2(0,1), ImVec2(1,0));
 
+			Drop();
+
 			ImGui::SetCursorPos(cursorPos);
 			DrawHelperBar();
 
@@ -99,7 +102,7 @@ namespace Loopie {
 
 		}
 
-		Drop();
+		
 		ImGui::End();
 	}
 

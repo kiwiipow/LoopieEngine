@@ -1,4 +1,5 @@
 #include "OrbitalCamera.h"
+#include "Loopie/Core/Time.h"
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
@@ -83,8 +84,12 @@ namespace Loopie
         m_inputRotation *= m_cameraRotationSpeed;
     }
 
-    void OrbitalCamera::Update(float dt)
+    void OrbitalCamera::Update()
     {
+
+        if (m_inputRotation == vec3{ 0.f, 0.f ,0.f} && m_inputDirection == vec3{ 0.f, 0.f, 0.f } && m_panDirection == vec3{ 0.f, 0.f, 0.f } && m_zoomInput == 0.f)
+            return;
+
         Transform* transform = m_entity->GetTransform();
  
         if (m_entityToPivot != m_entity)
@@ -113,14 +118,14 @@ namespace Loopie
             m_yaw += -m_inputRotation.x;
             m_pitch += m_inputRotation.y;
 
-            m_inputDirection.x *= dt;
-            m_inputDirection.z *= dt;
+            m_inputDirection.x *= Time::GetDeltaTime();
+            m_inputDirection.z *= Time::GetDeltaTime();
 
             m_inputDirection += m_panDirection/10.f;
             m_inputDirection.z += m_zoomInput;
 
-            quaternion yawRotation = glm::normalize(glm::angleAxis(m_yaw, glm::vec3(0, 1, 0)));
-            quaternion pitchRotation = glm::normalize(glm::angleAxis(m_pitch, glm::vec3(1, 0, 0)));
+            quaternion yawRotation = normalize(angleAxis(m_yaw, vec3(0, 1, 0)));
+            quaternion pitchRotation = normalize(angleAxis(m_pitch, vec3(1, 0, 0)));
             quaternion orbitRotation = yawRotation * pitchRotation;
 
             transform->Translate(m_inputDirection, ObjectSpace::Local);

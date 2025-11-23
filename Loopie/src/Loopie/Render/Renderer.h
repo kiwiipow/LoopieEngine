@@ -1,5 +1,5 @@
 #pragma once
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 #include "Loopie/Resources/Types/Material.h"
 #include "Loopie/Resources/Types/Texture.h"
 #include "Loopie/Render/VertexArray.h"

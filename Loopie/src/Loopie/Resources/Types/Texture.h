@@ -1,6 +1,6 @@
 #pragma once
 #include "Loopie/Resources/Resource.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 
 #include "Loopie/Render/TextureBuffer.h"
 

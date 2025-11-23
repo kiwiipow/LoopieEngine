@@ -7,7 +7,7 @@
 #include "Loopie/Render/Renderer.h"
 #include "Loopie/Render/Gizmo.h"
 
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
 
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/TextureImporter.h"
@@ -50,25 +50,25 @@ namespace Loopie
 
 		m_hierarchy.SetScene(scene);
 
+		Application::GetInstance().m_notifier.AddObserver(this);
+
 	}
 
 	void EditorModule::OnUnload()
 	{
 		AssetRegistry::Shutdown();
+		Application::GetInstance().m_notifier.RemoveObserver(this);
 	}
 
-	void EditorModule::OnUpdate(float dt)
+	void EditorModule::OnUpdate()
 	{
+
 		Application& app = Application::GetInstance();
 		InputEventManager& inputEvent = app.GetInputEvent();
 
-		if (inputEvent.HasEvent(SDL_EVENT_WINDOW_FOCUS_GAINED)) {
-			AssetRegistry::RefreshAssetRegistry();
-		}
-
-		m_hierarchy.Update(dt, inputEvent);
-		m_assetsExplorer.Update(dt, inputEvent);
-		m_scene.Update(dt, inputEvent);
+		m_hierarchy.Update(inputEvent);
+		m_assetsExplorer.Update(inputEvent);
+		m_scene.Update(inputEvent);
 
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
@@ -92,7 +92,7 @@ namespace Loopie
 			if (!buffer)
 				continue;
 
-			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix());
+			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix(), false);
 			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetWidth());
 			buffer->Bind();
 			RenderWorld(cam);
@@ -105,8 +105,13 @@ namespace Loopie
 
 		/// SceneWindowRender
 		m_scene.StartScene();
-		Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix());
+		Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
 		RenderWorld(m_scene.GetCamera());
+		if (HierarchyInterface::s_SelectedEntity) {
+			Camera* cam = HierarchyInterface::s_SelectedEntity->GetComponent<Camera>();
+			if (cam)
+				Gizmo::DrawFrustum(cam->GetFrustum());
+		}
 		Renderer::EndScene();
 		m_scene.EndScene();
 
@@ -122,7 +127,6 @@ namespace Loopie
 
 	void EditorModule::OnInterfaceRender()
 	{
-
 		ImGui::DockSpaceOverViewport();
 
 		m_mainMenu.Render();
@@ -135,13 +139,19 @@ namespace Loopie
 	}
 
 	void EditorModule::RenderWorld(Camera* camera)
-	{
+	{	
+
 		for (auto& [uuid, entity] : scene->GetAllEntities()) {
 			if (!entity->GetIsActive())
 				continue;
 			MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
 			if (!renderer || !renderer->GetIsActive())
 				continue;
+
+			if (!camera->GetFrustum().Intersects(renderer->GetWorldAABB()))
+				continue;
+
+			renderer->Render();
 			Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
 		}
 	}
@@ -150,5 +160,16 @@ namespace Loopie
 	{
 		m_scene.ChargeModel("assets/models/BakerHouse.fbx");
 		m_scene.ChargeTexture("assets/textures/Baker_house.png");
-	}	
+	}
+
+	void EditorModule::OnNotify(const EngineNotification& type)
+	{
+		if (type == EngineNotification::OnProjectChange) {
+			AssetRegistry::Initialize();
+			Application::GetInstance().GetWindow().SetTitle(Application::GetInstance().m_activeProject.GetProjectName().c_str());
+			m_assetsExplorer.Reload();
+			///LOAD SCENE
+		}
+	}
+
 }

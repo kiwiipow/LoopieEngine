@@ -1,6 +1,9 @@
 #include "Loopie/Components/Component.h"
 #include "Loopie/Scene/Entity.h"
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
+#include "Loopie/Events/Event.h"
+#include "Loopie/Events/EventTypes.h"
+
 #include <memory>
 namespace Loopie
 {
@@ -59,6 +62,8 @@ namespace Loopie
 
         void ForceRefreshMatrices();
 
+        
+
     private:
 
         vec3 GetWorldPosition() const;
@@ -66,7 +71,8 @@ namespace Loopie
         vec3 GetWorldScale() const;
 
         void RefreshMatrices() const;
-
+    public:
+        Event<TransformNotification> m_transformNotifier;
     private:
         vec3 m_localPosition = vec3(0);
         quaternion m_localRotation = quaternion(1, 0, 0, 0);

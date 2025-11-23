@@ -1,17 +1,21 @@
 #pragma once
-#include "Loopie/Core/Math.h"
+#include "Loopie/Math/MathTypes.h"
+#include "Loopie/Math/Frustum.h"
 #include "Loopie/Components/Component.h"
+#include "Loopie/Events/EventTypes.h"
 #include "Loopie/Render/FrameBuffer.h"
 
 namespace Loopie
 {
-	class Camera : public Component
+	class Camera : public Component, public IObserver<TransformNotification>
 	{
 	public:
 		DEFINE_TYPE(Camera)
 
-		Camera(float fov = 45.0f, float near_plane = 0.1f, float far_plane = 200.0f, bool canBeMainCamera = true);
+		Camera(float fov = 60.0f, float near_plane = 0.3f, float far_plane = 200.0f, bool canBeMainCamera = true);
 		~Camera();
+		void Init() override; //// From Component
+		void OnNotify(const TransformNotification& id) override;
 
 		void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
@@ -28,6 +32,7 @@ namespace Loopie
 		void SetFarPlane(float farPlane);
 		float GetFarPlane() const;
 		vec4 GetViewport() const { return m_viewport; }
+		const Frustum& GetFrustum() const;
 
 		void SetDirty() const;
 
@@ -42,14 +47,16 @@ namespace Loopie
 		void SetIfBeMainCamera(bool canBe) { m_canBeMainCamera = canBe; }
 
 
-		void Init() override; //// From Component
+		
+		
 	private:
 		void CalculateMatrices() const;
 	private:
 		vec4 m_viewport = vec4(0,0,1,1);
+		mutable Frustum m_frustum;
 
-		float m_fov=45.0f;
-		float m_nearPlane = 0.1f;
+		float m_fov=60.0f;
+		float m_nearPlane = 0.3f;
 		float m_farPlane=200.0f;
 
 		mutable matrix4 m_viewMatrix = matrix4(1);

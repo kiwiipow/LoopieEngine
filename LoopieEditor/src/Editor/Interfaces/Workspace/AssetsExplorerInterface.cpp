@@ -43,7 +43,7 @@ namespace Loopie {
 		GoToDirectory(project.GetAssetsPath());
 	}
 
-	void AssetsExplorerInterface::Update(float dt, const InputEventManager& inputEvent) {
+	void AssetsExplorerInterface::Update(const InputEventManager& inputEvent) {
 		if (m_focused)
 			HotKeysControls(inputEvent);
 
@@ -464,9 +464,25 @@ namespace Loopie {
 			ImGui::EndDragDropTarget();
 		}
 	}
+
+	void AssetsExplorerInterface::Reload()
+	{
+		Refresh();
+		const Project& project = Application::GetInstance().m_activeProject;
+		m_currentDirectory = project.GetAssetsPath();
+		m_selectedFile = "";
+	}
+
 	void AssetsExplorerInterface::Refresh(bool folderTree, bool folderFiles, bool searchFiles)
 	{
 		AssetRegistry::RefreshAssetRegistry();
+		const Project& project = Application::GetInstance().m_activeProject;
+
+		if (!std::filesystem::exists(m_currentDirectory))
+			m_currentDirectory = project.GetAssetsPath();
+
+		if (!std::filesystem::exists(m_selectedFile))
+			m_selectedFile = "";
 
 		if(!m_dirtyFoldersTree)
 			m_dirtyFoldersTree = folderTree;
