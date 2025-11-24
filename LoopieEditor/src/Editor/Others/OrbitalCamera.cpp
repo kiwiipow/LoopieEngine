@@ -2,8 +2,10 @@
 #include "Loopie/Core/Time.h"
 #include "Loopie/Scene/Entity.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Components/MeshRenderer.h"
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
 #include "Loopie/Core/Log.h"
+#include "Loopie/Math/AABB.h"
 
 namespace Loopie
 {
@@ -32,21 +34,13 @@ namespace Loopie
 
         if (inputEvent.GetKeyStatus(SDL_SCANCODE_LALT) == KeyState::REPEAT && m_entity != m_entityToPivot)
         {
-           // Log::Info("{0} {1} {2}", m_entity->GetTransform()->GetPosition().x, m_entity->GetTransform()->GetPosition().y, m_entity->GetTransform()->GetPosition().z);
             if (inputEvent.GetMouseButtonStatus(0) == KeyState::REPEAT)
             {
-               // Log::Info("Entering Alt + Mouse 0");
                 m_inputRotation = vec3(mouseDelta.x, mouseDelta.y, 0);
-            }
-            if (inputEvent.GetMouseButtonStatus(1) == KeyState::REPEAT)
-            {
-               // Log::Info("Entering Alt + Mouse 1");
-                m_panDirection = vec3(mouseDelta.x, mouseDelta.y, 0);
             }
             if (inputEvent.GetMouseButtonStatus(2) == KeyState::REPEAT)
             {
-                //Log::Info("Entering Alt + Mouse 2");
-                m_zoomInput = mouseScroll.y * m_cameraZoomSpeed;
+                m_orbitOffset.z += mouseDelta.y * m_cameraOrbitalZoomSpeed;
             }
         }
         else
@@ -73,8 +67,19 @@ namespace Loopie
         }
         if (inputEvent.GetKeyStatus(SDL_SCANCODE_F) == KeyState::DOWN)
         {
-            if(HierarchyInterface::s_SelectedEntity != nullptr)
+            if (HierarchyInterface::s_SelectedEntity != nullptr)
+            {
                 m_entityToPivot = HierarchyInterface::s_SelectedEntity;
+                MeshRenderer* renderer = HierarchyInterface::s_SelectedEntity->GetComponent<MeshRenderer>();
+                if (renderer)
+                {
+                    vec3 objectScale = renderer->GetWorldAABB().GetSize();
+                    float maxScaleValue = objectScale.x;
+                    maxScaleValue = objectScale.y > maxScaleValue ? objectScale.y : maxScaleValue;
+                    maxScaleValue = objectScale.z > maxScaleValue ? objectScale.z : maxScaleValue;
+                    m_orbitOffset.z = -5 * maxScaleValue;
+                }
+            }
         }
 
         if (mouseScroll.y != 0)
@@ -86,14 +91,13 @@ namespace Loopie
 
     void OrbitalCamera::Update()
     {
-        if (m_inputRotation == vec3{ 0.f, 0.f ,0.f} && m_inputDirection == vec3{ 0.f, 0.f, 0.f } && m_panDirection == vec3{ 0.f, 0.f, 0.f } && m_zoomInput == 0.f)
+        if (m_inputRotation == vec3{ 0.f, 0.f ,0.f} && m_inputDirection == vec3{ 0.f, 0.f, 0.f } && m_panDirection == vec3{ 0.f, 0.f, 0.f } && m_orbitOffset.z == 0.f)
             return;
         
         Transform* transform = m_entity->GetTransform();
  
         if (m_entityToPivot != m_entity)
         {
-
             m_yaw += -m_inputRotation.x;
             m_pitch += m_inputRotation.y;
 
@@ -113,7 +117,6 @@ namespace Loopie
         }
         else
         {
-
             m_yaw += -m_inputRotation.x;
             m_pitch += m_inputRotation.y;
 
@@ -131,5 +134,4 @@ namespace Loopie
             transform->SetLocalRotation(orbitRotation);
         }
     }
-
 }

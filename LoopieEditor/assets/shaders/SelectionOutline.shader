@@ -18,7 +18,7 @@ uniform mat4 lp_Transform;
 
 void main()
 {
-    gl_Position = lp_Projection * lp_View* lp_Transform * vec4(a_Position, 1.0);
+    gl_Position = lp_Projection * lp_View * lp_Transform * vec4(a_Position, 1.0);
 }
 
 
@@ -26,7 +26,7 @@ void main()
 #version 460 core
 out vec4 FragColor;
 
-uniform vec4 u_Color = vec4(1, 0.757,0,1.0);
+uniform vec4 u_Color = vec4(0.0, 0.5, 0.75, 1.0);
 
 void main()
 {
