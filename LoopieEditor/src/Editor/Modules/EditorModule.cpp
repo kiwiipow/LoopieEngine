@@ -17,7 +17,6 @@
 #include "Loopie/Resources/Types/Material.h"
 ///
 
-#include <imgui.h>
 #include <glad/glad.h>
 
 namespace Loopie
@@ -148,8 +147,8 @@ namespace Loopie
 		Renderer::EnableStencil();
 		Renderer::EnableDepth();
 		Renderer::Clear();
-		Renderer::SetStencilFunc(GL_ALWAYS, 1, 0xFF);
-		Renderer::SetStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		Renderer::SetStencilFunc(Renderer::StencilFunc::ALWAYS, 1, 0xFF);
+		Renderer::SetStencilOp(Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP, Renderer::StencilOp::REPLACE);
 		Renderer::SetStencilMask(0xFF);
 		//Renderer::DisableStencil();
 		for (auto& [uuid, entity] : scene->GetAllEntities()) {
@@ -165,12 +164,23 @@ namespace Loopie
 
 			if (entity == HierarchyInterface::s_SelectedEntity) {
 				Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
-				Renderer::SetStencilFunc(GL_NOTEQUAL,1,0xFF);
+
+				Renderer::SetStencilFunc(Renderer::StencilFunc::NOTEQUAL,1,0xFF);
 				Renderer::SetStencilMask(0x00);
-				Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), selectedObjectMaterial, entity->GetTransform());
+
+				float outlineScale = 1.05f;
+				glm::vec3 center = renderer->GetWorldAABB().GetCenter();
+
+				glm::mat4 T1 = glm::translate(glm::mat4(1.0f), center);
+				glm::mat4 S = glm::scale(glm::mat4(1.0f), glm::vec3(outlineScale));
+				glm::mat4 T2 = glm::translate(glm::mat4(1.0f), -center);
+				glm::mat4 outlineModel = T1 * S * T2 * entity->GetTransform()->GetLocalToWorldMatrix();
+				Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), selectedObjectMaterial, outlineModel);
+
 				Renderer::SetStencilMask(0xFF);
 				Renderer::EnableDepth();
 				Renderer::DisableStencil();
+
 			}
 			else
 			{

@@ -95,9 +95,14 @@ namespace Loopie {
 
 	void Renderer::FlushRenderItem(std::shared_ptr<VertexArray> vao, std::shared_ptr<Material> material, const Transform* transform)
 	{
+		FlushRenderItem(vao, material, transform->GetLocalToWorldMatrix());
+	}
+
+	void Renderer::FlushRenderItem(std::shared_ptr<VertexArray> vao, std::shared_ptr<Material> material, const matrix4& modelMatrix)
+	{
 		vao->Bind();
 		material->Bind();
-		SetRenderUniforms(material, transform);
+		SetRenderUniforms(material, modelMatrix);
 		glDrawElements(GL_TRIANGLES, vao->GetIndexBuffer().GetCount(), GL_UNSIGNED_INT, nullptr);
 		vao->Unbind();
 	}
@@ -123,7 +128,11 @@ namespace Loopie {
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
 	{
-		material->GetShader().SetUniformMat4("lp_Transform", transform->GetLocalToWorldMatrix());
+		SetRenderUniforms(material, transform->GetLocalToWorldMatrix());
+	}
+	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix)
+	{
+		material->GetShader().SetUniformMat4("lp_Transform", modelMatrix);
 	}
 	void Renderer::EnableDepth()
 	{
@@ -141,16 +150,16 @@ namespace Loopie {
 	{
 		glDisable(GL_STENCIL_TEST);
 	}
-	void Renderer::SetStencilMask(GLuint mask)
+	void Renderer::SetStencilMask(unsigned int mask)
 	{
 		glStencilMask(mask);
 	}
-	void Renderer::SetStencilOp(GLenum stencil_fail, GLenum depth_fail, GLenum pass)
+	void Renderer::SetStencilOp(StencilOp stencil_fail, StencilOp depth_fail, StencilOp pass)
 	{
-		glStencilOp(stencil_fail, depth_fail, pass);
+		glStencilOp((unsigned int)stencil_fail, (unsigned int)depth_fail, (unsigned int)pass);
 	}
-	void Renderer::SetStencilFunc(GLenum cond, GLint ref, GLuint mask)
+	void Renderer::SetStencilFunc(StencilFunc cond, int ref, unsigned int mask)
 	{
-		glStencilFunc(cond, ref, mask);
+		glStencilFunc((unsigned int)cond, ref, mask);
 	}
 }

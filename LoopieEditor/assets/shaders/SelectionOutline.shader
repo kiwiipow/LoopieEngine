@@ -18,14 +18,7 @@ uniform mat4 lp_Transform;
 
 void main()
 {
-    // Transform position and normal to world space
-    vec3 worldPos = vec3(lp_Transform * vec4(a_Position, 1.0));
-    vec3 worldNormal = normalize(mat3(lp_Transform) * a_Normal);
-
-    // Offset along normal
-    vec3 offsetPos = worldPos + worldNormal * 0.1;
-
-    gl_Position = lp_Projection * lp_View * vec4(offsetPos, 1.0);
+    gl_Position = lp_Projection * lp_View* lp_Transform * vec4(a_Position, 1.0);
 }
 
 
@@ -33,7 +26,7 @@ void main()
 #version 460 core
 out vec4 FragColor;
 
-uniform vec4 u_Color = vec4(1.0);
+uniform vec4 u_Color = vec4(1, 0.757,0,1.0);
 
 void main()
 {
