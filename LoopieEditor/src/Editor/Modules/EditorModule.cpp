@@ -44,9 +44,9 @@ namespace Loopie
 		////
 
 		m_assetsExplorer.Init();
-		m_console.Init();
 		m_hierarchy.Init();
 		m_inspector.Init();
+		m_console.Init();
 		m_game.Init();
 		m_scene.Init();
 		m_mainMenu.Init();

@@ -4,6 +4,9 @@
 #include "Editor/Interfaces/Interface.h"
 #include "Editor/ImGuiHelpers/ImGuiHelpers.h"
 
+#include "Loopie/Events/Event.h"
+#include "Editor/Events/EditorEventTypes.h"
+
 #include <filesystem>
 #include <vector>
 #include <memory>
@@ -62,10 +65,14 @@ namespace Loopie {
 		void DrawContextMenu(const std::filesystem::path& file);
 		void DrawCreateAssetMenu();
 		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
+	
+	public:
+		static Event<OnEntityOrFileNotification> s_OnFileSelected;
 
+		static std::filesystem::path s_SelectedFile;
 	private:
 		std::filesystem::path m_currentDirectory;
-		std::filesystem::path m_selectedFile;
+
 
 		std::filesystem::path m_relativePath;
 		std::vector<std::string> m_relativePathSteps;

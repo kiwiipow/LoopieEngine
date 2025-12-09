@@ -1,7 +1,9 @@
 #include "InspectorInterface.h"
 #include "Editor/Interfaces/Workspace/HierarchyInterface.h"
+#include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 
 #include "Loopie/Components/Transform.h"
+#include "Loopie/Core/Log.h"
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
@@ -11,34 +13,71 @@
 
 namespace Loopie {
 	InspectorInterface::InspectorInterface() {
-
+		
 	}
+
+	InspectorInterface::~InspectorInterface() {
+		HierarchyInterface::s_OnEntitySelected.RemoveObserver(this);
+		AssetsExplorerInterface::s_OnFileSelected.RemoveObserver(this);
+	}
+
+	void InspectorInterface::Init() {
+		HierarchyInterface::s_OnEntitySelected.AddObserver(this);
+		AssetsExplorerInterface::s_OnFileSelected.AddObserver(this);
+	}
+
 
 	void InspectorInterface::Render() {
 		if (ImGui::Begin("Inspector")) {
 
-			if (HierarchyInterface::s_SelectedEntity == nullptr) {
-				ImGui::End();
-				return;
+			switch (m_mode)
+			{
+			case InspectorMode::EntityMode:
+				DrawEntityInspector(HierarchyInterface::s_SelectedEntity);
+				break;
+			case InspectorMode::ImportMode:
+				DrawFileImportSettings(AssetsExplorerInterface::s_SelectedFile);
+				break;
+			default:
+				break;
 			}
-			std::shared_ptr<Entity> entitySelected = HierarchyInterface::s_SelectedEntity;
-			DrawEntityConfig(entitySelected);
-
-			std::vector<Component*> components = entitySelected->GetComponents();
-			for (auto* component : components) {
-				if (component->GetTypeID() == Transform::GetTypeIDStatic()) {
-					DrawTransform(static_cast<Transform*>(component));
-				}
-				else if (component->GetTypeID() == Camera::GetTypeIDStatic()) {
-					DrawCamera(static_cast<Camera*>(component));
-				}
-				else if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
-					DrawMeshRenderer(static_cast<MeshRenderer*>(component));
-				}
-			}
-			AddComponent(entitySelected);
 		}
 		ImGui::End();
+	}
+
+	void InspectorInterface::DrawEntityInspector(const std::shared_ptr<Entity>& entity)
+	{
+		if (!entity)
+			return;
+
+		DrawEntityConfig(entity);
+
+		std::vector<Component*> components = entity->GetComponents();
+		for (auto* component : components) {
+			if (component->GetTypeID() == Transform::GetTypeIDStatic()) {
+				DrawTransform(static_cast<Transform*>(component));
+			}
+			else if (component->GetTypeID() == Camera::GetTypeIDStatic()) {
+				DrawCamera(static_cast<Camera*>(component));
+			}
+			else if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
+				DrawMeshRenderer(static_cast<MeshRenderer*>(component));
+			}
+		}
+		AddComponent(entity);
+	}
+
+	void InspectorInterface::DrawFileImportSettings(const std::filesystem::path& path)
+	{
+		if (path.empty() || !path.has_extension()) 
+			return;
+
+
+		std::string extension = path.extension().string();
+		if (extension == ".mat") 
+		{
+			DrawMaterialImportSettings(path);
+		}
 	}
 
 	void InspectorInterface::DrawEntityConfig(const std::shared_ptr<Entity>& entity)
@@ -290,6 +329,23 @@ namespace Loopie {
 
 	void InspectorInterface::AddComponent(const std::shared_ptr<Entity>& entity)
 	{
+		
+	}
 
+	void InspectorInterface::DrawMaterialImportSettings(const std::filesystem::path& path)
+	{
+		if (ImGui::Button("Apply")) {
+			
+		}
+	}
+
+	void InspectorInterface::OnNotify(const OnEntityOrFileNotification& id)
+	{
+		if (id == OnEntityOrFileNotification::OnEntitySelect) {
+			m_mode = InspectorMode::EntityMode;
+		}
+		else if (id == OnEntityOrFileNotification::OnFileSelect) {
+			m_mode = InspectorMode::ImportMode;
+		}
 	}
 }

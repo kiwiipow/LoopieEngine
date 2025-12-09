@@ -8,6 +8,7 @@
 
 namespace Loopie {
 	std::shared_ptr<Entity> HierarchyInterface::s_SelectedEntity = nullptr;
+	Event<OnEntityOrFileNotification> HierarchyInterface::s_OnEntitySelected;
 
 	HierarchyInterface::HierarchyInterface() {
 		
@@ -56,6 +57,7 @@ namespace Loopie {
 	void HierarchyInterface::SelectEntity(std::shared_ptr<Entity> entity)
 	{
 		s_SelectedEntity = entity;
+		s_OnEntitySelected.Notify(OnEntityOrFileNotification::OnEntitySelect);
 	}
 
 	void HierarchyInterface::DrawEntitySlot(const std::shared_ptr<Entity>& entity)
