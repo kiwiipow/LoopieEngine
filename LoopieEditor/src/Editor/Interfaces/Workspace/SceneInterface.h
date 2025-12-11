@@ -36,6 +36,7 @@ namespace Loopie {
 		std::shared_ptr<FrameBuffer> m_buffer;
 		std::shared_ptr<OrbitalCamera> m_camera;
 
+		bool m_usingGuizmo;
 		bool m_interacted = false;
 		ivec2 m_windowSize = ivec2(0);
 		ivec2 m_mousePosition = ivec2(0);

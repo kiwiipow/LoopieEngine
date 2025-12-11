@@ -57,14 +57,14 @@ namespace Loopie {
 		
 		m_camera->ProcessEvent(inputEvent);
 		m_camera->Update();
-		if (inputEvent.GetMouseButtonStatus(0) == KeyState::DOWN)
+		if (inputEvent.GetMouseButtonStatus(0) == KeyState::DOWN && !m_usingGuizmo)
 			MousePick();
 	}
 
 	void SceneInterface::Render() {
-		const bool gizmoActive = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
+		m_usingGuizmo = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoNav;
-		if (gizmoActive)
+		if (m_usingGuizmo)
 		{
 			flags |= ImGuiWindowFlags_NoMove;
 		}
