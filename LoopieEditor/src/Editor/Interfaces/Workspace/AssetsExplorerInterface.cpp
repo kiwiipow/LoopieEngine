@@ -13,9 +13,15 @@
 #include <imgui_internal.h>
 
 namespace Loopie {
-	AssetsExplorerInterface::AssetsExplorerInterface() {
 
+	Event<OnEntityOrFileNotification> AssetsExplorerInterface::s_OnFileSelected;
+	std::filesystem::path AssetsExplorerInterface::s_SelectedFile = "";
+
+	AssetsExplorerInterface::AssetsExplorerInterface() {
 		
+	}
+	AssetsExplorerInterface::~AssetsExplorerInterface() {
+		Application::GetInstance().m_notifier.RemoveObserver(this);
 	}
 
 	void AssetsExplorerInterface::Init()
@@ -38,8 +44,16 @@ namespace Loopie {
 		m_emptyFolderIcon = ResourceManager::GetTexture(iconsToLoadMetadatas[1]);
 		m_folderIcon = ResourceManager::GetTexture(iconsToLoadMetadatas[2]);
 
+		Application::GetInstance().m_notifier.AddObserver(this);
+
 		const Project& project = Application::GetInstance().m_activeProject;
 		GoToDirectory(project.GetAssetsPath());
+	}
+
+	void AssetsExplorerInterface::OnNotify(const EngineNotification& id)
+	{
+		if (id == EngineNotification::OnAssetRegistryReload)
+			PassiveRefresh();
 	}
 
 	void AssetsExplorerInterface::Update(const InputEventManager& inputEvent) {
@@ -89,7 +103,7 @@ namespace Loopie {
 						ImGui::EndPopup();
 					}
 
-					if (m_focused)
+					//if (m_focused)
 						GetExternalFile();
 					DrawFolderContent();
 
@@ -109,13 +123,13 @@ namespace Loopie {
 
 	void AssetsExplorerInterface::HotKeysControls(const InputEventManager& inputEvent)
 	{
-		if (m_selectedFile.empty()) {
+		if (s_SelectedFile.empty()) {
 			return;
 		}
 
 		bool actionDone = false;
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_DELETE) == KeyState::DOWN) {
-			DirectoryManager::Delete(m_selectedFile);
+			DirectoryManager::Delete(s_SelectedFile);
 			actionDone = true;
 		}
 
@@ -145,16 +159,31 @@ namespace Loopie {
 
 		Application& app = Application::GetInstance();
 		InputEventManager& inputEvent = app.GetInputEvent();
-		if (!inputEvent.HasFileBeenDropped())
+		if (!inputEvent.HasFileBeenDropped() && !m_fileDropped)
 			return;
+
+		if (m_fileDropped && !m_focused) {
+			m_fileDropped = false;
+			m_droppedFiles.clear();
+			return;
+		}
+		if (!m_fileDropped) {
+			m_fileDropped = true;
+			m_droppedFiles.clear();
+			for (const char* path : inputEvent.GetDroppedFiles()) {
+				m_droppedFiles.emplace_back(path);
+			}
+			return;
+		}
+
+		m_fileDropped = false;
 
 		std::filesystem::path assetsPath = app.m_activeProject.GetAssetsPath();
 		std::filesystem::path currentPath = m_currentDirectory;
 
-		const std::vector<const char*>& droppedFiles = inputEvent.GetDroppedFiles();
-		for (size_t i = 0; i < droppedFiles.size(); i++)
+		for (size_t i = 0; i < m_droppedFiles.size(); i++)
 		{
-			std::filesystem::path droppedPath = droppedFiles[i];
+			std::filesystem::path droppedPath = m_droppedFiles[i];
 
 			currentPath = std::filesystem::absolute(currentPath);
 			droppedPath = std::filesystem::absolute(droppedPath);
@@ -176,6 +205,8 @@ namespace Loopie {
 			}
 		}
 
+		m_droppedFiles.clear();
+
 
 		Refresh(true, true, false);
 	}
@@ -191,9 +222,8 @@ namespace Loopie {
 		m_relativePath = std::filesystem::relative(m_currentDirectory, project.GetAssetsPath());
 
 		if (removeSearch) {
-			m_selectedFile.clear();
 			ClearSearch();
-			m_dirtyFooterText = true;
+			SelectFile("");
 		}
 
 		m_relativePathSteps.clear();
@@ -210,9 +240,12 @@ namespace Loopie {
 
 	void AssetsExplorerInterface::SelectFile(const std::filesystem::path& filePath)
 	{
-		m_selectedFile = filePath;
+		s_SelectedFile = filePath;
+
+		s_OnFileSelected.Notify(OnEntityOrFileNotification::OnFileSelect);
+
 		if (m_isSearching) {
-			GoToDirectory(m_selectedFile, false);
+			GoToDirectory(s_SelectedFile, false);
 		}
 
 		m_dirtyFooterText = true;
@@ -381,7 +414,7 @@ namespace Loopie {
 					}
 					else
 					{
-						///Open
+						OpenFile(node.Path);
 					}
 				}
 				else if (ImGui::IsItemClicked()) {
@@ -402,7 +435,7 @@ namespace Loopie {
 
 			ImGui::SetCursorScreenPos(cursor);
 			ImGuiSelectableFlags flags = ImGuiSelectableFlags_Disabled;
-			if (m_selectedFile == node.Path)
+			if (s_SelectedFile == node.Path)
 				flags |= ImGuiSelectableFlags_Highlight;
 			if (ImGui::Selectable("##file", false, flags, ImVec2((float)thumbnailSize, (float)thumbnailSize))) { }
 
@@ -421,7 +454,7 @@ namespace Loopie {
 		if (m_dirtyFooterText)
 			RebuildFooter();
 
-		if (!m_selectedFile.empty()) {
+		if (!s_SelectedFile.empty()) {
 			
 			ImGui::TextDisabled(m_cachedFooterText.c_str());
 		}
@@ -465,8 +498,8 @@ namespace Loopie {
 		Refresh();
 		const Project& project = Application::GetInstance().m_activeProject;
 		m_currentDirectory = project.GetAssetsPath();
-		m_selectedFile = "";
-		m_dirtyFooterText = true;
+		ClearSearch();
+		SelectFile("");
 	}
 
 	void AssetsExplorerInterface::Refresh(bool folderTree, bool folderFiles, bool searchFiles)
@@ -477,8 +510,8 @@ namespace Loopie {
 		if (!std::filesystem::exists(m_currentDirectory))
 			m_currentDirectory = project.GetAssetsPath();
 
-		if (!std::filesystem::exists(m_selectedFile))
-			m_selectedFile = "";
+		if (!std::filesystem::exists(s_SelectedFile))
+			s_SelectedFile = "";
 
 		m_dirtyFooterText = true;
 
@@ -488,6 +521,26 @@ namespace Loopie {
 			m_dirtyFolderFiles = folderFiles;
 		if(!m_dirtyFileSearch)
 			m_dirtyFileSearch = searchFiles;
+	}
+
+	void AssetsExplorerInterface::PassiveRefresh()
+	{
+		const Project& project = Application::GetInstance().m_activeProject;
+
+		if (!std::filesystem::exists(m_currentDirectory))
+			m_currentDirectory = project.GetAssetsPath();
+
+		if (!std::filesystem::exists(s_SelectedFile))
+			s_SelectedFile = "";
+
+		m_dirtyFooterText = true;
+
+		if (!m_dirtyTreeFolders)
+			m_dirtyTreeFolders = true;
+		if (!m_dirtyFolderFiles)
+			m_dirtyFolderFiles = true;
+		if (!m_dirtyFileSearch)
+			m_dirtyFileSearch = true;
 	}
 
 	void AssetsExplorerInterface::RebuildTreeFolderCache()
@@ -566,10 +619,10 @@ namespace Loopie {
 	}
 	void AssetsExplorerInterface::RebuildFooter()
 	{
-		if (!m_selectedFile.empty()) {
+		if (!s_SelectedFile.empty()) {
 			const Project& project = Application::GetInstance().m_activeProject;
 			std::filesystem::path path = project.GetAssetsPath();
-			path = path.stem() / std::filesystem::relative(m_selectedFile, path);
+			path = path.stem() / std::filesystem::relative(s_SelectedFile, path);
 
 			m_cachedFooterText = path.string();
 
@@ -609,6 +662,17 @@ namespace Loopie {
 		{
 			CreateMaterial(m_currentDirectory, "NewMaterial");
 		}
+		if (ImGui::MenuItem("Create Scene"))
+		{
+			CreateScene(m_currentDirectory, "NewScene");
+		}
+	}
+
+	void AssetsExplorerInterface::OpenFile(const std::filesystem::path& filePath)
+	{
+		if (filePath.extension().string() == ".scene") {
+			Application::GetInstance().GetScene().ReadAndLoadSceneFile(filePath.string());
+		}
 	}
 
 	std::string AssetsExplorerInterface::CreateMaterial(const std::filesystem::path& directory, const std::string& name)
@@ -625,6 +689,23 @@ namespace Loopie {
 		filePath += ".mat";
 		if (!DirectoryManager::Contains(filePath)) {
 			DirectoryManager::Copy("assets/materials/defaultMaterial.mat", filePath);
+			Refresh();
+		}
+		return filePath.string();
+	}
+	std::string AssetsExplorerInterface::CreateScene(const std::filesystem::path& directory, const std::string& name)
+	{
+		std::vector<std::string> names;
+		for (const auto& entry : std::filesystem::directory_iterator(directory))
+		{
+			if (entry.is_regular_file()) {
+				names.push_back(entry.path().stem().string());
+			}
+		}
+		std::filesystem::path filePath = directory / Helper::MakeUniqueName(name, names);
+		filePath += ".scene";
+		if (!DirectoryManager::Contains(filePath)) {
+			DirectoryManager::Copy("assets/scenes/DefaultScene.scene", filePath);
 			Refresh();
 		}
 		return filePath.string();

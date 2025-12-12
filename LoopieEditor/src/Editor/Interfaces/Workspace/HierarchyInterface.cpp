@@ -8,6 +8,7 @@
 
 namespace Loopie {
 	std::shared_ptr<Entity> HierarchyInterface::s_SelectedEntity = nullptr;
+	Event<OnEntityOrFileNotification> HierarchyInterface::s_OnEntitySelected;
 
 	HierarchyInterface::HierarchyInterface() {
 		
@@ -30,20 +31,28 @@ namespace Loopie {
 				return;
 			}
 
+			ImVec2 cursorPos = ImGui::GetCursorPos();
+
 			if (ImGui::IsWindowHovered() && (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)))
 				SelectEntity(nullptr);
 
+			if (ImGui::BeginPopupContextWindow("HierarchyBackgroundContext", ImGuiPopupFlags_MouseButtonRight)) {
+				DrawContextMenu(nullptr);
+				ImGui::EndPopup();
+			}
 
 			for (const auto& entity : m_scene->GetRootEntity()->GetChildren())
 			{
 				DrawEntitySlot(entity);
 				
 			}
-			
-			if (ImGui::BeginPopupContextWindow("HierarchyBackgroundContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
-				DrawContextMenu(nullptr);
-				ImGui::EndPopup();
-			}
+		
+
+			ImVec2 size = ImGui::GetContentRegionAvail();
+			//ImGui::SetCursorPos(cursorPos);  /// And move up the avail
+			ImGui::SetNextItemAllowOverlap();
+			ImGui::InvisibleButton("##DropTarget", size, ImGuiButtonFlags_None);
+			Drop(m_scene->GetRootEntity());
 		}
 		ImGui::End();
 	}
@@ -56,6 +65,7 @@ namespace Loopie {
 	void HierarchyInterface::SelectEntity(std::shared_ptr<Entity> entity)
 	{
 		s_SelectedEntity = entity;
+		s_OnEntitySelected.Notify(OnEntityOrFileNotification::OnEntitySelect);
 	}
 
 	void HierarchyInterface::DrawEntitySlot(const std::shared_ptr<Entity>& entity)

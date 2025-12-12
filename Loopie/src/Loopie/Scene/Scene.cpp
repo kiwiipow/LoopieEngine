@@ -1,10 +1,12 @@
 #include "Scene.h"
 #include "Loopie/Files/Json.h"
+#include "Loopie/Core/Application.h"
 #include "Loopie/Core/Log.h"
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
 #include "Loopie/Helpers/LoopieHelpers.h"
+#include "Loopie/Resources/AssetRegistry.h"
 
 #include <unordered_set>
 
@@ -17,8 +19,9 @@ namespace Loopie {
 		m_rootEntity = std::make_shared<Entity>("scene");
 		m_rootEntity->AddComponent<Transform>();
 
-		//ReadAndLoadSceneFile(std::string("TESTSavedScene.json"));
-		//ReadAndLoadSceneFile(filePath);
+		AABB worldBounds(vec3(-500, -500, -500), vec3(500, 500, 500));
+		m_octree = std::make_unique<Octree>(worldBounds);
+
 	}
 
 	Scene::~Scene()
@@ -26,18 +29,13 @@ namespace Loopie {
 		m_entities.clear();
 	}
 
-	void Scene::SaveScene(const std::string* filePath)
+	void Scene::SaveScene(const std::string filePath)
 	{
 		JsonData saveData;
 		JsonNode entitiesObj = saveData.CreateArrayField("entities");
-
-		// Pol comment to understand json::objects and json::arrays
-		// Array field = values
-		// Object field = kvm
 		
 		for (const auto& [id, entity] : GetAllEntities())
 		{
-			//json entityObj = json::object();
 			JsonData entityObj = JsonData();
 			
 			entityObj.CreateField<std::string>("uuid", id.Get());
@@ -61,56 +59,59 @@ namespace Loopie {
 			saveData.AddArrayElement("entities", entityObj.GetRoot());
 		}
 
-		saveData.ToFile("TESTSavedScene.json");
+		saveData.ToFile(filePath);
 		Log::Info("Scene saved.");
 	}
 
 	std::shared_ptr<Entity> Scene::CreateEntity(const std::string& name,
 												std::shared_ptr<Entity> parentEntity)
 	{
-		std::string uniqueName = GetUniqueName(parentEntity, name);
+		std::shared_ptr<Entity> realParent = parentEntity ? parentEntity : m_rootEntity;
+		std::string uniqueName = GetUniqueName(realParent, name);
 		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
-		if (!parentEntity)
-			m_rootEntity->AddChild(entity);
-		else
-			parentEntity->AddChild(entity);
+
+		realParent->AddChild(entity);
 
 		entity->AddComponent<Transform>();
 
 		m_entities[entity->GetUUID()] = entity;
+		m_octree->Insert(entity);
+
 		return entity;
 	}
 
 	std::shared_ptr<Entity> Scene::CreateEntity(const UUID& uuid, const std::string& name,
 												 std::shared_ptr<Entity> parentEntity)
 	{
-		std::string uniqueName = GetUniqueName(parentEntity, name);
+
+		std::shared_ptr<Entity> realParent = parentEntity ? parentEntity : m_rootEntity;
+
+		std::string uniqueName = GetUniqueName(realParent, name);
 		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
 		entity->SetUUID(uuid);
 
-		if (!parentEntity)
-			m_rootEntity->AddChild(entity);
-		else
-			parentEntity->AddChild(entity);
+		realParent->AddChild(entity);
 
 		entity->AddComponent<Transform>();
 
 		m_entities[entity->GetUUID()] = entity;
+		m_octree->Insert(entity);
+
 		return entity;
 	}
 
 	std::shared_ptr<Entity> Scene::CreateEntity(const vec3& position, const quaternion& rotation, const vec3& scale,
 												std::shared_ptr<Entity> parentEntity, const std::string& name)
 	{
-		std::string uniqueName = GetUniqueName(parentEntity, name);
+		std::shared_ptr<Entity> realParent = parentEntity ? parentEntity : m_rootEntity;
+		std::string uniqueName = GetUniqueName(realParent, name);
 		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
-		if (!parentEntity)
-			m_rootEntity->AddChild(entity);
-		else
-			parentEntity->AddChild(entity);
+
+		realParent->AddChild(entity);
 
 		entity->AddComponent<Transform>(position, rotation, scale);
 		m_entities[entity->GetUUID()] = entity;
+		m_octree->Insert(entity);
 
 		return entity;
 	}
@@ -119,12 +120,10 @@ namespace Loopie {
 										std::shared_ptr<Entity> parentEntity,
 										const std::string& name)
 	{
-		std::string uniqueName = GetUniqueName(parentEntity, name);
+		std::shared_ptr<Entity> realParent = parentEntity ? parentEntity : m_rootEntity;
+		std::string uniqueName = GetUniqueName(realParent, name);
 		std::shared_ptr<Entity> entity = std::make_shared<Entity>(uniqueName);
-		if (!parentEntity)
-			m_rootEntity->AddChild(entity);
-		else
-			parentEntity->AddChild(entity);
+		realParent->AddChild(entity);
 
 		if (!transform)
 		{
@@ -135,6 +134,7 @@ namespace Loopie {
 			entity->AddComponent<Transform>(*transform);
 		}
 		m_entities[entity->GetUUID()] = entity;
+		m_octree->Insert(entity);
 
 		return entity;
 	}
@@ -145,6 +145,7 @@ namespace Loopie {
 		if (it == m_entities.end())
 			return;
 
+		m_octree->Remove(it->second);
 		RemoveEntityRecursive(it->second);
 	}
 
@@ -153,7 +154,18 @@ namespace Loopie {
 		if (!entity) 
 			return;
 
+		m_octree->Remove(entity);
 		RemoveEntityRecursive(entity);
+	}
+
+	void Scene::SetFilePath(std::string filePath)
+	{
+		m_filePath = filePath;
+	}
+
+	std::string Scene::GetFilePath() const
+	{
+		return m_filePath;
 	}
 
 	std::shared_ptr<Entity> Scene::GetRootEntity() const
@@ -177,6 +189,11 @@ namespace Loopie {
 			}
 		}
 		return nullptr;
+	}
+
+	Octree& Scene::GetOctree() const
+	{
+		return *m_octree;
 	}
 
 	const std::unordered_map<UUID, std::shared_ptr<Entity>>& Scene::GetAllEntities() const
@@ -214,20 +231,18 @@ namespace Loopie {
 		return siblingEntities;
 	}
 
-	void Scene::ReadAndLoadSceneFile(std::string filePath)
+	void Scene::ReadAndLoadSceneFile(std::string filePath, bool safeSceneAsLastLoaded)
 	{
-		// TODO: This should read the serialized file and load the entities and their uuid
-		// We can use the hierarchy for this
-
 		m_entities.clear();
+		m_octree->Clear();
 
-		// TEMP
+		AABB worldBounds(vec3(-500, -500, -500), vec3(500, 500, 500));
+		m_octree = std::make_unique<Octree>(worldBounds);
+
 		m_rootEntity = std::make_shared<Entity>("scene");
 		m_rootEntity->AddComponent<Transform>();
-		// END_TEMP
 		
-		//JsonData saveData = Json::ReadFromFile(*filePath);
-		JsonData saveData = Json::ReadFromFile("TESTSavedScene.json");
+		JsonData saveData = Json::ReadFromFile(filePath);
 
 		if (saveData.IsEmpty())
 		{
@@ -243,8 +258,6 @@ namespace Loopie {
 			return;
 		}
 
-		// Map used to store created entities by UUID for later linking
-
 		// First iteration: Create all entities
 		for (unsigned int i = 0; i < rootNode.Size(); ++i)
 		{
@@ -259,13 +272,14 @@ namespace Loopie {
 			bool active = entityNode.GetValue<bool>("active", false).Result;
 
 			std::shared_ptr<Entity> entity = CreateEntity(uuid, name);
+			entity->SetName(name);
 			entity->SetIsActive(active);		
 		}
 
 		// Second iteration: Link relationships and components
 		for (size_t i = 0; i < rootNode.Size(); ++i)
 		{
-			JsonResult<json> entityJson = rootNode.GetArrayElement<json>(i);
+			JsonResult<json> entityJson = rootNode.GetArrayElement<json>(uint32_t(i));
 			JsonNode entityNode = JsonNode(&entityJson.Result);
 
 			if (!entityNode.IsValid() || !entityNode.Contains("uuid"))
@@ -290,11 +304,13 @@ namespace Loopie {
 
 				for (size_t j = 0; j < componentsObj.Size(); ++j)
 				{
-					JsonResult<json> componentJson = componentsObj.GetArrayElement<json>(j);
+					JsonResult<json> componentJson = componentsObj.GetArrayElement<json>(uint32_t(j));
 					JsonNode componentNode = JsonNode(&componentJson.Result);
 
-					// Check which component type it is - I don't know if we can do this more clean?
-					
+					// *** Component Checking *** - PSS 08/12/25
+					// This checks manually which component type it is.
+					// This lacks scalability. 
+					// Might be worth looking into if components expand too much.
 					if (componentNode.Contains("transform"))
 					{
 						JsonNode node = componentNode.Child("transform");
@@ -322,6 +338,26 @@ namespace Loopie {
 			}
 		}
 		Log::Info("Scene loaded successfully");
+
+		if (safeSceneAsLastLoaded) {
+			std::filesystem::path config = Application::GetInstance().m_activeProject.GetConfigPath();
+			if (!config.empty())
+			{
+				JsonData configData = Json::ReadFromFile(config.string());
+				JsonResult<std::string> result = configData.Child("last_scene").GetValue<std::string>();
+				if (!result.Found) {
+					configData.CreateField<std::string>("last_scene", "");
+				}
+				configData.SetValue<std::string>("last_scene", filePath);
+				configData.ToFile(config.string());
+
+				/*Metadata* metadata = AssetRegistry::GetMetadata(filePath); /// Swap to UUID
+				if (metadata)
+					configData.SetValue<std::string>("last_scene", metadata->UUID.Get());*/
+			}
+		}
+
+		
 	}
 
 	std::string Scene::GetUniqueName(std::shared_ptr<Entity> parentEntity, const std::string& desiredName)

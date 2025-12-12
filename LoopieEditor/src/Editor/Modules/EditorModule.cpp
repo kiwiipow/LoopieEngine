@@ -31,10 +31,18 @@ namespace Loopie
 		/////SCENE
 		Application::GetInstance().CreateScene(""); /// Maybe default One
 		scene = &Application::GetInstance().GetScene();
-		CreateBakerHouse();
 
-		scene->CreateEntity({ 0,0,-10 }, { 1,0,0,0 }, {1,1,1}, nullptr, "MainCamera")->AddComponent<Camera>();
-		scene->CreateEntity({ 0,0,-20 }, { 1,0,0,0 }, {1,1,1}, nullptr, "SecondaryCamera")->AddComponent<Camera>();
+		JsonData data = Json::ReadFromFile(Application::GetInstance().m_activeProject.GetConfigPath());
+		JsonResult<std::string> result = data.Child("last_scene").GetValue<std::string>();
+		if (result.Found)
+			scene->ReadAndLoadSceneFile(result.Result);
+		else {
+			CreateBakerHouse();
+
+			scene->CreateEntity({ 0,0,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
+			scene->CreateEntity({ 0,0,-20 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "SecondaryCamera")->AddComponent<Camera>();
+		}
+		
 
 		Metadata& metadata = AssetRegistry::GetOrCreateMetadata("assets/materials/outlineMaterial.mat");
 		selectedObjectMaterial = ResourceManager::GetMaterial(metadata);
@@ -45,9 +53,9 @@ namespace Loopie
 		////
 
 		m_assetsExplorer.Init();
-		m_console.Init();
 		m_hierarchy.Init();
 		m_inspector.Init();
+		m_console.Init();
 		m_game.Init();
 		m_scene.Init();
 		m_mainMenu.Init();
@@ -107,26 +115,26 @@ namespace Loopie
 			}
 		}
 
-		/// SceneWindowRender
-		m_scene.StartScene();
-		Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
-		RenderWorld(m_scene.GetCamera());
-		if (HierarchyInterface::s_SelectedEntity) {
-			Camera* cam = HierarchyInterface::s_SelectedEntity->GetComponent<Camera>();
-			if (cam)
-				Gizmo::DrawFrustum(cam->GetFrustum());
-		}
-		Renderer::EndScene();
-		m_scene.EndScene();
+		/// SceneWindowRender		
+		if (m_scene.IsVisible()) {
+			m_scene.StartScene();
+			Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
+			RenderWorld(m_scene.GetCamera());
+			Renderer::EndScene();
+			m_scene.EndScene();
+		}		
 
 		/// GameWindowRender
-		m_game.StartScene();
-		if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
-			Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
-			RenderWorld(m_game.GetCamera());
-			Renderer::EndScene();
+		if (m_game.IsVisible()) {
+			m_game.StartScene();
+			if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
+				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
+				RenderWorld(m_game.GetCamera());
+				Renderer::EndScene();
+			}
+			m_game.EndScene();
 		}
-		m_game.EndScene();
+		
 	}
 
 	void EditorModule::OnInterfaceRender()
@@ -147,45 +155,74 @@ namespace Loopie
 		Renderer::EnableStencil();
 		Renderer::EnableDepth();
 		Renderer::Clear();
-		Renderer::SetStencilFunc(Renderer::StencilFunc::ALWAYS, 1, 0xFF);
-		Renderer::SetStencilOp(Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP, Renderer::StencilOp::REPLACE);
-		Renderer::SetStencilMask(0xFF);
-		//Renderer::DisableStencil();
-		for (auto& [uuid, entity] : scene->GetAllEntities()) {
+
+		// POST
+		std::vector<std::shared_ptr<Entity>> entities;
+		scene->GetOctree().CollectVisibleEntitiesFrustum(camera->GetFrustum(), entities);
+
+		std::vector<MeshRenderer*> renderers;
+		renderers.reserve(1);
+
+		for (const auto& entity : entities)
+		{
 			if (!entity->GetIsActive())
 				continue;
-			MeshRenderer* renderer = entity->GetComponent<MeshRenderer>();
-			if (!renderer || !renderer->GetIsActive())
-				continue;
 
-			if (!camera->GetFrustum().Intersects(renderer->GetWorldAABB()))
-				continue;
-			renderer->Render();
-
-			if (entity == HierarchyInterface::s_SelectedEntity) {
-				Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
-
-				Renderer::SetStencilFunc(Renderer::StencilFunc::NOTEQUAL,1,0xFF);
-				Renderer::SetStencilMask(0x00);
-
-				float outlineScale = 1.05f;
-				glm::vec3 center = renderer->GetWorldAABB().GetCenter();
-
-				glm::mat4 T1 = glm::translate(glm::mat4(1.0f), center);
-				glm::mat4 S = glm::scale(glm::mat4(1.0f), glm::vec3(outlineScale));
-				glm::mat4 T2 = glm::translate(glm::mat4(1.0f), -center);
-				glm::mat4 outlineModel = T1 * S * T2 * entity->GetTransform()->GetLocalToWorldMatrix();
-				Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), selectedObjectMaterial, outlineModel);
-
-				Renderer::SetStencilMask(0xFF);
-				Renderer::EnableDepth();
-				Renderer::DisableStencil();
-
-			}
-			else
+			const std::vector<Component*>& components = entity->GetComponents();
+			renderers.clear();
+			for (size_t i = 0; i < components.size(); i++)
 			{
-				Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
+				Component* component = components[i];
+				if (!component->GetIsActive())
+					continue;
+				if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
+					MeshRenderer* renderer = static_cast<MeshRenderer*>(component);
+					if(renderer->GetMesh())
+						renderers.push_back(renderer);
+				}
+
+				if (Renderer::IsGizmoActive()) {
+					if(component->GetTypeID() != Camera::GetTypeIDStatic())
+						component->RenderGizmo();
+				}
 			}
+
+			for (size_t i = 0; i < renderers.size(); i++)
+			{
+				MeshRenderer* renderer = renderers[i];
+
+				if (!camera->GetFrustum().Intersects(renderer->GetWorldAABB()))
+					continue;
+				if (!Renderer::IsGizmoActive() || entity != HierarchyInterface::s_SelectedEntity) {
+					Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
+				}
+				else {
+					Renderer::SetStencilFunc(Renderer::StencilFunc::ALWAYS, 1, 0xFF);
+					Renderer::SetStencilOp(Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP, Renderer::StencilOp::REPLACE);
+					Renderer::SetStencilMask(0xFF);
+
+					Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
+
+					Renderer::SetStencilFunc(Renderer::StencilFunc::NOTEQUAL, 1, 0xFF);
+					Renderer::SetStencilMask(0x00);
+
+					Renderer::FlushRenderItem(renderer->GetMesh()->GetVAO(), selectedObjectMaterial, entity->GetTransform());
+
+					Renderer::SetStencilMask(0xFF);
+					Renderer::EnableDepth();
+					Renderer::DisableStencil();
+				}
+			}
+		}
+		Renderer::DisableStencil();
+		if (Renderer::IsGizmoActive()) {
+			if (HierarchyInterface::s_SelectedEntity)
+			{
+				Camera* cam = HierarchyInterface::s_SelectedEntity->GetComponent<Camera>();
+				if(cam)
+					cam->RenderGizmo();
+			}
+			scene->GetOctree().DebugDraw(vec4{255, 0, 0, 255});
 		}
 	}
 

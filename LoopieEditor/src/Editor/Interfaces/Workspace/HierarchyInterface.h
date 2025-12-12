@@ -1,6 +1,8 @@
 #pragma once 
 #include "Editor/Interfaces/Interface.h"
 #include "Loopie/Scene/Scene.h"
+#include "Loopie/Events/Event.h"
+#include "Editor/Events/EditorEventTypes.h"
 
 namespace Loopie {
 	class HierarchyInterface : public Interface {
@@ -28,6 +30,7 @@ namespace Loopie {
 
 	public:
 		static std::shared_ptr<Entity> s_SelectedEntity;
+		static Event<OnEntityOrFileNotification> s_OnEntitySelected;
 	private:
 		Scene* m_scene = nullptr;
 	};

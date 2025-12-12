@@ -26,13 +26,17 @@ namespace Loopie {
 		const UUID& GetUUID() const;
 		bool GetIsActive() const;
 
+		// Default Calls
+		virtual void Update() {};
+		virtual void RenderGizmo() {};
+
 		// Setters
 		void SetIsActive(bool active);
 		void SetUUID(const std::string uuid);
 
 		// Serialize & Deserialize
-		virtual JsonNode Serialize(JsonNode& parent) const =0;
-		virtual void Deserialize(const JsonNode& data) =0;
+		virtual JsonNode Serialize(JsonNode& parent) const = 0;
+		virtual void Deserialize(const JsonNode& data) = 0;
 
 		virtual void Init() = 0;
 

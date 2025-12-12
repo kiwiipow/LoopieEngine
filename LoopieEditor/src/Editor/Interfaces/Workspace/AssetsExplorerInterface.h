@@ -4,16 +4,20 @@
 #include "Editor/Interfaces/Interface.h"
 #include "Editor/ImGuiHelpers/ImGuiHelpers.h"
 
+#include "Loopie/Events/Event.h"
+#include "Loopie/Events/EventTypes.h"
+#include "Editor/Events/EditorEventTypes.h"
+
 #include <filesystem>
 #include <vector>
 #include <memory>
 #include <string>
 
 namespace Loopie {
-	class AssetsExplorerInterface : public Interface {
+	class AssetsExplorerInterface : public Interface , public IObserver<EngineNotification>{
 	public:
 		AssetsExplorerInterface();
-		~AssetsExplorerInterface() = default;
+		~AssetsExplorerInterface();
 
 		void Init() override;
 		void Update(const InputEventManager& inputEvent) override;
@@ -35,6 +39,8 @@ namespace Loopie {
 			bool IsEmpty;
 		};
 
+		void OnNotify(const EngineNotification& id) override;
+
 		void HotKeysControls(const InputEventManager& inputEvent);
 
 		void GetExternalFile();
@@ -52,6 +58,7 @@ namespace Loopie {
 		void DropFile(const std::string& to);
 
 		void Refresh(bool folderTree = true, bool folderFiles = true, bool searchFiles = true);
+		void PassiveRefresh();
 		void RebuildTreeFolderCache();
 		CachedDirectoryTreeNode BuildDirectoryNode(const std::filesystem::path& directory);
 		void RebuildFolderFilesCache();
@@ -61,11 +68,19 @@ namespace Loopie {
 
 		void DrawContextMenu(const std::filesystem::path& file);
 		void DrawCreateAssetMenu();
-		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
 
+		void OpenFile(const std::filesystem::path& filePath);
+		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
+		std::string CreateScene(const std::filesystem::path& directory, const std::string& name);
+
+	
+	public:
+		static Event<OnEntityOrFileNotification> s_OnFileSelected;
+
+		static std::filesystem::path s_SelectedFile;
 	private:
 		std::filesystem::path m_currentDirectory;
-		std::filesystem::path m_selectedFile;
+
 
 		std::filesystem::path m_relativePath;
 		std::vector<std::string> m_relativePathSteps;
@@ -92,5 +107,9 @@ namespace Loopie {
 
 		bool m_dirtyFooterText = true;
 		std::string m_cachedFooterText;
+		
+		bool m_fileDropped = false;
+		std::vector<std::string> m_droppedFiles;
+		
 	};
 }
