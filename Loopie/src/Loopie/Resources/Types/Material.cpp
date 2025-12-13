@@ -19,7 +19,8 @@ namespace Loopie
 
 	Material::~Material()
 	{
-
+		if (m_texture)
+			m_texture->DecrementReferenceCount();
 	}
 
 	std::shared_ptr<Material> Material::GetDefault()
@@ -28,7 +29,7 @@ namespace Loopie
 			return s_Material;
 		Metadata& metadata = AssetRegistry::GetOrCreateMetadata("assets/materials/defaultMaterial.mat");
 		if (!metadata.HasCache) {
-			MaterialImporter::ImportMaterial("assets/textures/simpleWhiteTexture.png", metadata);
+			MaterialImporter::ImportMaterial("assets/materials/defaultMaterial.mat", metadata);
 		}
 		s_Material = ResourceManager::GetMaterial(metadata);
 		s_Material->Load();
@@ -175,6 +176,11 @@ namespace Loopie
 	{
 		if (!m_editable)
 			return;
+
+		if (m_texture)
+			m_texture->DecrementReferenceCount();
 		m_texture = texture;
+		if (m_texture)
+			m_texture->IncrementReferenceCount();
 	}
 }

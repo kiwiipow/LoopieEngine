@@ -37,28 +37,42 @@ namespace Loopie {
 
 		for (auto& [key, metadata] : s_Assets) {
 			
+			const std::string& pathString = s_UUIDToPath[metadata.UUID];
+			bool updated = false;
 			if (metadata.IsOutdated) {
-				const std::string& pathString = s_UUIDToPath[metadata.UUID];
-				metadata.LastModified = MetadataRegistry::GetLastModifiedFromPath(pathString);
-				Log::Info("{0}", pathString);
-				/// DO REIMPORTS
+				metadata.LastModified = MetadataRegistry::GetLastModifiedFromPath(pathString);			
+				updated = true;
+			}
+			/// DO REIMPORTS
 
-				if (metadata.Type == ResourceType::TEXTURE || TextureImporter::CheckIfIsImage(pathString.c_str())) {
+			if (metadata.Type == ResourceType::TEXTURE || TextureImporter::CheckIfIsImage(pathString.c_str())) {
+				if (metadata.IsOutdated || metadata.CachesPath.size() == 0) {
 					TextureImporter::ImportImage(pathString, metadata);
+					updated = true;
 				}
-				else if (metadata.Type == ResourceType::MESH || MeshImporter::CheckIfIsModel(pathString.c_str())) {
+			}
+			else if (metadata.Type == ResourceType::MESH || MeshImporter::CheckIfIsModel(pathString.c_str())) {
+				if (metadata.IsOutdated || metadata.CachesPath.size() == 0) {
 					MeshImporter::ImportModel(pathString, metadata);
+					updated = true;
 				}
-				else if (metadata.Type == ResourceType::MATERIAL || MaterialImporter::CheckIfIsMaterial(pathString.c_str())) {
+			}
+			else if (metadata.Type == ResourceType::MATERIAL || MaterialImporter::CheckIfIsMaterial(pathString.c_str())) {
+				if (metadata.IsOutdated || metadata.CachesPath.size() == 0) {
 					MaterialImporter::ImportMaterial(pathString, metadata);
+					updated = true;
 				}
+			}
 
-				///
+			///
+			if (updated) {
+				Log::Info("{0}", pathString);
 				UpdateMetadata(metadata, pathString);
 			}
 		}
 
 		CleanOrphanedLibraryFiles();
+		
 
 		Application::GetInstance().m_notifier.Notify(EngineNotification::OnAssetRegistryReload);
 	}

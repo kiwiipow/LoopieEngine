@@ -4,6 +4,7 @@
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/MeshImporter.h"
 
+#include "Editor/Interfaces/Workspace/SceneInterface.h"
 #include <imgui.h>
 
 namespace Loopie {
@@ -17,7 +18,7 @@ namespace Loopie {
 	void HierarchyInterface::Update(const InputEventManager& inputEvent)
 	{
 		if(m_focused)
-			HotKeysSelectedEntiy(inputEvent);
+			HotKeysSelectedEntiy(inputEvent);	
 	}
 
 	void HierarchyInterface::Render() {
@@ -25,7 +26,7 @@ namespace Loopie {
 		if (ImGui::Begin("Hierarchy")) {
 
 			m_focused = ImGui::IsWindowHovered();
-
+			
 			if (!m_scene) {
 				ImGui::End();
 				return;

@@ -13,6 +13,8 @@ namespace Loopie {
 		virtual void Render() {};
 		virtual void Init() {};
 
+		bool IsFocused() const { return m_focused; }
+
 	protected:
 		bool m_focused = false;
 	};

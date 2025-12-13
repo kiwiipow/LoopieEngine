@@ -19,7 +19,9 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+
 namespace Loopie {
+
 	SceneInterface::SceneInterface() {
 		m_camera = std::make_shared<OrbitalCamera>();
 		m_buffer = std::make_shared<FrameBuffer>(1,1);
@@ -60,6 +62,8 @@ namespace Loopie {
 		m_camera->Update();
 		if (inputEvent.GetMouseButtonStatus(0) == KeyState::DOWN && !m_usingGuizmo)
 			MousePick();
+
+		HotKeysSelectedEntiy(inputEvent);
 	}
 
 	void SceneInterface::Render() {
@@ -130,6 +134,31 @@ namespace Loopie {
 	void SceneInterface::EndScene()
 	{
 		m_buffer->Unbind();
+	}
+
+	void SceneInterface::HotKeysSelectedEntiy(const InputEventManager& inputEvent)
+	{
+		if (!HierarchyInterface::s_SelectedEntity) {
+			return;
+		}
+
+		if (inputEvent.GetKeyStatus(SDL_SCANCODE_DELETE) == KeyState::DOWN) {
+			Application::GetInstance().GetScene().RemoveEntity(HierarchyInterface::s_SelectedEntity->GetUUID());
+			HierarchyInterface::SelectEntity(nullptr);
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_C, KeyModifier::CTRL)) {
+			/// Copy
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_V, KeyModifier::CTRL)) {
+			/// Paste
+		}
+
+		if (inputEvent.GetKeyWithModifier(SDL_SCANCODE_X, KeyModifier::CTRL)) {
+			/// Cut
+		}
+
 	}
 
 	void SceneInterface::Drop()

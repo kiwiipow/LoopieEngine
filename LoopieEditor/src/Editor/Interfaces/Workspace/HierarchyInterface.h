@@ -29,6 +29,7 @@ namespace Loopie {
 		std::shared_ptr<Entity> CreatePrimitiveModel(const std::string& modelPath, const std::string& name, const std::shared_ptr<Entity>& parent);
 
 	public:
+
 		static std::shared_ptr<Entity> s_SelectedEntity;
 		static Event<OnEntityOrFileNotification> s_OnEntitySelected;
 	private:

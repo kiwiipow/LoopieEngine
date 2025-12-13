@@ -28,10 +28,10 @@ namespace Loopie {
 
     class ResourceManager {    
     public:
-
         static std::shared_ptr<Texture> GetTexture(const Metadata& metadata);
         static std::shared_ptr<Mesh> GetMesh(const Metadata& metadata, int index);
         static std::shared_ptr<Material> GetMaterial(const Metadata& metadata);
+        static void RemoveResource(Resource& resource);
 
     private:
         static std::shared_ptr<Resource> GetResource(const ResourceKey& key);

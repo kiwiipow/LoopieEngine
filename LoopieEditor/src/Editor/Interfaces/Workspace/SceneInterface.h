@@ -9,6 +9,7 @@
 #include <array>
 
 namespace Loopie {
+
 	class SceneInterface : public Interface {
 	public:
 		SceneInterface();
@@ -31,11 +32,16 @@ namespace Loopie {
 		bool IsVisible() { return m_visible; }
 
 	private:
+
+		void HotKeysSelectedEntiy(const InputEventManager& inputEvent);
+
 		void Drop();
 		void DrawHelperBar();
 		Ray MouseRay();
 
+
 	private:
+
 		std::shared_ptr<FrameBuffer> m_buffer;
 		std::shared_ptr<OrbitalCamera> m_camera;
 

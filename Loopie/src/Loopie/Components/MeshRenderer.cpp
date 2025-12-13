@@ -18,6 +18,11 @@ namespace Loopie {
 	{
 		if (GetOwner() && GetTransform())
 			GetTransform()->m_transformNotifier.RemoveObserver(this);
+
+		if (m_mesh)
+			m_mesh->DecrementReferenceCount();
+		if (m_material)
+			m_material->DecrementReferenceCount();
 	}
 
 	void MeshRenderer::Init()
@@ -53,13 +58,21 @@ namespace Loopie {
 
 	void MeshRenderer::SetMesh(std::shared_ptr<Mesh> mesh)
 	{
+		if (m_mesh)
+			m_mesh->DecrementReferenceCount();
 		m_mesh = mesh;
+		if (m_mesh)
+			m_mesh->IncrementReferenceCount();
 		SetBoundingBoxesDirty();
 	}
 
 	void MeshRenderer::SetMaterial(std::shared_ptr<Material> material)
 	{
+		if(m_material)
+			m_material->DecrementReferenceCount();
 		m_material = material;
+		if(m_material)
+			m_material->IncrementReferenceCount();
 	}
 
 	std::shared_ptr<Material> MeshRenderer::GetMaterial() {
@@ -105,13 +118,13 @@ namespace Loopie {
 
 			Metadata* meta = AssetRegistry::GetMetadata(id);
 			if (meta)
-				m_mesh = ResourceManager::GetMesh(*meta, index);
+				SetMesh(ResourceManager::GetMesh(*meta, index));
 		}
 		if (data.Contains("material_uuid")) {
 			UUID id = UUID(data.GetValue<std::string>("material_uuid").Result);
 			Metadata* meta = AssetRegistry::GetMetadata(id);
 			if (meta)
-				m_material = ResourceManager::GetMaterial(*meta);
+				SetMaterial(ResourceManager::GetMaterial(*meta));
 		}
 	}
 

@@ -24,7 +24,7 @@ namespace Loopie {
 		virtual bool Load() = 0;
 	
 		void IncrementReferenceCount() { m_referenceCount++; }
-		void DecrementReferenceCount() { m_referenceCount--; }
+		void DecrementReferenceCount();
 
 	protected:
 		UUID m_uuid;

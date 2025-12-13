@@ -42,6 +42,7 @@ namespace Loopie {
 		void OnNotify(const OnEntityOrFileNotification& id) override;
 
 	private:
+
 		InspectorMode m_mode = InspectorMode::None;
 	};
 }

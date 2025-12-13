@@ -4,6 +4,8 @@
 #include "Loopie/Core/Application.h"
 #include "Loopie/Files/Json.h"
 
+#include "Loopie/Resources/ResourceManager.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -32,6 +34,14 @@ namespace Loopie {
 		JsonResult<std::string> shaderNode = jsonData.GetValue<std::string>("shader");
 		std::string shaderUUID = shaderNode.Result;
 
+		JsonResult<std::string> textureNode = jsonData.GetValue<std::string>("texture");
+		bool hasTexture = textureNode.Found;
+		std::string textureUUID;
+		if (hasTexture)
+			textureUUID = textureNode.Result;
+		else
+			textureUUID = "";
+
 		JsonNode propertiesNode = jsonData.Child("properties");
 		std::vector<std::string> propKeys = propertiesNode.GetObjectKeys();
 
@@ -46,6 +56,10 @@ namespace Loopie {
 		
 
 		fs.write(shaderUUID.c_str(), UUID::UUID_SIZE);
+
+		fs.write(reinterpret_cast<const char*>(&hasTexture), sizeof(hasTexture));
+		if(hasTexture)
+		fs.write(textureUUID.c_str(), UUID::UUID_SIZE);
 
 		unsigned int propertyCount = (unsigned int)propKeys.size();
 		fs.write(reinterpret_cast<const char*>(&propertyCount), sizeof(propertyCount));
@@ -138,9 +152,21 @@ namespace Loopie {
 
 		///Load
 
-		std::string id(UUID::UUID_SIZE, '\0');
-		file.read(id.data(), UUID::UUID_SIZE);
-		//UUID shaderUUID = UUID(id);
+		std::string shaderId(UUID::UUID_SIZE, '\0');
+		file.read(shaderId.data(), UUID::UUID_SIZE);
+		//UUID shaderUUID = UUID(shaderId);
+
+		bool hasTexture = false;
+		file.read(reinterpret_cast<char*>(&hasTexture), sizeof(hasTexture));
+		if (hasTexture) {
+			std::string textureId(UUID::UUID_SIZE, '\0');
+			file.read(textureId.data(), UUID::UUID_SIZE);
+			UUID textureUUID = UUID(textureId);
+			Metadata* meta = AssetRegistry::GetMetadata(textureUUID);
+			if(meta)
+				material.SetTexture(ResourceManager::GetTexture(*meta));
+		}
+		
 
 		unsigned int propertiesCount = 0;
 		file.read(reinterpret_cast<char*>(&propertiesCount), sizeof(propertiesCount));
@@ -246,6 +272,9 @@ namespace Loopie {
 		//std::string shaderUUIDString = shader.GetUUID().Get();
 
 		jsonData.CreateField("shader", randomUUID.Get());
+		if (material.GetTexture()) {
+			jsonData.CreateField("texture", material.GetTexture()->GetUUID().Get());
+		}
 		JsonNode propertiesNode = jsonData.CreateObjectField("properties");
 
 		const auto& props = material.GetUniforms();

@@ -192,8 +192,6 @@ namespace Loopie
 			{
 				MeshRenderer* renderer = renderers[i];
 
-				if (!camera->GetFrustum().Intersects(renderer->GetWorldAABB()))
-					continue;
 				if (!Renderer::IsGizmoActive() || entity != HierarchyInterface::s_SelectedEntity) {
 					Renderer::AddRenderItem(renderer->GetMesh()->GetVAO(), renderer->GetMaterial(), entity->GetTransform());
 				}

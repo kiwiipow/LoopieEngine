@@ -53,6 +53,7 @@ namespace Loopie {
 		void DrawPathBar();
 		void DrawFolderContent();
 		void DrawFooter();
+		void DrawRenamePopup();	
 
 		void DragFile(const std::string& from);
 		void DropFile(const std::string& to);
@@ -70,6 +71,7 @@ namespace Loopie {
 		void DrawCreateAssetMenu();
 
 		void OpenFile(const std::filesystem::path& filePath);
+		std::string CreateFolder(const std::filesystem::path& directory, const std::string& name);
 		std::string CreateMaterial(const std::filesystem::path& directory, const std::string& name);
 		std::string CreateScene(const std::filesystem::path& directory, const std::string& name);
 
@@ -110,6 +112,9 @@ namespace Loopie {
 		
 		bool m_fileDropped = false;
 		std::vector<std::string> m_droppedFiles;
+
+		std::filesystem::path m_renamingFile;
+		char m_renameBuffer[256] = { 0 };
 		
 	};
 }

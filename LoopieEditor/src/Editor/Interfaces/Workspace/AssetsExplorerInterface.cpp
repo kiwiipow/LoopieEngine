@@ -13,7 +13,6 @@
 #include <imgui_internal.h>
 
 namespace Loopie {
-
 	Event<OnEntityOrFileNotification> AssetsExplorerInterface::s_OnFileSelected;
 	std::filesystem::path AssetsExplorerInterface::s_SelectedFile = "";
 
@@ -118,7 +117,50 @@ namespace Loopie {
 		}
 		ImGui::End();
 
+		if (!m_renamingFile.empty()) {
+			ImGui::OpenPopup("Renaming...###popUp");
+		}
 
+		if (ImGui::BeginPopupModal("Renaming...###popUp", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename File");
+			ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
+
+			if (ImGui::Button("OK", ImVec2(120, 0))) {
+
+				if (!m_renamingFile.empty()) {
+					std::filesystem::path newPath = m_renamingFile.parent_path() / std::string(m_renameBuffer);
+					if (std::filesystem::exists(m_renamingFile)) {
+						
+						DirectoryManager::Move(m_renamingFile, newPath.string() + m_renamingFile.extension().string());
+
+						std::string metafile = m_renamingFile.string();
+						metafile += ".meta";
+
+						std::string newMetafile = newPath.string();
+						if (std::filesystem::is_directory(m_renamingFile))
+							newMetafile += ".meta";
+						else
+							newMetafile += m_renamingFile.extension().string() + ".meta";
+						
+						DirectoryManager::Move(metafile, newMetafile);
+
+
+						
+					}
+					m_renamingFile.clear();
+					Refresh();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+				m_renamingFile.clear();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 	void AssetsExplorerInterface::HotKeysControls(const InputEventManager& inputEvent)
@@ -653,11 +695,18 @@ namespace Loopie {
 
 		if (ImGui::MenuItem("Rename"))
 		{
-
+			m_renamingFile = file;
+			std::string filename = file.stem().string();
+			strncpy(m_renameBuffer, filename.c_str(), sizeof(m_renameBuffer));
+			ImGui::OpenPopup("RenameFilePopup");
 		}
 	}
 
 	void AssetsExplorerInterface::DrawCreateAssetMenu() {
+		if(ImGui::MenuItem("Create Folder"))
+		{
+			CreateFolder(m_currentDirectory, "NewFolder");
+		}
 		if (ImGui::MenuItem("Create Material"))
 		{
 			CreateMaterial(m_currentDirectory, "NewMaterial");
@@ -666,6 +715,7 @@ namespace Loopie {
 		{
 			CreateScene(m_currentDirectory, "NewScene");
 		}
+
 	}
 
 	void AssetsExplorerInterface::OpenFile(const std::filesystem::path& filePath)
@@ -675,16 +725,19 @@ namespace Loopie {
 		}
 	}
 
+	std::string AssetsExplorerInterface::CreateFolder(const std::filesystem::path& directory, const std::string& name) {
+		std::vector<std::string> names;
+		Helper::GetPathExistingNames(directory, names);
+		std::filesystem::path filePath = DirectoryManager::CreateFolder(m_currentDirectory, Helper::MakeUniqueName(name, names));
+		Refresh();
+		return filePath.string();
+	}
+
 	std::string AssetsExplorerInterface::CreateMaterial(const std::filesystem::path& directory, const std::string& name)
 	{
 
 		std::vector<std::string> names;
-		for (const auto& entry : std::filesystem::directory_iterator(directory))
-		{
-			if (entry.is_regular_file()) {
-				names.push_back(entry.path().stem().string());
-			}
-		}		 
+		Helper::GetPathExistingNames(directory, names);
 		std::filesystem::path filePath = directory / Helper::MakeUniqueName(name, names);
 		filePath += ".mat";
 		if (!DirectoryManager::Contains(filePath)) {
@@ -696,12 +749,7 @@ namespace Loopie {
 	std::string AssetsExplorerInterface::CreateScene(const std::filesystem::path& directory, const std::string& name)
 	{
 		std::vector<std::string> names;
-		for (const auto& entry : std::filesystem::directory_iterator(directory))
-		{
-			if (entry.is_regular_file()) {
-				names.push_back(entry.path().stem().string());
-			}
-		}
+		Helper::GetPathExistingNames(directory, names);
 		std::filesystem::path filePath = directory / Helper::MakeUniqueName(name, names);
 		filePath += ".scene";
 		if (!DirectoryManager::Contains(filePath)) {

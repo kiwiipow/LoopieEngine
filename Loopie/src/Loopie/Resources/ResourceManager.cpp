@@ -46,4 +46,14 @@ namespace Loopie {
         }
         return nullptr;
     }
+
+    void ResourceManager::RemoveResource(Resource& resource)
+    {
+        for (auto it = m_Resources.begin(); it != m_Resources.end(); ++it) {
+            if (it->second.get() == &resource) {
+                m_Resources.erase(it);
+                return;
+            }
+        }
+    }
 }

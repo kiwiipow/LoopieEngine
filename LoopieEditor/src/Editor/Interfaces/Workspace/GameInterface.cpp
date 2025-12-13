@@ -8,6 +8,7 @@
 
 
 namespace Loopie {
+
 	GameInterface::GameInterface() {
 		m_buffer = std::make_shared<FrameBuffer>(1, 1);
 	}

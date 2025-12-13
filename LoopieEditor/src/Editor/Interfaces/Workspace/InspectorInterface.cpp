@@ -12,6 +12,7 @@
 #include <imgui.h>
 
 namespace Loopie {
+
 	InspectorInterface::InspectorInterface() {
 		
 	}
