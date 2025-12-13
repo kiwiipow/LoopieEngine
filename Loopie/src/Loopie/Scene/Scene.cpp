@@ -340,6 +340,7 @@ namespace Loopie {
 		Log::Info("Scene loaded successfully");
 
 		if (safeSceneAsLastLoaded) {
+			m_filePath = filePath;
 			std::filesystem::path config = Application::GetInstance().m_activeProject.GetConfigPath();
 			if (!config.empty())
 			{
