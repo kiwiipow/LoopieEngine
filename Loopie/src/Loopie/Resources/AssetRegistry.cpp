@@ -67,6 +67,7 @@ namespace Loopie {
 			///
 			if (updated) {
 				Log::Info("{0}", pathString);
+				metadata.IsOutdated = false;
 				UpdateMetadata(metadata, pathString);
 			}
 		}
