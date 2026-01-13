@@ -1,11 +1,13 @@
 #pragma once
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
-class EmitterInstance;
+
 
 namespace Loopie
 {
-	enum ParticleTypeEnum
+	class EmitterInstance;
+
+	enum ParticleType
 	{
 		SMOKE_PARTICLE,
 		FIREWORK_1_PARTICLE,
@@ -33,7 +35,7 @@ namespace Loopie
 	{
 		private:
 
-			ParticleTypeEnum partType;
+			ParticleType partType;
 			velocityOverLifetime velocityOT;
 			colorOverLifetime colorOT;
 			sizeOverLifetime sizeOT;
@@ -48,8 +50,8 @@ namespace Loopie
 			void Load();
 
 			//getters/setters
-			ParticleTypeEnum GetParticleType()const;
-			void SetParticleType(ParticleTypeEnum t);
+			ParticleType GetParticleType()const;
+			void SetParticleType(ParticleType t);
 
 			velocityOverLifetime GetVelocityOT()const;
 			void SetVelocityOT(velocityOverLifetime vOT);

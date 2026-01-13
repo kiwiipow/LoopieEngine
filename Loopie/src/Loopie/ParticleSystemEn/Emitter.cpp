@@ -4,7 +4,10 @@ namespace Loopie
 {
 	Emitter::Emitter()
 	{
-
+		name = "DefaultName";
+		spawnRate = 0;
+		maxParticles = 0;
+		R_Texture = nullptr;
 	}
 	void Emitter::SavePartModule()
 	{
@@ -14,7 +17,7 @@ namespace Loopie
 	{
 
 	}
-	void Emitter::AddModule(ParticleTypeEnum type)
+	void Emitter::AddModule(ParticleType type)
 	{
 
 	}

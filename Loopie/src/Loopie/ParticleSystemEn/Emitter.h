@@ -2,25 +2,28 @@
 #include "Loopie/Resources/Types/Texture.h"
 #include <vector>
 
-class ParticleModule;
-class ParticleTypeEnum;
+
 namespace Loopie 
 {
+	class ParticleModule;
+	enum ParticleType;
+
 	class Emitter
 	{
+		private:
 		private:
 			const char* name;
 			unsigned int spawnRate;
 			unsigned int maxParticles;
 
 			std::vector<ParticleModule*> particleModule;
-			Texture R_Texture;
+			Texture* R_Texture;
 
 		public:
 			Emitter();
 			void SavePartModule();
 			void LoadPartModule();
-			void AddModule(ParticleTypeEnum type);
+			void AddModule(ParticleType type);
 
 			//getters/setters
 			const char* GetName()const;

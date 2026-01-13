@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
+#include "Emitter.h"
 
-class Emitter;
 
 namespace Loopie
 {
@@ -21,7 +21,7 @@ namespace Loopie
 			{
 				return emittersArray;
 			}
-			void AddElemToEmitterArray(Emitter em)const
+			void AddElemToEmitterArray(Emitter em)
 			{
 				emittersArray.push_back(em);
 			}

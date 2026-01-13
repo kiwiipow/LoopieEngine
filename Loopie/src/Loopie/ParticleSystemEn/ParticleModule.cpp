@@ -24,11 +24,11 @@ namespace Loopie
 	}
 
 	//getters/setters
-	ParticleTypeEnum ParticleModule::GetParticleType()const
+	ParticleType ParticleModule::GetParticleType()const
 	{
 		return partType;
 	}
-	void ParticleModule::SetParticleType(ParticleTypeEnum t)
+	void ParticleModule::SetParticleType(ParticleType t)
 	{
 		partType = t;
 	}

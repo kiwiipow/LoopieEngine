@@ -1,11 +1,10 @@
 #pragma once
 #include <vector>
-
-struct Particle;
-class ParticleComponent;
-
+#include "ParticleComponent.h"
 namespace Loopie
 {
+	class ParticleComponent;
+
 	class EmitterInstance
 	{
 		private:

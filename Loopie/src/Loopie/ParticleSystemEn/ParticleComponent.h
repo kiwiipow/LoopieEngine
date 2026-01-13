@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
-class EmitterInstance;
-class ParticleSystem;
+
 namespace Loopie
-{
+{   
+	class EmitterInstance;
+	class ParticleSystem;
+
 	struct Particle
 	{
 		vec3 position;
