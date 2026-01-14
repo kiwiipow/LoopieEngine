@@ -15,7 +15,6 @@ namespace Loopie
 			{
 				
 			}
-
 			//setters/getters
 			std::vector<Emitter>GetEmitterArray()const
 			{

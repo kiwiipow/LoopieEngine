@@ -17,4 +17,14 @@ namespace Loopie
 	{
 
 	}
+
+
+	ParticleComponent* EmitterInstance::GetParticleComponent()
+	{
+		return owner;
+	}
+	void EmitterInstance::SetParticleComponent(ParticleComponent* pc)
+	{
+		owner = pc;
+	}
 }

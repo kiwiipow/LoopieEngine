@@ -11,7 +11,6 @@ namespace Loopie
 	class Emitter
 	{
 		private:
-		private:
 			const char* name;
 			unsigned int spawnRate;
 			unsigned int maxParticles;

@@ -23,6 +23,7 @@ namespace Loopie
 		std::vector<EmitterInstance> emittersVector;
 		ParticleSystem* partSystem;
 	public:
+		ParticleComponent();
 		void Save();
 		void Load();
 		void Update();
