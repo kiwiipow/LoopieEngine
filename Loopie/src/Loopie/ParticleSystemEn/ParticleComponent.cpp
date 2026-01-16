@@ -6,6 +6,10 @@ namespace Loopie
 	{
 		partSystem = nullptr;
 	}
+	ParticleComponent::ParticleComponent(ParticleSystem* pSystem)
+	{
+		partSystem = pSystem;
+	}
 	void ParticleComponent::Save()
 	{
 
@@ -21,5 +25,14 @@ namespace Loopie
 	void ParticleComponent::Reset()
 	{
 
+	}
+
+	std::vector<EmitterInstance*> ParticleComponent::GetEmittersVector()
+	{
+		return emittersVector;
+	}
+	void ParticleComponent::AddElemToEmitterVector(EmitterInstance* eInstance)
+	{
+		emittersVector.push_back(eInstance);
 	}
 }
