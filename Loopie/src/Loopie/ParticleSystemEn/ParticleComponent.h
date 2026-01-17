@@ -20,7 +20,7 @@ namespace Loopie
 	class ParticleComponent
 	{
 	private:
-		std::vector<EmitterInstance> emittersVector;
+		std::vector<EmitterInstance*> emittersVector;
 		ParticleSystem* partSystem;
 	public:
 		ParticleComponent();

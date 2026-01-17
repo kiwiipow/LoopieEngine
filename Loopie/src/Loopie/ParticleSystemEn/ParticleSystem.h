@@ -8,7 +8,7 @@ namespace Loopie
 	class ParticleSystem
 	{
 		private:
-			std::vector <Emitter> emittersArray;
+			std::vector <Emitter*> emittersArray;
 
 		public:
 			ParticleSystem()
@@ -16,11 +16,11 @@ namespace Loopie
 				
 			}
 			//setters/getters
-			std::vector<Emitter>GetEmitterArray()const
+			std::vector<Emitter*>GetEmitterArray()const
 			{
 				return emittersArray;
 			}
-			void AddElemToEmitterArray(Emitter em)
+			void AddElemToEmitterArray(Emitter* em)
 			{
 				emittersArray.push_back(em);
 			}
