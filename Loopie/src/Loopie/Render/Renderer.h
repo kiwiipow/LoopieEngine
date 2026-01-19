@@ -53,6 +53,15 @@ namespace Loopie {
 
 			std::shared_ptr<Material> Material;
 			const Transform* Transform;
+
+			bool operator<(const RenderItem& other) const
+			{
+				if (Material != other.Material) 
+				{
+					return Material < other.Material;
+				}
+				return VAO < other.VAO;
+			}
 		};
 
 		static void Init(void* context);
