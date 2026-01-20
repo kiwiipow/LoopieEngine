@@ -1,112 +1,195 @@
 #pragma once
 #include "ParticleSystem.h"
-#include <glm/gtc/constants.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/compatibility.hpp>
+#include "Loopie/Core/Log.h"
+#include "Loopie/Render/Renderer.h"
+#include "Loopie/Resources/AssetRegistry.h"
+#include "Loopie/Resources/ResourceManager.h"
+#include <random>
 
-ParticleSystem::ParticleSystem()
+namespace Loopie 
 {
-	m_ParticlePool.resize(1000);
-}
-void ParticleSystem::OnUpdate(GLCore::Timestep ts)
-{
-	for (auto& particle : m_ParticlePool)
+	// Random number generator
+	float RandomFloat(float min, float max)
 	{
-		if (!particle.Active)
-			continue;
+		return min + ((float)rand() / (float)RAND_MAX) * (max - min);
+	}
 
-		if (particle.LifeRemaining <= 0.0f)
+
+	ParticleSystem::ParticleSystem(unsigned int maxParticles): m_maxParticles(maxParticles)
+	{
+		m_particlePool.resize(m_maxParticles);
+		m_poolIndex = m_maxParticles - 1;
+
+		InitializeQuad();
+		InitializeMaterial();
+	}
+	
+
+	void ParticleSystem::InitializeQuad() 
+	{
+		
+		float vertices[] = 
 		{
-			particle.Active = false;
-			continue;
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f,
+			-0.5f,  0.5f, 0.0f
+		};
+
+		unsigned int indices[] = 
+		{
+			0, 1, 2,
+			2, 3, 0
+		};
+
+		m_quadVBO = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
+		m_quadIBO = std::make_shared<IndexBuffer>(indices, 6);
+
+		BufferLayout layout;
+		layout.AddLayoutElement(0, GLVariableType::FLOAT, 3, "Position");
+		m_quadVBO->SetLayout(layout);
+
+		m_quadVAO = std::make_shared<VertexArray>();
+		m_quadVAO->AddBuffer(m_quadVBO.get(), m_quadIBO.get());
+	}
+	void ParticleSystem::InitializeMaterial() 
+	{
+		
+		Metadata& metadata = AssetRegistry::GetOrCreateMetadata("../LoopieEditor/assets/materials/ParticleMaterial.mat");//if locations change this needs to change
+		m_particleMaterial = ResourceManager::GetMaterial(metadata);
+
+		//THIS LINE SHOULD BE ENAMBLED BUT  MAKES IT NOT WORK I DONT UNDERSTAND 
+		//m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
+
+		if (!m_particleMaterial)
+		{
+			Log::Error("Failed to load particle material!");
 		}
-
-		particle.LifeRemaining -= ts;
-		particle.Position += particle.Velocity * (float)ts;
-		particle.Rotation += 0.01f * ts;
+		
 	}
-}
-void ParticleSystem::Emit(const ParticleProps& particleProps)
-{
-	Particle& particle = m_ParticlePool[m_PoolIndex];
-	particle.Active = true;
-	particle.Position = particleProps.Position;
-	particle.Rotation = Random::Float() * 2.0f * glm::pi<float>();
 
-	// Velocity
-	particle.Velocity = particleProps.Velocity;
-	particle.Velocity.x += particleProps.VelocityVariation.x * (Random::Float() - 0.5f);
-	particle.Velocity.y += particleProps.VelocityVariation.y * (Random::Float() - 0.5f);
-
-	// Color
-	particle.ColorBegin = particleProps.ColorBegin;
-	particle.ColorEnd = particleProps.ColorEnd;
-
-	particle.LifeTime = particleProps.LifeTime;
-	particle.LifeRemaining = particleProps.LifeTime;
-	particle.SizeBegin = particleProps.SizeBegin + particleProps.SizeVariation * (Random::Float() - 0.5f);
-	particle.SizeEnd = particleProps.SizeEnd;
-
-	m_PoolIndex = --m_PoolIndex % m_ParticlePool.size();
-}
-void ParticleSystem::OnRender(GLCore::Utils::OrthographicCamera& camera)
-{
-	if (!m_QuadVA)
+	void ParticleSystem::OnUpdate(float deltaTime)
 	{
-		float vertices[] = {
-			 -0.5f, -0.5f, 0.0f,
-			  0.5f, -0.5f, 0.0f,
-			  0.5f,  0.5f, 0.0f,
-			 -0.5f,  0.5f, 0.0f
-		};
+		for (auto& particle : m_particlePool) 
+		{
+			if (!particle.Active)
+			{
+				continue;
+			}
+			if (particle.LifeRemaining <= 0.0f) 
+			{
+				particle.Active = false;
+				continue;
+			}
 
-		glCreateVertexArrays(1, &m_QuadVA);
-		glBindVertexArray(m_QuadVA);
-
-		GLuint quadVB, quadIB;
-		glCreateBuffers(1, &quadVB);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVB);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glEnableVertexArrayAttrib(quadVB, 0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-
-		uint32_t indices[] = {
-			0, 1, 2, 2, 3, 0
-		};
-
-		glCreateBuffers(1, &quadIB);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIB);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		m_ParticleShader = std::unique_ptr<GLCore::Utils::Shader>(GLCore::Utils::Shader::FromGLSLTextFiles("assets/shader.glsl.vert", "assets/shader.glsl.frag"));
-		m_ParticleShaderViewProj = glGetUniformLocation(m_ParticleShader->GetRendererID(), "u_ViewProj");
-		m_ParticleShaderTransform = glGetUniformLocation(m_ParticleShader->GetRendererID(), "u_Transform");
-		m_ParticleShaderColor = glGetUniformLocation(m_ParticleShader->GetRendererID(), "u_Color");
+			particle.LifeRemaining -= deltaTime;
+			particle.Position += particle.Velocity * deltaTime;
+			particle.Rotation += 0.01 * deltaTime;
+		}
 	}
-
-	glUseProgram(m_ParticleShader->GetRendererID());
-	glUniformMatrix4fv(m_ParticleShaderViewProj, 1, GL_FALSE, glm::value_ptr(camera.GetViewProjectionMatrix()));
-
-	for (auto& particle : m_ParticlePool)
+	void ParticleSystem::Emit(const ParticleProps& particleProps)
 	{
-		if (!particle.Active)
-			continue;
+		TestParticle& particle = m_particlePool[m_poolIndex];
+		float twoPi = 6.28318530718f;
 
-		// Fade away particles
-		float life = particle.LifeRemaining / particle.LifeTime;
-		glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
-		//color.a = color.a * life;
+		particle.Active = true;
+		particle.Position = particleProps.Position;
+		particle.Rotation = RandomFloat(0, twoPi) ;
 
-		float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
+	
+		particle.Velocity = particleProps.Velocity;
+		particle.Velocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
+		particle.Velocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
 
-		// Render
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f })
-			* glm::rotate(glm::mat4(1.0f), particle.Rotation, { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { size, size, 1.0f });
-		glUniformMatrix4fv(m_ParticleShaderTransform, 1, GL_FALSE, glm::value_ptr(transform));
-		glUniform4fv(m_ParticleShaderColor, 1, glm::value_ptr(color));
-		glBindVertexArray(m_QuadVA);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		
+		particle.ColorBegin = particleProps.ColorBegin;
+		particle.ColorEnd = particleProps.ColorEnd;
+
+		
+		particle.SizeBegin = particleProps.SizeBegin + RandomFloat(-particleProps.SizeVariation * 0.5f, particleProps.SizeVariation * 0.5f);
+		particle.SizeEnd = particleProps.SizeEnd;
+
+		
+		particle.LifeTime = particleProps.LifeTime;
+		particle.LifeRemaining = particleProps.LifeTime;
+
+		// Update index 
+		m_poolIndex = (m_poolIndex - 1) % m_particlePool.size();
 	}
+	void ParticleSystem::OnRender()
+	{
+		if (!m_quadVAO || !m_particleMaterial)
+		{
+			return;
+		}
+			
+
+		// Render particles in reverse order for proper blending
+		for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it) 
+		{
+			auto& particle = *it;
+
+			if (!particle.Active)
+			{
+				continue;
+			}
+			
+			//interpolations
+			float life = particle.LifeRemaining / particle.LifeTime;
+
+			vec4 color;
+			color.r = glm::mix(particle.ColorEnd.r, particle.ColorBegin.r, life);
+			color.g = glm::mix(particle.ColorEnd.g, particle.ColorBegin.g, life);
+			color.b = glm::mix(particle.ColorEnd.b, particle.ColorBegin.b, life);
+			color.a = glm::mix(particle.ColorEnd.a, particle.ColorBegin.a, life);
+
+			float size = glm::mix(particle.SizeEnd, particle.SizeBegin, life);
+
+			// transform matrix
+			matrix4 transform = translate(matrix4(1.0f), vec3(particle.Position.x, particle.Position.y, 0.0f));
+			transform = rotate(transform, particle.Rotation, vec3(0.0f, 0.0f, 1.0f));
+			transform = scale(transform, vec3(size, size, 1.0f));
+
+			// Set material color 
+			m_particleMaterial->Bind();
+			m_particleMaterial->GetShader().SetUniformVec4("u_Color", color);
+
+			// Render the particle
+			Renderer::FlushRenderItem(m_quadVAO, m_particleMaterial, transform);
+		}
+	}
+
+	void ParticleSystem::SetMaxParticles(unsigned int count) 
+	{
+		m_maxParticles = count;
+		m_particlePool.resize(m_maxParticles);
+		m_poolIndex = m_maxParticles - 1;
+	}
+	int ParticleSystem::GetMaxParticles() const
+	{
+		return m_maxParticles; 
+	}
+	int ParticleSystem::GetActiveParticles() const 
+	{
+		int count = 0;
+		for (const auto& particle : m_particlePool) 
+		{
+			if (particle.Active)
+			{
+				count++;
+
+			}	
+		}
+		return count;
+	}
+	std::vector<Emitter> ParticleSystem::GetEmitterArray()const
+	{
+		return m_emittersArray;
+	}
+	void ParticleSystem::AddElemToEmitterArray(Emitter em)
+	{
+		m_emittersArray.push_back(em);
+	}
+
+	
 }

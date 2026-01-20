@@ -76,6 +76,12 @@ namespace Loopie {
 
 		static void EnableDepth();
 		static void DisableDepth();
+		static void EnableDepthMask();
+		static void DisableDepthMask();
+
+		static void EnableBlend();
+		static void DisableBlend();
+		static void BlendFunction();
 
 		static void EnableStencil();
 		static void DisableStencil();

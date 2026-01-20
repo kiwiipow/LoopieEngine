@@ -2,6 +2,7 @@
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
 
+
 namespace Loopie
 {   
 	class EmitterInstance;

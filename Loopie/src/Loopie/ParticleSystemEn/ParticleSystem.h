@@ -1,7 +1,11 @@
 #pragma once
-#include <vector>
 #include "Emitter.h"
+#include "Loopie/Render/VertexArray.h"
+#include "Loopie/Resources/Types/Material.h"
+#include <vector>
+#include <memory>
 
+#include "Loopie/Math/MathTypes.h"
 
 namespace Loopie
 {
@@ -9,24 +13,30 @@ namespace Loopie
 	class Shader;
 	struct ParticleProps
 	{
-		glm::vec2 Position;
-		glm::vec2 Velocity, VelocityVariation;
-		glm::vec4 ColorBegin, ColorEnd;
-		float SizeBegin, SizeEnd, SizeVariation;
+		vec2 Position = vec2(0.0f);
+		vec2 Velocity = vec2(0.0f);
+		vec2 VelocityVariation = vec2(0.0f);
+		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		vec4 ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		float SizeBegin = 1.0f;
+		float SizeEnd = 0.0f;
+		float SizeVariation = 0.0f;
 		float LifeTime = 1.0f;
 	};
 	class ParticleSystem
 	{
 		private:
-			std::vector <Emitter> emittersArray;
+			std::vector <Emitter> m_emittersArray;
 
 			struct TestParticle
 			{
-				glm::vec2 Position;
-				glm::vec2 Velocity;
-				glm::vec4 ColorBegin, ColorEnd;
+				vec2 Position = vec2(0.0f);
+				vec2 Velocity = vec2(0.0f);
+				vec4 ColorBegin = vec4(0.0f);
+				vec4 ColorEnd = vec4(0.0f);
 				float Rotation = 0.0f;
-				float SizeBegin, SizeEnd;
+				float SizeBegin = 1.0f;
+				float SizeEnd = 0.0f;
 
 				float LifeTime = 1.0f;
 				float LifeRemaining = 0.0f;
@@ -34,30 +44,35 @@ namespace Loopie
 				bool Active = false;
 
 			};
-			std::vector<TestParticle> m_ParticlePool;//contains the max number of particles allowed that get recicled over and over
-			uint32_t m_PoolIndex = 999; //index starts in reverse because particles need to be rendered in reverse
 
-			GLuint m_QuadVA = 0;
-			std::unique_ptr<Shader> m_ParticleShader;
-			GLint m_ParticleShaderViewProj, m_ParticleShaderTransform, m_ParticleShaderColor;
+			void InitializeQuad();
+			void InitializeMaterial();
+
+			std::vector<TestParticle> m_particlePool;//contains the max number of particles allowed that get recicled over and over
+			unsigned int m_poolIndex = 0; //index starts in reverse because particles need to be rendered in reverse
+			unsigned int m_maxParticles = 1000;
+
+
+			//harcode quad
+			std::shared_ptr<VertexArray> m_quadVAO;
+			std::shared_ptr<VertexBuffer> m_quadVBO;
+			std::shared_ptr<IndexBuffer> m_quadIBO;
+			std::shared_ptr<Material> m_particleMaterial;
+			
 		public:
-			ParticleSystem()
-			{
-				
-			}
+			ParticleSystem(unsigned int maxParticles = 1000);
+		
 
-			void OnUpdate(float ts);//time step
-			void OnRender(Camera camera);
+			void OnUpdate(float dt);//time step
+			void OnRender();
 			void Emit(const ParticleProps& particleProps);
 
+			void SetMaxParticles(unsigned int count);
+			int GetMaxParticles() const;
+			int GetActiveParticles() const;
+
 			//setters/getters
-			std::vector<Emitter>GetEmitterArray()const
-			{
-				return emittersArray;
-			}
-			void AddElemToEmitterArray(Emitter em)
-			{
-				emittersArray.push_back(em);
-			}
+			std::vector<Emitter>GetEmitterArray()const;
+			void AddElemToEmitterArray(Emitter em);
 	};
 }
