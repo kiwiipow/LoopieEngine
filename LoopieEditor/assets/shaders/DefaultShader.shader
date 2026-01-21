@@ -68,3 +68,4 @@ void main()
     vec3 litColor = texColor.rgb * diff;
     FragColor = vec4(litColor, texColor.a) * u_Color;
 }
+

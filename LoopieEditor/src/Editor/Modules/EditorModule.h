@@ -13,6 +13,8 @@
 #include "Editor/Interfaces/Workspace/AssetsExplorerInterface.h"
 #include "Editor/Interfaces/Workspace/TopBarInterface.h"
 
+#include "Loopie/ParticleSystemEn/ParticleSystem.h"  
+
 namespace Loopie {
 
 	class Camera;
@@ -34,6 +36,7 @@ namespace Loopie {
 		void OnInterfaceRender()override;
 	private:
 		void RenderWorld(Camera* camera);
+		void RenderParticles();
 		/// Test
 		void CreateBakerHouse();
 		void CreateCity();
@@ -52,5 +55,9 @@ namespace Loopie {
 		Scene* m_currentScene = nullptr;
 		std::shared_ptr<Material> m_selectedObjectMaterial;
 		Shader* m_selectedObjectShader;
+
+		//particle system
+		std::unique_ptr<Loopie::ParticleSystem> m_particleSystem;
+		float m_particleTimer = 0.0f;
 	};
 }

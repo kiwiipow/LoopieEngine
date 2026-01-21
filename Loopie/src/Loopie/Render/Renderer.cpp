@@ -149,7 +149,21 @@ namespace Loopie {
 	}
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix)
 	{
+		std::cout << "shader using " << material->GetShader().GetFilePath() << std::endl;
+
 		material->GetShader().SetUniformMat4("lp_Transform", modelMatrix);
+	}
+	void Renderer::EnableBlend()
+	{
+		glEnable(GL_BLEND);
+	}
+	void Renderer::DisableBlend()
+	{
+
+	}
+	void Renderer::BlendFunction()
+	{
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 	}
 	void Renderer::EnableDepth()
 	{
@@ -158,6 +172,14 @@ namespace Loopie {
 	void Renderer::DisableDepth()
 	{
 			glDisable(GL_DEPTH_TEST);
+	}
+	void Renderer::EnableDepthMask()
+	{
+		glDepthMask(GL_TRUE);
+	}
+	void Renderer::DisableDepthMask()
+	{
+		glDepthMask(GL_FALSE);
 	}
 	void Renderer::EnableStencil()
 	{

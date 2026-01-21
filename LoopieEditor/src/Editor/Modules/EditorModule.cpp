@@ -22,6 +22,9 @@
 
 #include <glad/glad.h>
 
+//particles
+#include "Loopie/Core/Time.h"
+
 namespace Loopie
 {
 	void EditorModule::OnLoad()
@@ -63,6 +66,9 @@ namespace Loopie
 
 		Application::GetInstance().m_notifier.AddObserver(this);
 
+		// Create particle system
+		m_particleSystem = std::make_unique<Loopie::ParticleSystem>(1000);
+
 	}
 
 	void EditorModule::OnUnload()
@@ -82,6 +88,33 @@ namespace Loopie
 		m_scene.Update(inputEvent);
 		m_topBar.Update(inputEvent);
 
+		///////////UPDATE PARTICLE SYSTEM ////////////
+		float dt = (float)Time::GetDeltaTime();
+		if (m_particleSystem)
+		{
+			m_particleSystem->OnUpdate(dt);
+
+			m_particleTimer += dt;
+			if (m_particleTimer >= 0.016f)
+			{
+				m_particleTimer = 0.0f;
+
+				//should add prop templates for smoke and firework
+				Loopie::ParticleProps props;
+				props.Position = vec2(0.0f, 7.0f);
+				props.Velocity = vec2(0.0f, 2.0f);
+				props.VelocityVariation = vec2(1.0f, 0.5f);
+				props.ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+				props.ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+				props.SizeBegin = 0.5f;
+				props.SizeEnd = 0.0f;
+				props.SizeVariation = 0.2f;
+				props.LifeTime = 1.0f;
+
+				m_particleSystem->Emit(props);
+			}
+		}
+		/////////////////////////////////////
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
 		{
@@ -105,9 +138,13 @@ namespace Loopie
 				continue;
 
 			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix(), false);
-			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetWidth());
+			//Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetWidth()); //why with 2 times??
+			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetHeight());
 			buffer->Bind();
 			RenderWorld(cam);
+			///////////////
+			RenderParticles();
+			///////////////
 			Renderer::EndScene();
 
 			if (buffer) {
@@ -120,6 +157,9 @@ namespace Loopie
 			m_scene.StartScene();
 			Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
 			RenderWorld(m_scene.GetCamera());
+			/////////////
+			RenderParticles();
+			/////////////////
 			Renderer::EndScene();
 			m_scene.EndScene();
 		}		
@@ -130,11 +170,13 @@ namespace Loopie
 			if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
 				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
 				RenderWorld(m_game.GetCamera());
+				/////////////////////
+				RenderParticles();
+				//////////////////
 				Renderer::EndScene();
 			}
 			m_game.EndScene();
 		}
-		
 	}
 
 	void EditorModule::OnInterfaceRender()
@@ -242,6 +284,22 @@ namespace Loopie
 			}
 		}
 		Renderer::DisableStencil();
+
+		//if (m_particleSystem) 
+		//{
+		//	// Enable blending for particles
+		//	glEnable(GL_BLEND);
+		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//	// Disable depth writing (but keep depth testing)
+		//	glDepthMask(GL_FALSE);
+
+		//	m_particleSystem->OnRender();
+
+		//	// Restore depth writing
+		//	glDepthMask(GL_TRUE);
+		//}
+
 		if (Renderer::IsGizmoActive()) {
 			if (selectedEntity)
 			{
@@ -251,6 +309,25 @@ namespace Loopie
 			}
 			m_currentScene->GetOctree().DebugDraw(Color::GREEN);
 		}
+	}
+	void EditorModule::RenderParticles()
+	{
+		if (!m_particleSystem)
+		{
+			return;
+		}
+		
+		// Prepare render state
+		Renderer::DisableStencil();
+		Renderer::EnableDepth(); 
+		Renderer::EnableDepthMask();
+		Renderer::EnableBlend();           
+		Renderer::BlendFunction();
+
+		m_particleSystem->OnRender();
+
+		Renderer::EnableDepthMask();       
+		Renderer::DisableBlend();        
 	}
 
 	void EditorModule::CreateBakerHouse()

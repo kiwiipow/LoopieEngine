@@ -2,6 +2,7 @@
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
 
+
 namespace Loopie
 {   
 	class EmitterInstance;
@@ -24,9 +25,14 @@ namespace Loopie
 		ParticleSystem* partSystem;
 	public:
 		ParticleComponent();
+		ParticleComponent(ParticleSystem* pSystem);
 		void Save();
 		void Load();
 		void Update();
 		void Reset();
+
+		//getters/seters
+		std::vector<EmitterInstance*> GetEmittersVector();
+		void AddElemToEmitterVector(EmitterInstance* eInstance);
 	};
 }

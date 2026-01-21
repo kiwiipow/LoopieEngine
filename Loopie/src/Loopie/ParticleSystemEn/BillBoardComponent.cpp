@@ -39,5 +39,9 @@ namespace Loopie
 	{
 		Btype = t;
 	}
+	AABB* Billboard::GetAABB()
+	{
+		return &Bbox;
+	}
 	
 }
