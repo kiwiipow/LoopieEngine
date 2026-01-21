@@ -152,6 +152,7 @@ namespace Loopie
 			transform = scale(transform, vec3(size, size, 1.0f));
 
 			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
+			//test coment: this was the latest added thing
 			UniformValue colorUni;
 			colorUni.type = UniformType_vec4;
 			colorUni.value = color;
