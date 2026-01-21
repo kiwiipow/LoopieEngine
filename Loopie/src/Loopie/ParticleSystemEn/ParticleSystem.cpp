@@ -27,16 +27,15 @@ namespace Loopie
 
 	void ParticleSystem::InitializeQuad() 
 	{
-		
-		float vertices[] = 
+		float vertices[] =
 		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
+			-0.5f, -0.5f, 0.0f,    
+			 0.5f, -0.5f, 0.0f,   
+			 0.5f,  0.5f, 0.0f,   
+			-0.5f,  0.5f, 0.0f,    
 		};
 
-		unsigned int indices[] = 
+		unsigned int indices[] =
 		{
 			0, 1, 2,
 			2, 3, 0
@@ -59,7 +58,7 @@ namespace Loopie
 		m_particleMaterial = ResourceManager::GetMaterial(metadata);
 
 		//THIS LINE SHOULD BE ENAMBLED BUT  MAKES IT NOT WORK I DONT UNDERSTAND 
-		m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
+		//m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
 		
 		if (!m_particleMaterial)
 		{
@@ -120,11 +119,11 @@ namespace Loopie
 	{
 		if (!m_quadVAO || !m_particleMaterial)
 		{
+			Log::Error("particle missing material or quad");
 			return;
 		}
 			
-
-		// Render particles in reverse order for proper blending
+		// Render particles in reverse order for blending
 		for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it) 
 		{
 			auto& particle = *it;
@@ -138,22 +137,26 @@ namespace Loopie
 			float life = particle.LifeRemaining / particle.LifeTime;
 
 			vec4 color;
-			color.r = glm::mix(particle.ColorEnd.r, particle.ColorBegin.r, life);
-			color.g = glm::mix(particle.ColorEnd.g, particle.ColorBegin.g, life);
-			color.b = glm::mix(particle.ColorEnd.b, particle.ColorBegin.b, life);
-			color.a = glm::mix(particle.ColorEnd.a, particle.ColorBegin.a, life);
+			color.r = mix(particle.ColorEnd.r, particle.ColorBegin.r, life);
+			color.g = mix(particle.ColorEnd.g, particle.ColorBegin.g, life);
+			color.b = mix(particle.ColorEnd.b, particle.ColorBegin.b, life);
+			color.a = mix(particle.ColorEnd.a, particle.ColorBegin.a, life);
 
-			float size = glm::mix(particle.SizeEnd, particle.SizeBegin, life);
-
-			// transform matrix
+			float size = mix(particle.SizeEnd, particle.SizeBegin, life);
+			
+			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
+			
+			// transform 
 			matrix4 transform = translate(matrix4(1.0f), vec3(particle.Position.x, particle.Position.y, 0.0f));
 			transform = rotate(transform, particle.Rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));
 
-			// Set material color 
-			m_particleMaterial->Bind();
-			m_particleMaterial->GetShader().SetUniformVec4("u_Color", color);
-
+			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
+			UniformValue colorUni;
+			colorUni.type = UniformType_vec4;
+			colorUni.value = color;
+			m_particleMaterial->SetShaderVariable("u_Color", colorUni);
+			
 			// Render the particle
 			Renderer::FlushRenderItem(m_quadVAO, m_particleMaterial, transform);
 		}
