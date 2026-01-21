@@ -53,6 +53,15 @@ namespace Loopie {
 
 			std::shared_ptr<Material> Material;
 			const Transform* Transform;
+
+			bool operator<(const RenderItem& other) const
+			{
+				if (Material != other.Material)
+				{
+					return Material < other.Material;
+				}
+				return VAO < other.VAO;
+			}
 		};
 
 		static void Init(void* context);
@@ -101,10 +110,10 @@ namespace Loopie {
 		static std::vector<Camera*> s_RenderCameras;
 		static std::shared_ptr<UniformBuffer> s_MatricesUniformBuffer;
 
-		static bool s_UseGizmos;
-
 		static VertexBuffer* s_billboardVBO;
 		static VertexBuffer* s_posSizeVBO;
 		static VertexBuffer* s_colorVBO;
+
+		static bool s_UseGizmos;
 	};
 }

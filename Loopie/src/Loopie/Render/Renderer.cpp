@@ -56,19 +56,17 @@ namespace Loopie {
 
 
 		//IMPORTANT: ASK ADRI ABOUT CHANGING m_RendererID INSIDE THE VBO CONSTRUCTOR IF NECESSARY
-		
+
 		//VBO containing 4 vertices of the particles
 		s_billboardVBO = new VertexBuffer(g_vertex_buffer_data, maxInstances * sizeof(glm::mat4));
 
 		//VBO containing positions and size of the particles
 
 		//I put nullptr for now because i don't know what the vertices' position will be, it will be updated later
-		 s_posSizeVBO = new VertexBuffer(nullptr, maxInstances * 4 * sizeof(GL_FLOAT));
+		s_posSizeVBO = new VertexBuffer(nullptr, maxInstances * 4 * sizeof(GL_FLOAT));
 
 		//VBO containing colors of particles
 		s_colorVBO = new VertexBuffer(nullptr, maxInstances * 4 * sizeof(GLubyte));
-
-
 	}
 
 	void Renderer::Shutdown() {
@@ -141,48 +139,18 @@ namespace Loopie {
 
 	void Renderer::FlushRenderQueue()
 	{
-		/// SORT By Material
-		 //PAULA BRANCH
-		 for (const RenderItem& item : s_RenderQueue) {
+		//sort by material
+		for (const RenderItem& item : s_RenderQueue) {
+			
+			item.VAO->Bind();
+			item.Material->Bind();
+			SetRenderUniforms(item.Material, item.Transform);
+			glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+			item.VAO->Unbind();
+		}
 
-			 item.VAO->Bind();
-			 item.Material->Bind();
-			 SetRenderUniforms(item.Material, item.Transform);
-			 glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-			 item.VAO->Unbind();
-		 }
-
-		 s_RenderQueue.clear();
-
-		 //JAVI BRANCH
-		 	/* 2. Taking the group of RenderItems, binding VAO and material
-		 	 3. Apply transforms for every instance
-		 	 4. Drawing using DrawElementsInstanced
-
-		 	 Some time was used trying to do this process, but decided to go with billboarding first
-		 	*/
-
-		 	//WHEN UPDATING:
-
-		// s_posSizeVBO->SetData();
-		// 
-		//for (const RenderItem& item : s_RenderQueue) {
-		//	
-		//	item.VAO->Bind();
-		//	item.Material->Bind();
-		//	SetRenderUniforms(item.Material, item.Transform);
-		//	glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-		//	item.VAO->Unbind();
-		//}
-
-		//s_RenderQueue.clear();
-
-
-
+		s_RenderQueue.clear();
 	}
-
-		
-	//}
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
 	{
@@ -190,8 +158,21 @@ namespace Loopie {
 	}
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix)
 	{
-		//material->GetShader().SetUniformMat4("lp_Transform", modelMatrix);
 		std::cout << "shader using " << material->GetShader().GetFilePath() << std::endl;
+
+		material->GetShader().SetUniformMat4("lp_Transform", modelMatrix);
+	}
+	void Renderer::EnableBlend()
+	{
+		glEnable(GL_BLEND);
+	}
+	void Renderer::DisableBlend()
+	{
+
+	}
+	void Renderer::BlendFunction()
+	{
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 	}
 	void Renderer::EnableDepth()
 	{
@@ -200,6 +181,14 @@ namespace Loopie {
 	void Renderer::DisableDepth()
 	{
 			glDisable(GL_DEPTH_TEST);
+	}
+	void Renderer::EnableDepthMask()
+	{
+		glDepthMask(GL_TRUE);
+	}
+	void Renderer::DisableDepthMask()
+	{
+		glDepthMask(GL_FALSE);
 	}
 	void Renderer::EnableStencil()
 	{
@@ -220,25 +209,5 @@ namespace Loopie {
 	void Renderer::SetStencilFunc(StencilFunc cond, int ref, unsigned int mask)
 	{
 		glStencilFunc((unsigned int)cond, ref, mask);
-	}
-	void Renderer::EnableBlend()
-	{
-		glEnable(GL_BLEND);
-	}
-	void Renderer::DisableBlend()
-	{
-
-	}
-	void Renderer::BlendFunction()
-	{
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-	void Renderer::EnableDepthMask()
-	{
-		glDepthMask(GL_TRUE);
-	}
-	void Renderer::DisableDepthMask()
-	{
-		glDepthMask(GL_FALSE);
 	}
 }

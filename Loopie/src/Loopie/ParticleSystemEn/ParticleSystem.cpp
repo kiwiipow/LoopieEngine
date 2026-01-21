@@ -58,7 +58,7 @@ namespace Loopie
 		m_particleMaterial = ResourceManager::GetMaterial(metadata);
 
 		//THIS LINE SHOULD BE ENAMBLED BUT  MAKES IT NOT WORK I DONT UNDERSTAND 
-		m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
+		//m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
 		
 		if (!m_particleMaterial)
 		{
