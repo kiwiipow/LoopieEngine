@@ -141,42 +141,48 @@ namespace Loopie {
 
 	void Renderer::FlushRenderQueue()
 	{
-		/// Sort By Material, then by VAO
+		/// SORT By Material
+		 //PAULA BRANCH
+		 for (const RenderItem& item : s_RenderQueue) {
 
-		std::sort(s_RenderQueue.begin(), s_RenderQueue.end());
+			 item.VAO->Bind();
+			 item.Material->Bind();
+			 SetRenderUniforms(item.Material, item.Transform);
+			 glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+			 item.VAO->Unbind();
+		 }
 
-		for (size_t i = 0; i < s_RenderQueue.size(); i++)
-		{
-			/*Next: 
-			1.Taking all the RenderItems with(in order of priority) :
-			 - Same material and mesh
-			 - Same material
-			 - Same mesh
-			 - Different
+		 s_RenderQueue.clear();
 
-			 2. Taking the group of RenderItems, binding VAO and material
-			 3. Apply transforms for every instance
-			 4. Drawing using DrawElementsInstanced
+		 //JAVI BRANCH
+		 	/* 2. Taking the group of RenderItems, binding VAO and material
+		 	 3. Apply transforms for every instance
+		 	 4. Drawing using DrawElementsInstanced
 
-			 Some time was used trying to do this process, but decided to go with billboarding first
-			*/
+		 	 Some time was used trying to do this process, but decided to go with billboarding first
+		 	*/
 
-			//WHEN UPDATING:
+		 	//WHEN UPDATING:
 
-			//s_posSizeVBO->SetData()
-		}
+		// s_posSizeVBO->SetData();
+		// 
+		//for (const RenderItem& item : s_RenderQueue) {
+		//	
+		//	item.VAO->Bind();
+		//	item.Material->Bind();
+		//	SetRenderUniforms(item.Material, item.Transform);
+		//	glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+		//	item.VAO->Unbind();
+		//}
 
-		for (const RenderItem& item : s_RenderQueue) {
-			
-			item.VAO->Bind();
-			item.Material->Bind();
-			SetRenderUniforms(item.Material, item.Transform);
-			glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-			item.VAO->Unbind();
-		}
+		//s_RenderQueue.clear();
 
-		s_RenderQueue.clear();
+
+
 	}
+
+		
+	//}
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
 	{
