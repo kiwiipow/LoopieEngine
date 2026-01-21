@@ -89,12 +89,12 @@ namespace Loopie
 		m_topBar.Update(inputEvent);
 
 		///////////UPDATE PARTICLE SYSTEM ////////////
-		float dt = (float)Time::GetDeltaTime();
+		float deltaTime = (float)Time::GetDeltaTime();
 		if (m_particleSystem)
 		{
-			m_particleSystem->OnUpdate(dt);
+			m_particleSystem->OnUpdate(deltaTime);
 
-			m_particleTimer += dt;
+			m_particleTimer += deltaTime;
 			if (m_particleTimer >= 0.016f)
 			{
 				m_particleTimer = 0.0f;
@@ -313,16 +313,14 @@ namespace Loopie
 	void EditorModule::RenderParticles()
 	{
 		if (!m_particleSystem)
-		{
 			return;
-		}
-		
+
 		// Prepare render state
 		Renderer::DisableStencil();
 		Renderer::EnableDepth(); 
-		Renderer::EnableDepthMask();
+		Renderer::DisableDepthMask();
 		Renderer::EnableBlend();           
-		Renderer::BlendFunction();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		m_particleSystem->OnRender();
 
