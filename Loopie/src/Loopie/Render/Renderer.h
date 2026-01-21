@@ -111,5 +111,9 @@ namespace Loopie {
 		static std::shared_ptr<UniformBuffer> s_MatricesUniformBuffer;
 
 		static bool s_UseGizmos;
+
+		static VertexBuffer* s_billboardVBO;
+		static VertexBuffer* s_posSizeVBO;
+		static VertexBuffer* s_colorVBO;
 	};
 }
