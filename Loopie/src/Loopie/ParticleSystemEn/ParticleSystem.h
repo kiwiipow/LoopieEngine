@@ -27,6 +27,7 @@ namespace Loopie
 	{
 		private:
 			std::vector <Emitter> m_emittersArray;
+			//std::vector <Emitter*> emittersArray;
 
 			struct TestParticle
 			{
@@ -74,5 +75,13 @@ namespace Loopie
 			//setters/getters
 			std::vector<Emitter>GetEmitterArray()const;
 			void AddElemToEmitterArray(Emitter em);
+			//std::vector<Emitter*>GetEmitterArray()const
+		//	{
+			//	return emittersArray;
+			//}
+		//	void AddElemToEmitterArray(Emitter* em)
+			//{
+			//	emittersArray.push_back(em);
+			//}
 	};
 }
