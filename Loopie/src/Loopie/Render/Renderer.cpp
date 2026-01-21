@@ -110,35 +110,19 @@ namespace Loopie {
 
 	void Renderer::FlushRenderQueue()
 	{
-		/// Sort By Material, then by VAO
+		/// SORT By Material
 
-		std::sort(s_RenderQueue.begin(), s_RenderQueue.end());
 
-		for (size_t i = 0; i < s_RenderQueue.size(); i++)
-		{
-			/*Next: 
-			1.Taking all the RenderItems with(in order of priority) :
-			 - Same material and mesh
-			 - Same material
-			 - Same mesh
-			 - Different
+		///
 
-			 2. Taking the group of RenderItems, binding VAO and material
-			 3. Apply transforms for every instance
-			 4. Drawing using DrawElementsInstanced
-
-			 Some time was used trying to do this process, but decided to go with billboarding first
-			*/
+		for (const RenderItem& item : s_RenderQueue) {
+			
+			item.VAO->Bind();
+			item.Material->Bind();
+			SetRenderUniforms(item.Material, item.Transform);
+			glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+			item.VAO->Unbind();
 		}
-
-		//for (const RenderItem& item : s_RenderQueue) {
-		//	
-		//	item.VAO->Bind();
-		//	item.Material->Bind();
-		//	SetRenderUniforms(item.Material, item.Transform);
-		//	glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-		//	item.VAO->Unbind();
-		//}
 
 		s_RenderQueue.clear();
 	}
