@@ -142,42 +142,47 @@ namespace Loopie {
 	void Renderer::FlushRenderQueue()
 	{
 		/// SORT By Material
+		 //PAULA BRANCH
+		 for (const RenderItem& item : s_RenderQueue) {
+
+			 item.VAO->Bind();
+			 item.Material->Bind();
+			 SetRenderUniforms(item.Material, item.Transform);
+			 glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+			 item.VAO->Unbind();
+		 }
+
+		 s_RenderQueue.clear();
+
+		 //JAVI BRANCH
+		 	/* 2. Taking the group of RenderItems, binding VAO and material
+		 	 3. Apply transforms for every instance
+		 	 4. Drawing using DrawElementsInstanced
+
+		 	 Some time was used trying to do this process, but decided to go with billboarding first
+		 	*/
+
+		 	//WHEN UPDATING:
+
+		// s_posSizeVBO->SetData();
+		// 
+		//for (const RenderItem& item : s_RenderQueue) {
+		//	
+		//	item.VAO->Bind();
+		//	item.Material->Bind();
+		//	SetRenderUniforms(item.Material, item.Transform);
+		//	glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
+		//	item.VAO->Unbind();
+		//}
+
+		//s_RenderQueue.clear();
 
 
-		///
 
-		// for (const RenderItem& item : s_RenderQueue) {
-			
-		// 	item.VAO->Bind();
-		// 	item.Material->Bind();
-		// 	SetRenderUniforms(item.Material, item.Transform);
-		// 	glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-		// 	item.VAO->Unbind();
-		// }
-
-		// 	 2. Taking the group of RenderItems, binding VAO and material
-		// 	 3. Apply transforms for every instance
-		// 	 4. Drawing using DrawElementsInstanced
-
-		// 	 Some time was used trying to do this process, but decided to go with billboarding first
-		// 	*/
-
-		// 	//WHEN UPDATING:
-
-		// 	//s_posSizeVBO->SetData()
-		// }
-
-		for (const RenderItem& item : s_RenderQueue) {
-			
-			item.VAO->Bind();
-			item.Material->Bind();
-			SetRenderUniforms(item.Material, item.Transform);
-			glDrawElements(GL_TRIANGLES, item.IndexCount, GL_UNSIGNED_INT, nullptr);
-			item.VAO->Unbind();
-		}
-
-		s_RenderQueue.clear();
 	}
+
+		
+	//}
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
 	{
