@@ -13,8 +13,8 @@ namespace Loopie
 	class Shader;
 	struct ParticleProps
 	{
-		vec2 Position = vec3(0.0f);
-		vec2 Velocity = vec2(0.0f);
+		vec3 Position = vec3(0.0f);
+		vec3 Velocity = vec3(0.0f);
 		vec2 VelocityVariation = vec2(0.0f);
 		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		vec4 ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -33,8 +33,8 @@ namespace Loopie
 
 			struct TestParticle
 			{
-				vec2 Position = vec3(0.0f);
-				vec2 Velocity = vec2(0.0f);
+				vec3 Position = vec3(0.0f);
+				vec3 Velocity = vec3(0.0f);
 				vec4 ColorBegin = vec4(0.0f);
 				vec4 ColorEnd = vec4(0.0f);
 				float Rotation = 0.0f;

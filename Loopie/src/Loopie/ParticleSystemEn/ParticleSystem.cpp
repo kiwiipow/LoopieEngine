@@ -147,7 +147,7 @@ namespace Loopie
 			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
 			
 			// transform 
-			matrix4 transform = translate(matrix4(1.0f), vec3(particle.Position.x, particle.Position.y, 0.0f));
+			matrix4 transform = translate(matrix4(1.0f), particle.Position);
 			transform = rotate(transform, particle.Rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));
 

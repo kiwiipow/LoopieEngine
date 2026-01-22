@@ -101,8 +101,8 @@ namespace Loopie
 
 				//should add prop templates for smoke and firework
 				Loopie::ParticleProps props;
-				props.Position = vec2(0.0f, 7.0f);
-				props.Velocity = vec2(0.0f, 2.0f);
+				props.Position = vec3(0.0f, 7.0f, 0.0f);
+				props.Velocity = vec3(0.0f, 2.0f, 0.0f);
 				props.VelocityVariation = vec2(1.0f, 0.5f);
 				props.ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 				props.ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
