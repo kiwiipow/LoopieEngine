@@ -4,6 +4,7 @@
 #include "Loopie/Render/Renderer.h"
 #include "Loopie/Resources/AssetRegistry.h"
 #include "Loopie/Resources/ResourceManager.h"
+#include "Loopie/Importers/MaterialImporter.h"
 #include <random>
 
 namespace Loopie 
@@ -53,13 +54,22 @@ namespace Loopie
 	}
 	void ParticleSystem::InitializeMaterial() 
 	{
-		
-		Metadata& metadata = AssetRegistry::GetOrCreateMetadata("../LoopieEditor/assets/materials/ParticleMaterial.mat");//if locations change this needs to change
-		m_particleMaterial = ResourceManager::GetMaterial(metadata);
+		//
+		//Metadata& metadata = AssetRegistry::GetOrCreateMetadata("assets/materials/ParticleMaterial.mat");//if locations change this needs to change
+		//m_particleMaterial = ResourceManager::GetMaterial(metadata);
 
 		//THIS LINE SHOULD BE ENAMBLED BUT  MAKES IT NOT WORK I DONT UNDERSTAND 
-		//m_particleMaterial.get()->SetShader("../LoopieEditor/assets/shaders/ParticleShader.shader");
 		
+		
+		Metadata& metadata = AssetRegistry::GetOrCreateMetadata("assets/materials/ParticleMaterial.mat");
+		if (!metadata.HasCache) 
+		{
+			MaterialImporter::ImportMaterial("assets/materials/ParticleMaterial.mat", metadata);
+		}
+		m_particleMaterial = ResourceManager::GetMaterial(metadata);
+		m_particleMaterial->Load();
+		m_particleMaterial->SetShader(m_particleShader);
+
 		if (!m_particleMaterial)
 		{
 			Log::Error("Failed to load particle material!");
@@ -157,6 +167,7 @@ namespace Loopie
 			colorUni.value = color;
 			m_particleMaterial->SetShaderVariable("u_Color", colorUni);
 			
+			//add to renderqueue
 			// Render the particle
 			Renderer::FlushRenderItem(m_quadVAO, m_particleMaterial, transform);
 		}
@@ -192,6 +203,19 @@ namespace Loopie
 	void ParticleSystem::AddElemToEmitterArray(Emitter em)
 	{
 		m_emittersArray.push_back(em);
+	}
+	void SetParticlePresets(ParticleType t)
+	{
+		switch (t)
+		{
+		case Loopie::SMOKE_PARTICLE:
+
+			break;
+		case Loopie::FIREWORK_1_PARTICLE:
+			break;
+		default:
+			break;
+		}
 	}
 
 	

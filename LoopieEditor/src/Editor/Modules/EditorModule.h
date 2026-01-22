@@ -58,6 +58,6 @@ namespace Loopie {
 
 		//particle system
 		std::unique_ptr<Loopie::ParticleSystem> m_particleSystem;
-		float m_particleTimer = 0.0f;
+		/*float m_particleTimer = 0.0f;*/
 	};
 }

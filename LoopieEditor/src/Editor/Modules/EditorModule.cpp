@@ -94,7 +94,7 @@ namespace Loopie
 		{
 			m_particleSystem->OnUpdate(dt);
 
-			m_particleTimer += dt;
+			m_particleSystem += dt;
 			if (m_particleTimer >= 0.016f)
 			{
 				m_particleTimer = 0.0f;
@@ -104,8 +104,8 @@ namespace Loopie
 				props.Position = vec2(0.0f, 7.0f);
 				props.Velocity = vec2(0.0f, 2.0f);
 				props.VelocityVariation = vec2(1.0f, 0.5f);
-				props.ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-				props.ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+				props.ColorBegin = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+				props.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
 				props.SizeBegin = 0.5f;
 				props.SizeEnd = 0.0f;
 				props.SizeVariation = 0.2f;
@@ -284,21 +284,6 @@ namespace Loopie
 			}
 		}
 		Renderer::DisableStencil();
-
-		//if (m_particleSystem) 
-		//{
-		//	// Enable blending for particles
-		//	glEnable(GL_BLEND);
-		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		//	// Disable depth writing (but keep depth testing)
-		//	glDepthMask(GL_FALSE);
-
-		//	m_particleSystem->OnRender();
-
-		//	// Restore depth writing
-		//	glDepthMask(GL_TRUE);
-		//}
 
 		if (Renderer::IsGizmoActive()) {
 			if (selectedEntity)

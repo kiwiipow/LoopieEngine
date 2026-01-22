@@ -4,13 +4,20 @@
 #include "Loopie/Resources/Types/Material.h"
 #include <vector>
 #include <memory>
-
+#include "Loopie/Render/Shader.h"
 #include "Loopie/Math/MathTypes.h"
 
 namespace Loopie
 {
 	class Camera;
 	class Shader;
+	enum ParticleType
+	{
+		SMOKE_PARTICLE,
+		FIREWORK_1_PARTICLE,
+		FIREWORK_2_PARTICLE,
+		FIREWORK_3_PARTICLE,
+	};
 	struct ParticleProps
 	{
 		vec2 Position = vec2(0.0f);
@@ -58,6 +65,8 @@ namespace Loopie
 			std::shared_ptr<VertexBuffer> m_quadVBO;
 			std::shared_ptr<IndexBuffer> m_quadIBO;
 			std::shared_ptr<Material> m_particleMaterial;
+			Shader m_particleShader = Shader("assets/shaders/ParticleShader.shader");
+			float m_particleTimer = 0.0f;
 			
 		public:
 			ParticleSystem(unsigned int maxParticles = 1000);
@@ -70,6 +79,8 @@ namespace Loopie
 			void SetMaxParticles(unsigned int count);
 			int GetMaxParticles() const;
 			int GetActiveParticles() const;
+			void SetParticlePresets(ParticleType t);
+
 
 			//setters/getters
 			std::vector<Emitter>GetEmitterArray()const;
