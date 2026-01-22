@@ -94,8 +94,8 @@ namespace Loopie
 		{
 			m_particleSystem->OnUpdate(dt);
 
-			m_particleSystem += dt;
-			if (m_particleTimer >= 0.016f)
+			m_particleTimer += dt;
+			if (m_particleTimer >= 0.015f)
 			{
 				m_particleTimer = 0.0f;
 
