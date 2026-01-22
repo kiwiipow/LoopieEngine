@@ -158,6 +158,7 @@ namespace Loopie
 			m_particleMaterial->SetShaderVariable("u_Color", colorUni);
 			
 			// Render the particle
+			//AddParticleRenderItem - > If max capacity reached, flush (this inside AddParticle function), draw and clear pos and color vectors
 			Renderer::FlushRenderItem(m_quadVAO, m_particleMaterial, transform);
 		}
 	}

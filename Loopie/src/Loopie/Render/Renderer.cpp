@@ -16,9 +16,10 @@ namespace Loopie {
 	std::shared_ptr<UniformBuffer> Renderer::s_MatricesUniformBuffer = nullptr;
 	bool Renderer::s_UseGizmos = true;
 
-	VertexBuffer* Renderer::s_billboardVBO = nullptr;
-	VertexBuffer* Renderer::s_posSizeVBO = nullptr;
-	VertexBuffer* Renderer::s_colorVBO = nullptr;
+	std::shared_ptr<VertexBuffer> Renderer::s_billboardVBO = nullptr;
+	std::shared_ptr<VertexBuffer> Renderer::s_posSizeVBO = nullptr;
+	std::shared_ptr<VertexBuffer> Renderer::s_colorVBO = nullptr;
+
 
 	void Renderer::Init(void* context) {
 		ASSERT(!gladLoadGLLoader((GLADloadproc)context), "Failed to Initialize GLAD!");
@@ -58,15 +59,17 @@ namespace Loopie {
 		//IMPORTANT: ASK ADRI ABOUT CHANGING m_RendererID INSIDE THE VBO CONSTRUCTOR IF NECESSARY
 
 		//VBO containing 4 vertices of the particles
-		s_billboardVBO = new VertexBuffer(g_vertex_buffer_data, maxInstances * sizeof(glm::mat4));
-
+		s_billboardVBO = std::make_shared<VertexBuffer>(g_vertex_buffer_data, sizeof(g_vertex_buffer_data));
+		layout.Reset();
+		layout.AddLayoutElement(0, GLVariableType::FLOAT, 12, "Mesh");
+		s_billboardVBO->SetLayout(layout);
 		//VBO containing positions and size of the particles
 
 		//I put nullptr for now because i don't know what the vertices' position will be, it will be updated later
-		s_posSizeVBO = new VertexBuffer(nullptr, maxInstances * 4 * sizeof(GL_FLOAT));
+		s_posSizeVBO = std::make_shared<VertexBuffer>(nullptr, maxInstances * 4 * sizeof(GL_FLOAT));
 
 		//VBO containing colors of particles
-		s_colorVBO = new VertexBuffer(nullptr, maxInstances * 4 * sizeof(GLubyte));
+		s_colorVBO = std::make_shared<VertexBuffer>(nullptr, maxInstances * 4 * sizeof(GLubyte));
 	}
 
 	void Renderer::Shutdown() {
@@ -114,7 +117,7 @@ namespace Loopie {
 
 	void Renderer::EndScene()
 	{
-		FlushRenderQueue();
+		FlushRenderQueue(); //Call FlushParticleRenderQueue as well
 		Gizmo::EndGizmo();
 	}
 
@@ -122,6 +125,17 @@ namespace Loopie {
 	{
 		s_RenderQueue.emplace_back(RenderItem{ vao, vao->GetIndexBuffer().GetCount(), material, transform});
 	}
+
+	void Renderer::AddParticleItem()
+	{
+
+	}
+
+	void Renderer::FlushParticleItems()
+	{
+
+	}
+
 
 	void Renderer::FlushRenderItem(std::shared_ptr<VertexArray> vao, std::shared_ptr<Material> material, const Transform* transform)
 	{
@@ -139,7 +153,7 @@ namespace Loopie {
 
 	void Renderer::FlushRenderQueue()
 	{
-		//sort by material
+
 		for (const RenderItem& item : s_RenderQueue) {
 			
 			item.VAO->Bind();
