@@ -56,7 +56,11 @@ namespace Loopie {
 			m_layout.emplace_back(BufferElement{ index, m_stride, type, count });
 			m_stride+=GetGLVariableSize(type)*count;
 		}
-
+		void Reset() 
+		{
+			m_layout.clear();
+			m_stride = 0;
+		}
 		unsigned int GetStride()const { return m_stride; }
 
 		const std::vector <BufferElement>& GetElements()const { return m_layout; }

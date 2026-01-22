@@ -53,7 +53,43 @@ namespace Loopie {
 
 			std::shared_ptr<Material> Material;
 			const Transform* Transform;
+
+			bool operator<(const RenderItem& other) const
+			{
+				if (Material != other.Material)
+				{
+					return Material < other.Material;
+				}
+				return VAO < other.VAO;
+			}
 		};
+
+		
+	
+		struct RenderParticlesData
+		{
+			//MaxInstances
+			//count
+			//VBOs
+
+			struct PosSizeData_ 
+			{
+				//vec2 and float
+				
+			};
+			struct ColorData_
+			{
+				//vec4 color
+
+			};
+			std::vector<PosSizeData_> PosSizeData;
+			std::vector<ColorData_> ColorData;
+
+		};
+
+		static RenderParticlesData s_ParticlesData;
+
+
 
 		static void Init(void* context);
 		static void Shutdown();
@@ -93,13 +129,18 @@ namespace Loopie {
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform);
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix);
 		static void FlushRenderQueue();
-
+		static void AddParticleItem();
+		static void FlushParticleItems();
 	public:
 	private:
 
 		static std::vector<RenderItem> s_RenderQueue;
 		static std::vector<Camera*> s_RenderCameras;
 		static std::shared_ptr<UniformBuffer> s_MatricesUniformBuffer;
+
+		static std::shared_ptr<VertexBuffer> s_billboardVBO;
+		static std::shared_ptr<VertexBuffer>s_posSizeVBO;
+		static std::shared_ptr<VertexBuffer>s_colorVBO;
 
 		static bool s_UseGizmos;
 	};

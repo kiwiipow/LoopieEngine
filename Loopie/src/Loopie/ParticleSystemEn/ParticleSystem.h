@@ -20,7 +20,7 @@ namespace Loopie
 	};
 	struct ParticleProps
 	{
-		vec2 Position = vec2(0.0f);
+		vec2 Position = vec3(0.0f);
 		vec2 Velocity = vec2(0.0f);
 		vec2 VelocityVariation = vec2(0.0f);
 		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -29,6 +29,9 @@ namespace Loopie
 		float SizeEnd = 0.0f;
 		float SizeVariation = 0.0f;
 		float LifeTime = 1.0f;
+		float LifeRemaining = 0.0f;
+
+		bool Active = false;
 	};
 	class ParticleSystem
 	{
@@ -37,7 +40,7 @@ namespace Loopie
 
 			struct TestParticle
 			{
-				vec2 Position = vec2(0.0f);
+				vec2 Position = vec3(0.0f);
 				vec2 Velocity = vec2(0.0f);
 				vec4 ColorBegin = vec4(0.0f);
 				vec4 ColorEnd = vec4(0.0f);
