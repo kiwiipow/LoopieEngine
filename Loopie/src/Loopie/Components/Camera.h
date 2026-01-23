@@ -37,6 +37,10 @@ namespace Loopie
 
 		void SetDirty() const;
 
+		vec3 Camera::GetPosition()const;
+		vec3 Camera::GetForward() const;
+		vec3 Camera::GetUp() const;
+
 		const std::shared_ptr<FrameBuffer> GetRenderTarget() const { return m_renderTarget; }
 		void SetRenderTarget(std::shared_ptr<FrameBuffer> buffer) { m_renderTarget = buffer; }
 
