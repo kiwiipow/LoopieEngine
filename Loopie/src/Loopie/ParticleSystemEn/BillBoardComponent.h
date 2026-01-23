@@ -1,7 +1,6 @@
 #pragma once
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Math/AABB.h"
-#include "Loopie/Components/Camera.h"
 namespace Loopie
 {
 	class Camera;
@@ -22,7 +21,7 @@ namespace Loopie
 			Billboard();
 			Billboard(BillboardType t);
 
-			vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex);
+			void CalcVecOriention(const Camera &camera, const vec3 &worldPos, vec3 normal);
 			void DrawDebug();
 
 			//getters/setters

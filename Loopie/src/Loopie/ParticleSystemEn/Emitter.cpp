@@ -9,67 +9,29 @@ namespace Loopie
 		return min + ((float)rand() / (float)RAND_MAX) * (max - min);
 	}
 
-	Emitter::Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate)
+	Emitter::Emitter(unsigned int maxParticles)
 	{
-		switch (type)
-		{
-		case Loopie::SMOKE_PARTICLE:
-			m_name = "Smoke";
-			m_spawnRate = spawnRate;
-			m_maxParticles = maxParticles;
-			m_emitterTimer = 0;
-			m_position = position;
-			m_active = true;
-			m_poolIndex = 0;
+		m_name = "DefaultName";
+		m_spawnRate = 10;
+		m_maxParticles = maxParticles;
+		m_emitterTimer = 0;
+		m_position = vec2(0, 0);
+		m_active = true;
+		m_poolIndex = 0;
 
-			m_particleProperties.Velocity = vec3(0.0f, 1.0f, 0.0f);
-			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
-			m_particleProperties.ColorBegin = vec4(0.2f, 0.2f, 0.2f, 1.0f);
-			m_particleProperties.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
-			m_particleProperties.SizeBegin = 2.0f;
-			m_particleProperties.SizeEnd = 0.1f;
-			m_particleProperties.SizeVariation = 0.5f;
-			m_particleProperties.LifeTime = 10.0f;
+		m_particleProperties.Velocity = vec2(0,0);
+		m_particleProperties.VelocityVariation = vec2(1,1);
+		m_particleProperties.ColorBegin = vec4(1,1,1,1);
+		m_particleProperties.ColorEnd = vec4(1,1,1,0);
+		m_particleProperties.SizeBegin = 1;
+		m_particleProperties.SizeEnd = 0;
+		m_particleProperties.SizeVariation = 0.5;
+		m_particleProperties.LifeTime = 1;
 
-			/*m_texture = nullptr;*/
+		/*m_texture = nullptr;*/
 
-			m_particlePool.resize(m_maxParticles);
-			m_poolIndex = m_maxParticles - 1;
-
-			break;
-		case Loopie::FIREWORK_1_PARTICLE:
-			break;
-		case Loopie::FIREWORK_2_PARTICLE:
-			break;
-		case Loopie::FIREWORK_3_PARTICLE:
-			break;
-		default:
-			m_name = "DefaultName";
-			m_spawnRate = 10;
-			m_maxParticles = maxParticles;
-			m_emitterTimer = 0;
-			m_position = vec3(0, 0, 0);
-			m_active = true;
-			m_poolIndex = 0;
-
-			m_particleProperties.Velocity = vec3(0, 0, 0);
-			m_particleProperties.VelocityVariation = vec3(1, 1, 0);
-			m_particleProperties.ColorBegin = vec4(1, 1, 1, 1);
-			m_particleProperties.ColorEnd = vec4(1, 1, 1, 0);
-			m_particleProperties.SizeBegin = 1;
-			m_particleProperties.SizeEnd = 0;
-			m_particleProperties.SizeVariation = 0.5;
-			m_particleProperties.LifeTime = 1;
-
-			/*m_texture = nullptr;*/
-
-			m_particlePool.resize(m_maxParticles);
-			m_poolIndex = m_maxParticles - 1;
-			break;
-		}
-
-
-
+		m_particlePool.resize(m_maxParticles);
+		m_poolIndex = m_maxParticles - 1;
 	}
 
 	void Emitter::OnUpdate(float dt)
@@ -122,7 +84,7 @@ namespace Loopie
 		particle.SetRotation(RandomFloat(0, twoPi));
 
 		// velocity
-		vec3 finalVelocity = particleProps.Velocity;
+		vec2 finalVelocity = particleProps.Velocity;
 		finalVelocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
 		finalVelocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
 		particle.SetVelocity(finalVelocity);
@@ -185,11 +147,11 @@ namespace Loopie
 		m_particlePool.resize(m_maxParticles);
 		m_poolIndex = m_maxParticles - 1;
 	}
-	vec3 Emitter::GetPosition() const
+	vec2 Emitter::GetPosition() const
 	{
 		return m_position;
 	}
-	void Emitter::SetPosition(const vec3& pos)
+	void Emitter::SetPosition(const vec2& pos)
 	{
 		m_position = pos;
 	}

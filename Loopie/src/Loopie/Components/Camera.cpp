@@ -193,16 +193,4 @@ namespace Loopie
 			SetAsMainCamera();
 		}
 	}
-
-	vec3 Camera::GetPosition() const {
-		return GetTransform()->GetPosition();
-	}
-
-	vec3 Camera::GetForward() const {
-		return -GetTransform()->Forward();
-	}
-
-	vec3 Camera::GetUp() const {
-		return GetTransform()->Up();
-	}
 }

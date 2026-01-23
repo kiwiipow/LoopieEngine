@@ -3,7 +3,6 @@
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Render/VertexArray.h"
 #include "Loopie/Resources/Types/Material.h"
-#include "Loopie/ParticleSystemEn/BillBoardComponent.h"
 #include <memory>
 
 namespace Loopie
@@ -16,22 +15,13 @@ namespace Loopie
 		FIREWORK_2_PARTICLE,
 		FIREWORK_3_PARTICLE,
 	};
-	//struct Particle
-	//{
-	//	vec3 position;
-	//	quaternion worldRotation;
-	//	float age;
-	//	float lifetime;
-	//	float velocity;
-	//	int spriteIndex;
 
-	//};
 	class ParticleModule
 	{
 		private:
 			ParticleType m_partType;
-			vec3 m_position;
-			vec3 m_velocity;
+			vec2 m_position;
+			vec2 m_velocity;
 			vec4 m_colorBegin;
 			vec4 m_colorEnd;
 			float m_rotation;
@@ -40,9 +30,6 @@ namespace Loopie
 			float m_lifetime;
 			float m_lifeRemaining;
 			bool m_active;
-
-			//Billboard
-			std::shared_ptr<Billboard> m_billboard;
 
 		public:
 
@@ -54,11 +41,11 @@ namespace Loopie
 			ParticleType GetParticleType()const;
 			void SetParticleType(ParticleType t);
 
-			vec3 GetPosition() const;
-			void SetPosition(const vec3& pos);
+			vec2 GetPosition() const;
+			void SetPosition(const vec2& pos);
 
-			vec3 GetVelocity() const;
-			void SetVelocity(const vec3& vel);
+			vec2 GetVelocity() const;
+			void SetVelocity(const vec2& vel);
 
 			float GetRotation() const;
 			void SetRotation(float rot);

@@ -73,7 +73,22 @@ namespace Loopie
 		m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
 
 		//create emiter
-		Emitter* smokeEmitter = new Emitter(1000, SMOKE_PARTICLE, vec3(0.0f, 1.0f, 0.0f), 10);
+			Emitter* smokeEmitter = new Emitter(1000);
+			smokeEmitter->SetName("Smoke");
+			smokeEmitter->SetPosition(vec2(0.0f, 1.0f));
+			smokeEmitter->SetSpawnRate(10);
+
+			//set properties to emiter
+			ParticleProps& smokeProps = smokeEmitter->GetEmissionProperties();
+			smokeProps.Velocity = vec2(0.0f, 1.0f);
+			smokeProps.VelocityVariation = vec2(0.5f, 0.3f);
+			smokeProps.ColorBegin = vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			smokeProps.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			smokeProps.SizeBegin =2.0f;
+			smokeProps.SizeEnd = 0.1f;
+			smokeProps.SizeVariation = 0.5f;
+			smokeProps.LifeTime = 10.0f;
+		
 		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
 
 	}

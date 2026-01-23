@@ -30,13 +30,10 @@ namespace Loopie
 	{
 		float vertices[] =
 		{
-				//Position        //UVs (For now it breaks the quads)
-								
-
-		   -0.5f, -0.5f, 0.0f,  //1.0f, 1.0f,
-			0.5f, -0.5f, 0.0f,  //1.0f, 1.0f,
-			0.5f,  0.5f, 0.0f,  //1.0f, 1.0f,
-		   -0.5f,  0.5f, 0.0f,  //1.0f, 1.0f
+			-0.5f, -0.5f, 0.0f,    
+			 0.5f, -0.5f, 0.0f,   
+			 0.5f,  0.5f, 0.0f,   
+			-0.5f,  0.5f, 0.0f,    
 		};
 
 		unsigned int indices[] =

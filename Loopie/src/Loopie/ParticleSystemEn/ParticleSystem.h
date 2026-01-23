@@ -2,7 +2,6 @@
 #include "Loopie/Render/VertexArray.h"
 #include "Loopie/Resources/Types/Material.h"
 #include "Loopie/Render/Shader.h"
-#include "Loopie/ParticleSystemEn/BillBoardComponent.h"
 #include <vector>
 #include <memory>
 
@@ -18,9 +17,7 @@ namespace Loopie
 			std::shared_ptr<VertexBuffer> m_quadVBO;
 			std::shared_ptr<IndexBuffer> m_quadIBO;
 			std::shared_ptr<Material> m_particleMaterial;
-			std::shared_ptr<Texture> m_particleTexture;
 			Shader m_particleShader = Shader("assets/shaders/ParticleShader.shader");;
-
 
 			void InitializeQuad();
 			void InitializeMaterial();
