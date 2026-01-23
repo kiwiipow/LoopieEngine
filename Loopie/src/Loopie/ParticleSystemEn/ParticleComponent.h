@@ -20,7 +20,8 @@ namespace Loopie
 
 	};
 	class ParticleComponent /*:public Component, public IObserver<TransformNotification>*/
-	{
+	{/*
+		DEFINE_TYPE(ParticleComponent)*/
 	private:
 		std::vector<EmitterInstance*> emittersVector;
 		ParticleSystem* partSystem;

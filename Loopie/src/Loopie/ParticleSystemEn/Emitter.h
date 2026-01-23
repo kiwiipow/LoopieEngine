@@ -17,6 +17,7 @@ namespace Loopie
 		vec3 Position = vec3(0.0f);
 		vec3 Velocity = vec3(0.0f);
 		vec3 VelocityVariation = vec3(0.0f);
+		vec3 PositionVariation = vec3(0.0f);
 		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		vec4 ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
 		float SizeBegin = 1.0f;

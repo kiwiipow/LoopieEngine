@@ -88,7 +88,7 @@ namespace Loopie
 			//smokeProps.SizeEnd = 0.1f;
 			//smokeProps.SizeVariation = 0.5f;
 			//smokeProps.LifeTime = 10.0f;
-		Emitter* smokeEmitter = new Emitter(1000, SMOKE_PARTICLE, vec3(0.0f, 1.0f, 0.0f), 10);
+		Emitter* smokeEmitter = new Emitter(1000, SMOKE_PARTICLE, vec3(0.0f, 1.0f, 0.0f),50);
 		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
 
 	}
