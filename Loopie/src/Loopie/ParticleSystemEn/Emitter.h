@@ -14,9 +14,9 @@ namespace Loopie
 
 	struct ParticleProps
 	{
-		vec2 Position = vec2(0.0f);
-		vec2 Velocity = vec2(0.0f);
-		vec2 VelocityVariation = vec2(0.0f);
+		vec3 Position = vec3(0.0f);
+		vec3 Velocity = vec3(0.0f);
+		vec3 VelocityVariation = vec3(0.0f);
 		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		vec4 ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
 		float SizeBegin = 1.0f;
@@ -32,7 +32,7 @@ namespace Loopie
 			unsigned int m_spawnRate;
 			unsigned int m_maxParticles;
 			float m_emitterTimer;
-			vec2 m_position;
+			vec3 m_position;
 			bool m_active;
 
 			std::vector<ParticleModule> m_particlePool;
@@ -61,8 +61,8 @@ namespace Loopie
 			unsigned int GetmaxParticles()const;
 			void SetmaxParticles(unsigned int maxPart);
 
-			vec2 GetPosition() const;
-			void SetPosition(const vec2& pos);
+			vec3 GetPosition() const;
+			void SetPosition(const vec3& pos);
 
 			ParticleProps& GetEmissionProperties();
 			void SetEmisionProperties(const ParticleProps& partProps);

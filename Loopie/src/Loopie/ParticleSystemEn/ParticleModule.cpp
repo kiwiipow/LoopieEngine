@@ -6,9 +6,9 @@ namespace Loopie
 	ParticleModule::ParticleModule()
 	{
 		m_partType = SMOKE_PARTICLE;
-		m_position = vec2(0,0);
+		m_position = vec3(0, 0, 0);
 		m_rotation = 0;
-		m_velocity = vec2(0,0);
+		m_velocity = vec3(0, 0, 0);
 		m_colorBegin = vec4(1, 1, 1, 1);
 		m_colorEnd = vec4(1, 1, 1, 1);
 		m_sizeBegin = 1;
@@ -83,20 +83,20 @@ namespace Loopie
 	{
 		m_partType = t;
 	}
-	vec2 ParticleModule::GetPosition() const
+	vec3 ParticleModule::GetPosition() const
 	{
 		return m_position;
 	}
-	void ParticleModule::SetPosition(const vec2& pos)
+	void ParticleModule::SetPosition(const vec3& pos)
 	{
 		m_position = pos;
 	}
 
-	vec2 ParticleModule::GetVelocity() const
+	vec3 ParticleModule::GetVelocity() const
 	{ 
 		return m_velocity; 
 	}
-	void ParticleModule::SetVelocity(const vec2& vel)
+	void ParticleModule::SetVelocity(const vec3& vel)
 	{
 		m_velocity = vel; 
 	}
