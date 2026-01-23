@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
-
+#include "Loopie/Components/Component.h"
+#include "Loopie/Events/EventTypes.h"
 
 namespace Loopie
 {   
@@ -18,14 +19,18 @@ namespace Loopie
 		int spriteIndex;
 
 	};
-	class ParticleComponent
+	class ParticleComponent:public Component, public IObserver<TransformNotification>
 	{
+	DEFINE_TYPE(ParticleComponent)
 	private:
 		std::vector<EmitterInstance*> emittersVector;
 		ParticleSystem* partSystem;
 	public:
 		ParticleComponent();
 		ParticleComponent(ParticleSystem* pSystem);
+
+		void Init() override; 
+
 		void Save();
 		void Load();
 		void Update();
