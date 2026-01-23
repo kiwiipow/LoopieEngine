@@ -43,7 +43,7 @@ namespace Loopie
 			/*Texture* m_texture;*/
 
 		public:
-			Emitter(unsigned int maxParticles);
+			Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate);
 
 			void OnUpdate(float dt);
 			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
