@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
-
+#include "Loopie/Render/VertexArray.h"
+#include "Loopie/Resources/Types/Material.h"
+#include <memory>
 
 namespace Loopie
 {
-	class EmitterInstance;
-
+	
 	enum ParticleType
 	{
 		SMOKE_PARTICLE,
@@ -15,51 +16,60 @@ namespace Loopie
 		FIREWORK_3_PARTICLE,
 	};
 
-	struct velocityOverLifetime
-	{
-		float minSpeed;
-		float maxSpeed;
-	};
-	struct colorOverLifetime
-	{
-		vec3 sourceColor;
-		vec3 destinationColor;
-	};
-	struct sizeOverLifetime
-	{
-		vec2 minSize;
-		vec2 maxSize;
-	};
-
 	class ParticleModule
 	{
 		private:
-
-			ParticleType partType;
-			velocityOverLifetime velocityOT;
-			colorOverLifetime colorOT;
-			sizeOverLifetime sizeOT;
+			ParticleType m_partType;
+			vec2 m_position;
+			vec2 m_velocity;
+			vec4 m_colorBegin;
+			vec4 m_colorEnd;
+			float m_rotation;
+			float m_sizeBegin;
+			float m_sizeEnd;
+			float m_lifetime;
+			float m_lifeRemaining;
+			bool m_active;
 
 		public:
 
 			ParticleModule();
-			void Spawn(EmitterInstance* emitter);
-			void Update(EmitterInstance* emitter);
-
-			void Save();
-			void Load();
+			void Update(float dt);
+			void Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
 
 			//getters/setters
 			ParticleType GetParticleType()const;
 			void SetParticleType(ParticleType t);
 
-			velocityOverLifetime GetVelocityOT()const;
-			void SetVelocityOT(velocityOverLifetime vOT);
+			vec2 GetPosition() const;
+			void SetPosition(const vec2& pos);
 
-			colorOverLifetime GetColorOT()const;
-			void SetColorOT(colorOverLifetime cOT);
+			vec2 GetVelocity() const;
+			void SetVelocity(const vec2& vel);
 
-			sizeOverLifetime GetSizeOT()const;
-			void SetSizeOT(sizeOverLifetime sOT);
+			float GetRotation() const;
+			void SetRotation(float rot);
+
+			float GetLifetime() const;
+			void SetLifetime(float time);
+
+			float GetLifeRemaining() const;
+			void SetLifeRemaining(float L_remain);
+
+			vec4 GetColorBegin() const;
+			void SetColorBegin(const vec4& col);
+
+			vec4 GetColorEnd() const;
+			void SetColorEnd(const vec4& col);
+
+			float GetSizeBegin() const;
+			void SetSizeBegin(float size);
+
+			float GetSizeEnd() const;
+			void SetSizeEnd(float size);
+
+			bool GetActive()const;
+			void SetActive(bool act);
+
 	};
 }

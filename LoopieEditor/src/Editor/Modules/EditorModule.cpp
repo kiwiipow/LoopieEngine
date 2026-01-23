@@ -19,6 +19,8 @@
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Resources/Types/Material.h"
 ///
+//temporal!
+#include "Loopie/ParticleSystemEn/Emitter.h"
 
 #include <glad/glad.h>
 
@@ -27,6 +29,7 @@
 
 namespace Loopie
 {
+	
 	void EditorModule::OnLoad()
 	{
 		AssetRegistry::Initialize();
@@ -67,7 +70,26 @@ namespace Loopie
 		Application::GetInstance().m_notifier.AddObserver(this);
 
 		// Create particle system
-		m_particleSystem = std::make_unique<Loopie::ParticleSystem>(1000);
+		m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
+
+		//create emiter
+			Emitter* smokeEmitter = new Emitter(1000);
+			smokeEmitter->SetName("Smoke");
+			smokeEmitter->SetPosition(vec2(0.0f, 1.0f));
+			smokeEmitter->SetSpawnRate(10);
+
+			//set properties to emiter
+			ParticleProps& smokeProps = smokeEmitter->GetEmissionProperties();
+			smokeProps.Velocity = vec2(0.0f, 1.0f);
+			smokeProps.VelocityVariation = vec2(0.5f, 0.3f);
+			smokeProps.ColorBegin = vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			smokeProps.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			smokeProps.SizeBegin =2.0f;
+			smokeProps.SizeEnd = 0.1f;
+			smokeProps.SizeVariation = 0.5f;
+			smokeProps.LifeTime = 10.0f;
+		
+		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
 
 	}
 
@@ -90,30 +112,7 @@ namespace Loopie
 
 		///////////UPDATE PARTICLE SYSTEM ////////////
 		float dt = (float)Time::GetDeltaTime();
-		if (m_particleSystem)
-		{
-			m_particleSystem->OnUpdate(dt);
-
-			m_particleTimer += dt;
-			if (m_particleTimer >= 0.016f)
-			{
-				m_particleTimer = 0.0f;
-
-				//should add prop templates for smoke and firework
-				Loopie::ParticleProps props;
-				props.Position = vec3(0.0f, 7.0f, 0.0f);
-				props.Velocity = vec3(0.0f, 2.0f, 0.0f);
-				props.VelocityVariation = vec2(1.0f, 0.5f);
-				props.ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-				props.ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
-				props.SizeBegin = 0.5f;
-				props.SizeEnd = 0.0f;
-				props.SizeVariation = 0.2f;
-				props.LifeTime = 1.0f;
-
-				m_particleSystem->Emit(props);
-			}
-		}
+		m_particleSystem->OnUpdate(dt);
 		/////////////////////////////////////
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
@@ -284,21 +283,6 @@ namespace Loopie
 			}
 		}
 		Renderer::DisableStencil();
-
-		//if (m_particleSystem) 
-		//{
-		//	// Enable blending for particles
-		//	glEnable(GL_BLEND);
-		//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		//	// Disable depth writing (but keep depth testing)
-		//	glDepthMask(GL_FALSE);
-
-		//	m_particleSystem->OnRender();
-
-		//	// Restore depth writing
-		//	glDepthMask(GL_TRUE);
-		//}
 
 		if (Renderer::IsGizmoActive()) {
 			if (selectedEntity)

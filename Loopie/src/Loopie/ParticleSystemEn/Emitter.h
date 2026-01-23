@@ -1,29 +1,56 @@
 #pragma once
+#include "ParticleModule.h"
+#include "Loopie/Render/VertexArray.h"
+#include "Loopie/Resources/Types/Material.h"
 #include "Loopie/Resources/Types/Texture.h"
-#include <vector>
 
+#include "Loopie/Math/MathTypes.h"
+#include <vector>
+#include <memory>
 
 namespace Loopie 
 {
-	class ParticleModule;
 	enum ParticleType;
 
+	struct ParticleProps
+	{
+		vec2 Position = vec2(0.0f);
+		vec2 Velocity = vec2(0.0f);
+		vec2 VelocityVariation = vec2(0.0f);
+		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		vec4 ColorEnd = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		float SizeBegin = 1.0f;
+		float SizeEnd = 0.0f;
+		float SizeVariation = 0.0f;
+		float LifeTime = 1.0f;
+		
+	};
 	class Emitter
 	{
 		private:
-			const char* name;
-			unsigned int spawnRate;
-			unsigned int maxParticles;
+			const char* m_name;
+			unsigned int m_spawnRate;
+			unsigned int m_maxParticles;
+			float m_emitterTimer;
+			vec2 m_position;
+			bool m_active;
 
-			std::vector<ParticleModule*> particleModule;
-			Texture* R_Texture;
+			std::vector<ParticleModule> m_particlePool;
+			unsigned int m_poolIndex;
+
+			ParticleProps m_particleProperties;
+
+			/*Texture* m_texture;*/
 
 		public:
-			Emitter();
-			void SavePartModule();
-			void LoadPartModule();
-			void AddModule(ParticleType type);
+			Emitter(unsigned int maxParticles);
 
+			void OnUpdate(float dt);
+			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
+			void Emit(const ParticleProps& particleProps);
+
+			void AddModule(ParticleType type);
+			
 			//getters/setters
 			const char* GetName()const;
 			void SetName(const char* n);
@@ -34,8 +61,18 @@ namespace Loopie
 			unsigned int GetmaxParticles()const;
 			void SetmaxParticles(unsigned int maxPart);
 
-			std::vector<ParticleModule*> GetParticleModule()const;
-			void AddElemToParticleModule(ParticleModule& partMod);
+			vec2 GetPosition() const;
+			void SetPosition(const vec2& pos);
+
+			ParticleProps& GetEmissionProperties();
+			void SetEmisionProperties(const ParticleProps& partProps);
+			
+			int GetActiveParticles() const;
+			bool IsActive() const;
+
+			/*Texture* GetTexture();
+			void SetTexture(Texture* tex);*/
+
 	};
 }
 
