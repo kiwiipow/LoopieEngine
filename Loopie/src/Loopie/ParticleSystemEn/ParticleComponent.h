@@ -8,16 +8,16 @@ namespace Loopie
 	
 	class ParticleSystem;
 
-	//struct Particle
-	//{
-	//	vec3 position;
-	//	quaternion worldRotation;
-	//	float age;
-	//	float lifetime;
-	//	float velocity;
-	//	int spriteIndex;
+	struct Particle
+	{
+		vec3 position;
+		quaternion worldRotation;
+		float age;
+		float lifetime;
+		float velocity;
+		int spriteIndex;
 
-	//};
+	};
 	class ParticleComponent : public Component
 	{
 	private:
