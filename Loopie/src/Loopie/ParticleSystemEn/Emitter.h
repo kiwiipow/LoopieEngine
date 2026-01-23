@@ -10,15 +10,11 @@
 
 namespace Loopie 
 {
-	/*enum ParticleType
-	{
-		SMOKE_PARTICLE,
-		FIREWORK_1_PARTICLE,
-		FIREWORK_2_PARTICLE,
-		FIREWORK_3_PARTICLE,
-	};*/
+	enum ParticleType;
+
 	struct ParticleProps
 	{
+		vec2 Position = vec2(0.0f);
 		vec2 Velocity = vec2(0.0f);
 		vec2 VelocityVariation = vec2(0.0f);
 		vec4 ColorBegin = vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -42,32 +38,14 @@ namespace Loopie
 			std::vector<ParticleModule> m_particlePool;
 			unsigned int m_poolIndex;
 
-			ParticleProps* m_particleProperties;
+			ParticleProps m_particleProperties;
 
-			Texture* m_texture;
+			/*Texture* m_texture;*/
 
-		/*	struct TestParticle
-			{
-				vec2 Position = vec3(0.0f);
-				vec2 Velocity = vec2(0.0f);
-				vec4 ColorBegin = vec4(0.0f);
-				vec4 ColorEnd = vec4(0.0f);
-				float Rotation = 0.0f;
-				float SizeBegin = 1.0f;
-				float SizeEnd = 0.0f;
-
-				float LifeTime = 1.0f;
-				float LifeRemaining = 0.0f;
-
-				bool Active = false;
-
-			};*/
-		
 		public:
-			Emitter();
 			Emitter(unsigned int maxParticles);
 
-			void OnUpdate(float deltaTime);
+			void OnUpdate(float dt);
 			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
 			void Emit(const ParticleProps& particleProps);
 
@@ -86,14 +64,15 @@ namespace Loopie
 			vec2 GetPosition() const;
 			void SetPosition(const vec2& pos);
 
-			void SetEmisionProperties(ParticleProps* partProps);
+			ParticleProps& GetEmissionProperties();
+			void SetEmisionProperties(const ParticleProps& partProps);
 			
 			int GetActiveParticles() const;
 			bool IsActive() const;
 
-			/*
-			void SavePartModule();
-			void LoadPartModule();*/
+			/*Texture* GetTexture();
+			void SetTexture(Texture* tex);*/
+
 	};
 }
 

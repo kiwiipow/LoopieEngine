@@ -1,5 +1,6 @@
 #include "Emitter.h"
 #include "Loopie/ParticleSystemEn/ParticleModule.h"
+
 namespace Loopie
 {
 	//rand number generator
@@ -18,71 +19,106 @@ namespace Loopie
 		m_active = true;
 		m_poolIndex = 0;
 
-		m_particleProperties->Velocity = vec2(0,0);
-		m_particleProperties->VelocityVariation = vec2(1,1);
-		m_particleProperties->ColorBegin = vec4(1,1,1,1);
-		m_particleProperties->ColorEnd = vec4(1,1,1,0);
-		m_particleProperties->SizeBegin = 1;
-		m_particleProperties->SizeEnd = 0;
-		m_particleProperties->SizeVariation = 0.5;
-		m_particleProperties->LifeTime = 1;
+		m_particleProperties.Velocity = vec2(0,0);
+		m_particleProperties.VelocityVariation = vec2(1,1);
+		m_particleProperties.ColorBegin = vec4(1,1,1,1);
+		m_particleProperties.ColorEnd = vec4(1,1,1,0);
+		m_particleProperties.SizeBegin = 1;
+		m_particleProperties.SizeEnd = 0;
+		m_particleProperties.SizeVariation = 0.5;
+		m_particleProperties.LifeTime = 1;
 
-		m_texture = nullptr;
+		/*m_texture = nullptr;*/
 
 		m_particlePool.resize(m_maxParticles);
 		m_poolIndex = m_maxParticles - 1;
 	}
 
-	void Emitter::OnUpdate(float deltaTime)
+	void Emitter::OnUpdate(float dt)
 	{
-		//loop pool to call update on particles
-
 		//update emiting like in old editor to be able to use particle type later
-		//m_particleSystem->OnUpdate(dt);
+		for (auto& particle : m_particlePool)
+		{
+			if (!particle.GetActive())
+			{
+                continue;
+			}
+			particle.Update(dt);
+		}
+		if (m_active && m_spawnRate > 0)
+		{
+			m_emitterTimer += dt;
+			float emissionInterval = 1.0f / m_spawnRate;
 
-		//m_particleTimer += dt;
-		//if (m_particleTimer >= 0.015f)
-		//{
-		//	m_particleTimer = 0.0f;
+			while (m_emitterTimer >= emissionInterval)
+			{
+				ParticleProps props = m_particleProperties;
+				props.Position = m_position;
 
-		//	//should add prop templates for smoke and firework
-		//	Loopie::ParticleProps props;
-		//	props.Position = vec2(0.0f, 7.0f);
-		//	props.Velocity = vec2(0.0f, 2.0f);
-		//	props.VelocityVariation = vec2(1.0f, 0.5f);
-		//	props.ColorBegin = vec4(0.1f, 0.1f, 0.1f, 1.0f);
-		//	props.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
-		//	props.SizeBegin = 0.5f;
-		//	props.SizeEnd = 0.0f;
-		//	props.SizeVariation = 0.2f;
-		//	props.LifeTime = 1.0f;
-
-		//	m_particleSystem->Emit(props);
-		//}
-
+				Emit(props);
+				m_emitterTimer -= emissionInterval;
+			}
+		}
 	}
 	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material)
 	{
-	//add the reverse order loop through particle pool of the onredner in the system
+		for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it)
+		{
+			auto& particle = *it;
+
+			if (!particle.GetActive())
+			{
+				continue;
+			}
+				
+			particle.Render(quadVAO, material);
+		}
 	}
 	void Emitter::Emit(const ParticleProps& particleProps)
 	{
-		//add emit code from system and fix variables
-	}
-	/*void Emitter::SavePartModule()
-	{
+		ParticleModule& particle = m_particlePool[m_poolIndex];
+		float twoPi = 6.28318530718f;
 
-	}
-	void Emitter::LoadPartModule()
-	{
+		particle.SetActive(true);
+		particle.SetPosition(particleProps.Position);
+		particle.SetRotation(RandomFloat(0, twoPi));
 
-	}*/
+		// velocity
+		vec2 finalVelocity = particleProps.Velocity;
+		finalVelocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
+		finalVelocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
+		particle.SetVelocity(finalVelocity);
+
+		// colors
+		particle.SetColorBegin(particleProps.ColorBegin);
+		particle.SetColorEnd(particleProps.ColorEnd);
+
+		// size
+		float sizeBegin = particleProps.SizeBegin + RandomFloat(-particleProps.SizeVariation * 0.5f, particleProps.SizeVariation * 0.5f);
+		particle.SetSizeBegin(sizeBegin);
+		particle.SetSizeEnd(particleProps.SizeEnd);
+		
+		particle.SetLifetime(particleProps.LifeTime);
+		
+		m_poolIndex = (m_poolIndex - 1) % m_particlePool.size();
+	}
 	void Emitter::AddModule(ParticleType type)
 	{
+		switch (type)
+		{
+		case Loopie::SMOKE_PARTICLE:
 
+			break;
+		case Loopie::FIREWORK_1_PARTICLE:
+			break;
+		case Loopie::FIREWORK_2_PARTICLE:
+			break;
+		case Loopie::FIREWORK_3_PARTICLE:
+			break;
+		default:
+			break;
+		}
 	}
-
-
 	const char* Emitter::GetName()const
 	{
 		return m_name;
@@ -108,14 +144,40 @@ namespace Loopie
 	void Emitter::SetmaxParticles(unsigned int maxPart)
 	{
 		m_maxParticles = maxPart;
+		m_particlePool.resize(m_maxParticles);
+		m_poolIndex = m_maxParticles - 1;
 	}
-
-	std::vector<ParticleModule*> Emitter::GetParticleModule()const
+	vec2 Emitter::GetPosition() const
 	{
-		return particleModule;
+		return m_position;
 	}
-	void Emitter::AddElemToParticleModule(ParticleModule& partMod)
+	void Emitter::SetPosition(const vec2& pos)
 	{
-		particleModule.push_back(&partMod);
+		m_position = pos;
+	}
+	int Emitter::GetActiveParticles() const
+	{
+		int count = 0;
+		for (const auto& particle : m_particlePool)
+		{
+			if (particle.GetActive())
+			{
+				count++;
+			}
+				
+		}
+		return count;
+	}
+	bool Emitter::IsActive() const
+	{
+		return m_active;
+	}
+	void Emitter::SetEmisionProperties(const ParticleProps& partProps)
+	{
+		m_particleProperties = partProps;
+	}
+	ParticleProps& Emitter::GetEmissionProperties()
+	{ 
+		return m_particleProperties;
 	}
 }

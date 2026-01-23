@@ -3,27 +3,16 @@
 #include "Loopie/Render/Renderer.h"
 namespace Loopie
 {
-	/*void ParticleModule::Save()
-	{
-
-	}
-	void ParticleModule::Load()
-	{
-
-	}*/
-	
 	ParticleModule::ParticleModule()
 	{
 		m_partType = SMOKE_PARTICLE;
 		m_position = vec2(0,0);
 		m_rotation = 0;
-		m_velocity.fixedSpeed = vec2(0, 0);
-		m_velocity.minSpeed = vec2(0, 0);
-		m_velocity.maxSpeed = vec2(0, 0);
-		m_color.beginColor = vec4(1, 1, 1, 1);
-		m_color.endColor = vec4(1, 1, 1, 1);
-		m_size.minSize = 1;
-		m_size.maxSize = 1;
+		m_velocity = vec2(0,0);
+		m_colorBegin = vec4(1, 1, 1, 1);
+		m_colorEnd = vec4(1, 1, 1, 1);
+		m_sizeBegin = 1;
+		m_sizeEnd = 1;
 		m_lifetime = 1;
 		m_lifeRemaining = 0;
 		m_active = false;
@@ -31,7 +20,7 @@ namespace Loopie
 	
 	void ParticleModule::Update(float dt)
 	{
-		if (m_active)
+		if (!m_active)
 		{
 			return;
 		}
@@ -42,7 +31,7 @@ namespace Loopie
 		}
 
 		m_lifeRemaining -= dt;
-		m_position += m_velocity.fixedSpeed * dt;
+		m_position += m_velocity * dt;
 		m_rotation += 0.01 * dt;
 			
 	}
@@ -55,14 +44,15 @@ namespace Loopie
 			
 			//interpolations
 			float life = m_lifeRemaining / m_lifetime;
+			if (life <=0) { life = 0; }
 
 			vec4 color;
-			color.r = mix(m_color.endColor.r, m_color.beginColor.r, life);
-			color.g = mix(m_color.endColor.g, m_color.beginColor.g, life);
-			color.b = mix(m_color.endColor.b, m_color.beginColor.b, life);
-			color.a = mix(m_color.endColor.a, m_color.beginColor.a, life);
+			color.r = mix(m_colorEnd.r, m_colorBegin.r, life);
+			color.g = mix(m_colorEnd.g, m_colorBegin.g, life);
+			color.b = mix(m_colorEnd.b, m_colorBegin.b, life);
+			color.a = mix(m_colorEnd.a, m_colorBegin.a, life);
 
-			float size = mix(m_size.maxSize, m_size.minSize, life);
+			float size = mix(m_sizeEnd, m_sizeBegin, life);
 
 			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
 			
@@ -102,6 +92,14 @@ namespace Loopie
 		m_position = pos;
 	}
 
+	vec2 ParticleModule::GetVelocity() const
+	{ 
+		return m_velocity; 
+	}
+	void ParticleModule::SetVelocity(const vec2& vel)
+	{
+		m_velocity = vel; 
+	}
 	float ParticleModule::GetRotation() const
 	{
 		return m_rotation;
@@ -111,31 +109,40 @@ namespace Loopie
 		m_rotation = rot;
 	}
 
-	velocityOverLifetime ParticleModule::GetVelocityOT()const
+	vec4 ParticleModule::GetColorBegin() const
 	{
-		return m_velocity;
+		return m_colorBegin;
 	}
-	void ParticleModule::SetVelocityOT(velocityOverLifetime vOT)
+	void ParticleModule::SetColorBegin(const vec4& col)
 	{
-		m_velocity = vOT;
-	}
-
-	colorOverLifetime ParticleModule::GetColorOT()const
-	{
-		return m_color;
-	}
-	void ParticleModule::SetColorOT(colorOverLifetime cOT)
-	{
-		m_color = cOT;
+		m_colorBegin = col;
 	}
 
-	sizeOverLifetime ParticleModule::GetSizeOT()const
+	vec4 ParticleModule::GetColorEnd() const
 	{
-		return m_size;
+		return m_colorEnd;
 	}
-	void ParticleModule::SetSizeOT(sizeOverLifetime sOT)
+	void ParticleModule::SetColorEnd(const vec4& col)
 	{
-		m_size = sOT;
+		m_colorEnd = col;
+	}
+
+	float ParticleModule::GetSizeBegin() const
+	{
+		return m_sizeBegin;
+	}
+	void ParticleModule::SetSizeBegin(float size)
+	{
+		m_sizeBegin = size;
+	}
+
+	float ParticleModule::GetSizeEnd() const
+	{
+		return m_sizeEnd;
+	}
+	void ParticleModule::SetSizeEnd(float size)
+	{
+		m_sizeEnd = size;
 	}
 
 	float ParticleModule::GetLifetime() const
@@ -155,5 +162,13 @@ namespace Loopie
 	void ParticleModule::SetLifeRemaining(float L_remain) 
 	{
 		m_lifeRemaining = L_remain;
+	}
+	bool ParticleModule::GetActive()const
+	{
+		return m_active;
+	}
+	void ParticleModule::SetActive(bool act)
+	{
+		m_active = act;
 	}
 }

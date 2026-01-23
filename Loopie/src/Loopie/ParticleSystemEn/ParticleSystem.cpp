@@ -5,18 +5,9 @@
 #include "Loopie/Resources/AssetRegistry.h"
 #include "Loopie/Resources/ResourceManager.h"
 #include "Loopie/Importers/MaterialImporter.h"
-//#include <algorithm>
 
-
-//#include <random>
-//#include "Loopie/Render/Renderer.h"
 namespace Loopie 
 {
-	//// Random number generator
-	//float RandomFloat(float min, float max)
-	//{
-	//	return min + ((float)rand() / (float)RAND_MAX) * (max - min);
-	//}
 	ParticleSystem::ParticleSystem()
 	{
 		if (m_particleShader.GetProgramID() != 0)
@@ -95,52 +86,8 @@ namespace Loopie
 		{ 
 			Log::Info("emitter array empty"); 
 		}
-		/*for (auto& particle : m_particlePool) 
-		{
-			if (!particle.Active)
-			{
-				continue;
-			}
-			if (particle.LifeRemaining <= 0.0f) 
-			{
-				particle.Active = false;
-				continue;
-			}
-
-			particle.LifeRemaining -= deltaTime;
-			particle.Position += particle.Velocity * deltaTime;
-			particle.Rotation += 0.01 * deltaTime;
-		}*/
+		
 	}
-	//void ParticleSystem::Emit(const ParticleProps& particleProps)
-	//{
-	//	TestParticle& particle = m_particlePool[m_poolIndex];
-	//	float twoPi = 6.28318530718f;
-
-	//	particle.Active = true;
-	//	particle.Position = particleProps.Position;
-	//	particle.Rotation = RandomFloat(0, twoPi) ;
-
-	//
-	//	particle.Velocity = particleProps.Velocity;
-	//	particle.Velocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
-	//	particle.Velocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
-
-	//	
-	//	particle.ColorBegin = particleProps.ColorBegin;
-	//	particle.ColorEnd = particleProps.ColorEnd;
-
-	//	
-	//	particle.SizeBegin = particleProps.SizeBegin + RandomFloat(-particleProps.SizeVariation * 0.5f, particleProps.SizeVariation * 0.5f);
-	//	particle.SizeEnd = particleProps.SizeEnd;
-
-	//	
-	//	particle.LifeTime = particleProps.LifeTime;
-	//	particle.LifeRemaining = particleProps.LifeTime;
-
-	//	// Update index 
-	//	m_poolIndex = (m_poolIndex - 1) % m_particlePool.size();
-	//}
 	void ParticleSystem::OnRender()
 	{
 		if (!m_quadVAO || !m_particleMaterial)
@@ -157,46 +104,6 @@ namespace Loopie
 				emitter->OnRender(m_quadVAO, m_particleMaterial);
 			}
 		}
-
-		//// Render particles in reverse order for blending
-		//for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it) 
-		//{
-		//	auto& particle = *it;
-
-		//	if (!particle.Active)
-		//	{
-		//		continue;
-		//	}
-		//	
-		//	//interpolations
-		//	float life = particle.LifeRemaining / particle.LifeTime;
-
-		//	vec4 color;
-		//	color.r = mix(particle.ColorEnd.r, particle.ColorBegin.r, life);
-		//	color.g = mix(particle.ColorEnd.g, particle.ColorBegin.g, life);
-		//	color.b = mix(particle.ColorEnd.b, particle.ColorBegin.b, life);
-		//	color.a = mix(particle.ColorEnd.a, particle.ColorBegin.a, life);
-
-		//	float size = mix(particle.SizeEnd, particle.SizeBegin, life);
-		//	
-		//	Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
-		//	
-		//	// transform 
-		//	matrix4 transform = translate(matrix4(1.0f), vec3(particle.Position.x, particle.Position.y, 0.0f));
-		//	transform = rotate(transform, particle.Rotation, vec3(0.0f, 0.0f, 1.0f));
-		//	transform = scale(transform, vec3(size, size, 1.0f));
-
-		//	// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
-		//	UniformValue colorUni;
-		//	colorUni.type = UniformType_vec4;
-		//	colorUni.value = color;
-		//	m_particleMaterial->SetShaderVariable("u_Color", colorUni);
-		//	
-		//	//add to renderqueue
-		//	// Render the particle
-		//	//AddParticleRenderItem - > If max capacity reached, flush (this inside AddParticle function), draw and clear pos and color vectors
-		//	Renderer::FlushRenderItem(m_quadVAO, m_particleMaterial, transform);
-		//}
 	}
 	int ParticleSystem::GetActiveParticles() const 
 	{

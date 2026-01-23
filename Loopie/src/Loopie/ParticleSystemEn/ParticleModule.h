@@ -16,34 +16,17 @@ namespace Loopie
 		FIREWORK_3_PARTICLE,
 	};
 
-	struct velocityOverLifetime
-	{
-		vec2 fixedSpeed;
-		vec2 minSpeed;
-		vec2 maxSpeed;
-	};
-	struct colorOverLifetime
-	{
-		vec4 fixedColor;
-		vec4 beginColor;
-		vec4 endColor;
-	};
-	struct sizeOverLifetime
-	{
-		vec2 fixedSize;
-		float minSize;
-		float maxSize;
-	};
-
 	class ParticleModule
 	{
 		private:
 			ParticleType m_partType;
 			vec2 m_position;
+			vec2 m_velocity;
+			vec4 m_colorBegin;
+			vec4 m_colorEnd;
 			float m_rotation;
-			velocityOverLifetime m_velocity;
-			colorOverLifetime m_color;
-			sizeOverLifetime m_size;
+			float m_sizeBegin;
+			float m_sizeEnd;
 			float m_lifetime;
 			float m_lifeRemaining;
 			bool m_active;
@@ -54,9 +37,6 @@ namespace Loopie
 			void Update(float dt);
 			void Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
 
-			/*void Save();
-			void Load();*/
-
 			//getters/setters
 			ParticleType GetParticleType()const;
 			void SetParticleType(ParticleType t);
@@ -64,23 +44,32 @@ namespace Loopie
 			vec2 GetPosition() const;
 			void SetPosition(const vec2& pos);
 
+			vec2 GetVelocity() const;
+			void SetVelocity(const vec2& vel);
+
 			float GetRotation() const;
 			void SetRotation(float rot);
-
-			velocityOverLifetime GetVelocityOT()const;
-			void SetVelocityOT(velocityOverLifetime vOT);
-
-			colorOverLifetime GetColorOT()const;
-			void SetColorOT(colorOverLifetime cOT);
-
-			sizeOverLifetime GetSizeOT()const;
-			void SetSizeOT(sizeOverLifetime sOT);
 
 			float GetLifetime() const;
 			void SetLifetime(float time);
 
 			float GetLifeRemaining() const;
 			void SetLifeRemaining(float L_remain);
+
+			vec4 GetColorBegin() const;
+			void SetColorBegin(const vec4& col);
+
+			vec4 GetColorEnd() const;
+			void SetColorEnd(const vec4& col);
+
+			float GetSizeBegin() const;
+			void SetSizeBegin(float size);
+
+			float GetSizeEnd() const;
+			void SetSizeEnd(float size);
+
+			bool GetActive()const;
+			void SetActive(bool act);
 
 	};
 }
