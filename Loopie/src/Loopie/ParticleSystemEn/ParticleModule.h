@@ -15,7 +15,16 @@ namespace Loopie
 		FIREWORK_2_PARTICLE,
 		FIREWORK_3_PARTICLE,
 	};
+	//struct Particle
+	//{
+	//	vec3 position;
+	//	quaternion worldRotation;
+	//	float age;
+	//	float lifetime;
+	//	float velocity;
+	//	int spriteIndex;
 
+	//};
 	class ParticleModule
 	{
 		private:

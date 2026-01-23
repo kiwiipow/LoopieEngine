@@ -4,19 +4,11 @@ namespace Loopie
 {
 	ParticleComponent::ParticleComponent()
 	{
-		partSystem = nullptr;
+		m_partSystem = nullptr;
 	}
 	ParticleComponent::ParticleComponent(ParticleSystem* pSystem)
 	{
-		partSystem = pSystem;
-	}
-	void ParticleComponent::Save()
-	{
-
-	}
-	void ParticleComponent::Load()
-	{
-
+		m_partSystem = pSystem;
 	}
 	void ParticleComponent::Update()
 	{
@@ -26,13 +18,20 @@ namespace Loopie
 	{
 
 	}
-
-	std::vector<EmitterInstance*> ParticleComponent::GetEmittersVector()
+	ParticleSystem* ParticleComponent::GetParticleSystem()
+	{
+		return m_partSystem;
+	}
+	void ParticleComponent::SetParticleSystem(ParticleSystem* p_system)
+	{
+		m_partSystem = p_system;
+	}
+	/*std::vector<EmitterInstance*> ParticleComponent::GetEmittersVector()
 	{
 		return emittersVector;
 	}
 	void ParticleComponent::AddElemToEmitterVector(EmitterInstance* eInstance)
 	{
 		emittersVector.push_back(eInstance);
-	}
+	}*/
 }
