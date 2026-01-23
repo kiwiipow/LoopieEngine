@@ -61,11 +61,51 @@ namespace Loopie
 			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));
 
+			//From HERE until THERE, there is the attemp at billboarding. 
+			// To use it, uncomment it and comment the three lines above that modify transform
+
+			//HERE:
+
+			//TEMPORAL
+			//float vertices[] =
+			//{
+			//	//Position        //UVs
+			//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
+			//	0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+			//	0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+			//   -0.5f,  0.5f, 0.0f,  0.0f, 1.0f
+			//};
+			// 
+			//vec3 billboardVertices[4];
+			// 
+			//matrix4 transform = matrix4(1.0f);
+
+			//for (size_t i = 0; i < 4; i++)
+			//{
+			//	billboardVertices[i] = m_billboard->CalcVecOriention(*camera, particle.Position, vec2(1.0f, 1.0f), 
+			//	vec2(vertices[3 * i], vertices[3*i + 1]));
+			//	//Log::Info("Vertex {}, x{}, y{}", i, vertices[3 * i], vertices[3 * i + 1]);
+			//	Log::Info("Vertex {} Before: {}, {}, {}", i, vertices[3 * i], vertices[3 * i + 1], vertices[3 * i + 2]);
+			//	Log::Info("Vertex {} After: {}, {}, {}", i, billboardVertices->x, billboardVertices->y, billboardVertices->z);
+			//}
+			//m_quadVBO->SetData(billboardVertices, sizeof(billboardVertices));
+
+			//THERE
+
 			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
 			UniformValue colorUni;
 			colorUni.type = UniformType_vec4;
 			colorUni.value = color;
 			material->SetShaderVariable("u_Color", colorUni);
+
+
+			//THIS IS AN ATTEMPT AT TEXTURES, the variable m_particleTexture that is now in ParticleSystem should either be passed
+			//as an argument through Update or created in this class
+			
+			//UniformValue texUni;
+			//texUni.type = UniformType_Sampler2D;
+			//texUni.value = m_particleTexture->GetDefault(); //We need some equivalent to this
+			//m_particleMaterial->SetShaderVariable("u_Albedo",texUni );
 			
 			//add to renderqueue
 			// Render the particle
