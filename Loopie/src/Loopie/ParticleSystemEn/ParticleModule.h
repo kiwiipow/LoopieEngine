@@ -3,6 +3,7 @@
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Render/VertexArray.h"
 #include "Loopie/Resources/Types/Material.h"
+#include "Loopie/ParticleSystemEn/BillBoardComponent.h"
 #include <memory>
 
 namespace Loopie
@@ -29,8 +30,8 @@ namespace Loopie
 	{
 		private:
 			ParticleType m_partType;
-			vec2 m_position;
-			vec2 m_velocity;
+			vec3 m_position;
+			vec3 m_velocity;
 			vec4 m_colorBegin;
 			vec4 m_colorEnd;
 			float m_rotation;
@@ -39,6 +40,9 @@ namespace Loopie
 			float m_lifetime;
 			float m_lifeRemaining;
 			bool m_active;
+
+			//Billboard
+			std::shared_ptr<Billboard> m_billboard;
 
 		public:
 
@@ -50,11 +54,11 @@ namespace Loopie
 			ParticleType GetParticleType()const;
 			void SetParticleType(ParticleType t);
 
-			vec2 GetPosition() const;
-			void SetPosition(const vec2& pos);
+			vec3 GetPosition() const;
+			void SetPosition(const vec3& pos);
 
-			vec2 GetVelocity() const;
-			void SetVelocity(const vec2& vel);
+			vec3 GetVelocity() const;
+			void SetVelocity(const vec3& vel);
 
 			float GetRotation() const;
 			void SetRotation(float rot);

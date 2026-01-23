@@ -15,12 +15,12 @@ namespace Loopie
 		m_spawnRate = 10;
 		m_maxParticles = maxParticles;
 		m_emitterTimer = 0;
-		m_position = vec2(0, 0);
+		m_position = vec3(0,0, 0);
 		m_active = true;
 		m_poolIndex = 0;
 
-		m_particleProperties.Velocity = vec2(0,0);
-		m_particleProperties.VelocityVariation = vec2(1,1);
+		m_particleProperties.Velocity = vec3(0,0,0);
+		m_particleProperties.VelocityVariation = vec3(1,1,0);
 		m_particleProperties.ColorBegin = vec4(1,1,1,1);
 		m_particleProperties.ColorEnd = vec4(1,1,1,0);
 		m_particleProperties.SizeBegin = 1;
@@ -84,7 +84,7 @@ namespace Loopie
 		particle.SetRotation(RandomFloat(0, twoPi));
 
 		// velocity
-		vec2 finalVelocity = particleProps.Velocity;
+		vec3 finalVelocity = particleProps.Velocity;
 		finalVelocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
 		finalVelocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
 		particle.SetVelocity(finalVelocity);
@@ -147,11 +147,11 @@ namespace Loopie
 		m_particlePool.resize(m_maxParticles);
 		m_poolIndex = m_maxParticles - 1;
 	}
-	vec2 Emitter::GetPosition() const
+	vec3 Emitter::GetPosition() const
 	{
 		return m_position;
 	}
-	void Emitter::SetPosition(const vec2& pos)
+	void Emitter::SetPosition(const vec3& pos)
 	{
 		m_position = pos;
 	}
