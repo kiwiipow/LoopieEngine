@@ -71,7 +71,7 @@ namespace Loopie
 
 		// CREATE PARTICLE SYSTEM
 		m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
-		Emitter* smokeEmitter = new Emitter(1000, FIREWORK_3,CAMERA_FACING,vec3(0.0f, 1.0f, 0.0f),50);
+		Emitter* smokeEmitter = new Emitter(1000, SMOKE,CAMERA_FACING,vec3(0.0f, 1.0f, 0.0f),50);
 		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
 
 	}
@@ -94,6 +94,12 @@ namespace Loopie
 		m_topBar.Update(inputEvent);
 
 		//UPDATE PARTICLE SYSTEM 
+		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
+		{
+			Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 7.0f, 0.0f), 20);
+			m_particleSystem->AddElemToEmitterArray(firework);
+		}
+
 		float dt = (float)Time::GetDeltaTime();
 		m_particleSystem->OnUpdate(dt);
 		

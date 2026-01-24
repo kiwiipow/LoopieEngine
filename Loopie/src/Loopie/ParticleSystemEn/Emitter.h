@@ -30,7 +30,7 @@ namespace Loopie
 	class Emitter
 	{
 		private:
-			const char* m_name;
+			std::string m_name;
 			unsigned int m_spawnRate;
 			unsigned int m_maxParticles;
 			float m_emitterTimer;
@@ -54,8 +54,8 @@ namespace Loopie
 			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam);
 			void Emit(const ParticleProps& particleProps);
 			
-			const char* GetName()const;
-			void SetName(const char* n);
+			std::string GetName()const;
+			void SetName(std::string n);
 
 			unsigned int GetSpawnrate()const;
 			void SetSpawnRate(unsigned int spawnR);

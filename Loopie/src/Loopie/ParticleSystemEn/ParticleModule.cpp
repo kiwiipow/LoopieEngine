@@ -5,7 +5,7 @@ namespace Loopie
 {
 	ParticleModule::ParticleModule()
 	{
-		m_partType = SMOKE_PARTICLE;
+		m_partType = SMOKE;
 		m_position = vec3(0, 0, 0);
 		m_rotation = 0;
 		m_velocity = vec3(0, 0, 0);

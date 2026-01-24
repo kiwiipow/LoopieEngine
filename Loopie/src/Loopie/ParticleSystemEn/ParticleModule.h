@@ -11,10 +11,8 @@ namespace Loopie
 	
 	enum ParticleType
 	{
-		SMOKE_PARTICLE,
-		FIREWORK_1,
-		FIREWORK_2,
-		FIREWORK_3,
+		SMOKE,
+		FIREWORK
 	};
 
 	class ParticleModule
