@@ -8,6 +8,7 @@
 namespace Loopie
 {
 	class Emitter;
+	class Camera;
 	class ParticleSystem
 	{
 		private:
@@ -28,7 +29,7 @@ namespace Loopie
 	
 
 			void OnUpdate(float dt);//time step
-			void OnRender();
+			void OnRender(Camera* cam);
 
 			void AddElemToEmitterArray(Emitter* em);
 			void DeleteElemFromEmitterArray(Emitter* em);

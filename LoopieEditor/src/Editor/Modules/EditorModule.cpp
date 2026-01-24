@@ -142,7 +142,7 @@ namespace Loopie
 			buffer->Bind();
 			RenderWorld(cam);
 			///////////////
-			RenderParticles();
+			RenderParticles(cam);
 			///////////////
 			Renderer::EndScene();
 
@@ -157,7 +157,7 @@ namespace Loopie
 			Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
 			RenderWorld(m_scene.GetCamera());
 			/////////////
-			RenderParticles();
+			RenderParticles(m_scene.GetCamera());
 			/////////////////
 			Renderer::EndScene();
 			m_scene.EndScene();
@@ -170,7 +170,7 @@ namespace Loopie
 				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
 				RenderWorld(m_game.GetCamera());
 				/////////////////////
-				RenderParticles();
+				RenderParticles(m_game.GetCamera());
 				//////////////////
 				Renderer::EndScene();
 			}
@@ -294,7 +294,7 @@ namespace Loopie
 			m_currentScene->GetOctree().DebugDraw(Color::GREEN);
 		}
 	}
-	void EditorModule::RenderParticles()
+	void EditorModule::RenderParticles(Camera* cam)
 	{
 		if (!m_particleSystem)
 		{
@@ -308,7 +308,7 @@ namespace Loopie
 		Renderer::EnableBlend();           
 		Renderer::BlendFunction();
 
-		m_particleSystem->OnRender();
+		m_particleSystem->OnRender(cam);
 
 		Renderer::EnableDepthMask();       
 		Renderer::DisableBlend();        

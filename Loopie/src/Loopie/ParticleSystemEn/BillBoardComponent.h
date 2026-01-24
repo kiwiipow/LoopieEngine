@@ -23,7 +23,7 @@ namespace Loopie
 
 		public:
 			Billboard(vec3 pos, BillboardType t);
-			matrix4  UpdateCalc(vec3 cameraPos);
+			matrix4  UpdateCalc(Camera* cam);
 			/*Billboard(BillboardType t);*/
 
 			//vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex);
@@ -32,6 +32,9 @@ namespace Loopie
 			//getters/setters
 			BillboardType GetType()const;
 			void SetType(BillboardType t);
+
+			vec3 GetPosition();
+			void SetPosition(vec3 pos);
 			/*AABB* GetAABB();*/
 			
 	};

@@ -33,13 +33,13 @@ namespace Loopie
 			bool m_active;
 
 			//MAYBE NEED TO MOVE TO EMITER SO BOTH PARTYCLE AND SYSTEM HAVE EASIER ACCES TO PAS THE CAMERA??? 
-			std::shared_ptr<Billboard> m_billboard;
+			/*std::shared_ptr<Billboard> m_billboard;*/
 
 		public:
 
 			ParticleModule();
 			void Update(float dt);
-			void Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
+			void Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, const matrix4& billboardTransform);
 
 			//getters/setters
 			ParticleType GetParticleType()const;

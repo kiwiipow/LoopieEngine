@@ -1,5 +1,7 @@
 #include "Emitter.h"
 #include "Loopie/ParticleSystemEn/ParticleModule.h"
+#include "Loopie/Core/Log.h"
+
 
 namespace Loopie
 {
@@ -10,6 +12,8 @@ namespace Loopie
 	}
 	Emitter::Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate)
 	{
+		m_billboard = std::make_shared<Billboard>(position, CAMERA_FACING);
+
 		switch (type)
 		{
 		case Loopie::SMOKE_PARTICLE:
@@ -88,8 +92,16 @@ namespace Loopie
 			}
 		}
 	}
-	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material)
+	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam)
 	{
+		if (!cam)
+		{
+			Log::Error("no camera passed to particle billboard!");
+		}
+
+		m_billboard->SetPosition(m_position);
+		matrix4 billboardTransform = m_billboard->UpdateCalc(cam);
+
 		for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it)
 		{
 			auto& particle = *it;
@@ -99,7 +111,7 @@ namespace Loopie
 				continue;
 			}
 				
-			particle.Render(quadVAO, material);
+			particle.Render(quadVAO, material, billboardTransform);
 		}
 	}
 	void Emitter::Emit(const ParticleProps& particleProps)

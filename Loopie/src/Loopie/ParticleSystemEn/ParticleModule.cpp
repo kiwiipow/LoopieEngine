@@ -18,7 +18,7 @@ namespace Loopie
 		m_active = false;
 
 		//1 BILLBOARD X PARTICLE OR 1 BILLBOARD X EMITTER?? TUTORIAL TREATS BILLBOARDS 1 X EMITTER I THINK??
-		m_billboard.pushback(new Billboard(m_position,CAMERA_FACING));
+		/*m_billboard.pushback(new Billboard(m_position,CAMERA_FACING));*/
 	}
 	
 	void ParticleModule::Update(float dt)
@@ -38,7 +38,7 @@ namespace Loopie
 		m_rotation += 0.01 * dt;
 			
 	}
-	void ParticleModule::Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material)
+	void ParticleModule::Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, const matrix4& billboardTransform)
 	{
 			if (!m_active)
 			{
@@ -64,11 +64,13 @@ namespace Loopie
 			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));*/
 
-			//I SUPOUSE THIS TRANSFORM IS THE ONE TO PASS TO RENDER BECAUSE IT CALCULATES USING CAMERA POSITION ??
-			//HOW TO PUT CAMERA IN HERE??
-			matrix4 transform = m_billboard.get()->UpdateCalc(camera pos);
+		    // transform + billboard
+			matrix4 transform = billboardTransform;
+			transform = translate(transform, m_position);
+			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
+			transform = scale(transform, vec3(size, size, 1.0f));
 
-			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
+
 			UniformValue colorUni;
 			colorUni.type = UniformType_vec4;
 			colorUni.value = color;

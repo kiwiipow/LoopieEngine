@@ -3,6 +3,7 @@
 #include "Loopie/Render/VertexArray.h"
 #include "Loopie/Resources/Types/Material.h"
 #include "Loopie/Resources/Types/Texture.h"
+#include "Loopie/ParticleSystemEn/BillBoardComponent.h"
 
 #include "Loopie/Math/MathTypes.h"
 #include <vector>
@@ -11,7 +12,7 @@
 namespace Loopie 
 {
 	enum ParticleType;
-
+	class Camera;
 	struct ParticleProps
 	{
 		vec3 Position = vec3(0.0f);
@@ -40,7 +41,7 @@ namespace Loopie
 			unsigned int m_poolIndex;
 
 			ParticleProps m_particleProperties;
-
+			std::shared_ptr<Billboard> m_billboard;
 			/*Texture* m_texture;*/
 
 		public:
@@ -48,7 +49,7 @@ namespace Loopie
 			Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate);
 
 			void OnUpdate(float dt);
-			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material);
+			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam);
 			void Emit(const ParticleProps& particleProps);
 
 			void AddModule(ParticleType type);
