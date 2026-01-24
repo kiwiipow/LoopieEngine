@@ -20,19 +20,20 @@ namespace Loopie
 		m_transform = matrix4(1.0f);
 	}
 	matrix4  Billboard::UpdateCalc(Camera* cam)
-	{//SHOULD ADD SWITCH HERE DEPENDING ON BILLBOARD TYPE
+	{
+		//SHOULD ADD SWITCH HERE DEPENDING ON BILLBOARD TYPE
+
+		//https://learnopengl.com/Getting-started/Camera
+
+		//THIS WOULD BE CAMERA ALIGNED 
+		vec3 billboardPos = m_position;
 		vec3 cameraPos = cam->GetPosition();
-		//MATH CALCS
-		vec3 directionFromCamera = m_position - cameraPos;
-		float theta{ glm::atan(directionFromCamera.y, directionFromCamera.x) };
-		float distance2D{glm::sqrt(directionFromCamera.x * directionFromCamera.x +
-								   directionFromCamera.y * directionFromCamera.y)};
-		float phi{ glm::atan(directionFromCamera.z, distance2D) };
+		vec3 cameraUp = cam->GetUp();
 
-		m_transform = matrix4(1.0f);
-		m_transform = translate(m_transform, m_position);
-		m_transform = m_transform * glm::eulerAngleXYZ(0.0f, phi, theta);
+		matrix4 lookAtMatrix = glm::lookAt(billboardPos, cameraPos, cameraUp);
 
+		m_transform = glm::inverse(lookAtMatrix);
+		
 		return m_transform;
 	}
 	//vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex, BillboardType Btype)
