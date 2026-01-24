@@ -68,19 +68,22 @@ namespace Loopie {
 	
 		struct RenderParticlesData
 		{
-			//MaxInstances
-			//count
+			const unsigned int maxInstances = 1000;
+			unsigned int count = 0;
 			//VBOs
 
 			struct PosSizeData_ 
 			{
-				//vec2 and float
+				vec3 position;
+				float size;
+
+				PosSizeData_(vec3& pos_, float size_) : position(pos_), size(size_) {}
 				
 			};
 			struct ColorData_
 			{
-				//vec4 color
-
+				vec4 color;
+				ColorData_(vec4& col) : color(col) {}
 			};
 			std::vector<PosSizeData_> PosSizeData;
 			std::vector<ColorData_> ColorData;
@@ -129,8 +132,9 @@ namespace Loopie {
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform);
 		static void SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix);
 		static void FlushRenderQueue();
-		static void AddParticleItem();
-		static void FlushParticleItems();
+
+		static void AddParticleItem(vec3 &position, float size, vec4 &color);
+		static void FlushParticleItems(std::shared_ptr<Material> material);
 	public:
 	private:
 

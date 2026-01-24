@@ -12,6 +12,7 @@
 namespace Loopie {
 
 	std::vector<Renderer::RenderItem> Renderer::s_RenderQueue = std::vector<Renderer::RenderItem>();
+	Renderer::RenderParticlesData Renderer::s_ParticlesData = Renderer::RenderParticlesData();
 	std::vector<Camera*> Renderer::s_RenderCameras = std::vector<Camera*>();
 	std::shared_ptr<UniformBuffer> Renderer::s_MatricesUniformBuffer = nullptr;
 	bool Renderer::s_UseGizmos = true;
@@ -126,16 +127,6 @@ namespace Loopie {
 		s_RenderQueue.emplace_back(RenderItem{ vao, vao->GetIndexBuffer().GetCount(), material, transform});
 	}
 
-	void Renderer::AddParticleItem()
-	{
-
-	}
-
-	void Renderer::FlushParticleItems()
-	{
-
-	}
-
 
 	void Renderer::FlushRenderItem(std::shared_ptr<VertexArray> vao, std::shared_ptr<Material> material, const Transform* transform)
 	{
@@ -164,6 +155,57 @@ namespace Loopie {
 		}
 
 		s_RenderQueue.clear();
+	}
+
+	void Renderer::AddParticleItem(vec3& position, float size, vec4& color)
+	{
+		if (s_ParticlesData.count >= s_ParticlesData.maxInstances) 
+		{
+			return;
+		}
+
+		RenderParticlesData::PosSizeData_ posSize(position, size);
+		s_ParticlesData.PosSizeData.push_back(posSize);
+
+		RenderParticlesData::ColorData_ colorData(color);
+		s_ParticlesData.ColorData.push_back(colorData);
+
+		s_ParticlesData.count++;
+	}
+
+	void Renderer::FlushParticleItems(std::shared_ptr<Material> material)
+	{
+		std::vector<float> posSizeBuffer;
+
+		for (size_t i = 0; i < s_ParticlesData.PosSizeData.size(); i++)
+		{
+			posSizeBuffer.push_back(s_ParticlesData.PosSizeData[i].position.x);
+			posSizeBuffer.push_back(s_ParticlesData.PosSizeData[i].position.y);
+			posSizeBuffer.push_back(s_ParticlesData.PosSizeData[i].position.z);
+			posSizeBuffer.push_back(s_ParticlesData.PosSizeData[i].size);
+		}
+
+		std::vector<float> colorBuffer;
+
+		for (size_t i = 0; i < s_ParticlesData.ColorData.size(); i++)
+		{
+			colorBuffer.push_back(s_ParticlesData.ColorData[i].color.r);
+			colorBuffer.push_back(s_ParticlesData.ColorData[i].color.g);
+			colorBuffer.push_back(s_ParticlesData.ColorData[i].color.b);
+			colorBuffer.push_back(s_ParticlesData.ColorData[i].color.a);
+		}
+
+		s_posSizeVBO->SetData(posSizeBuffer.data(), posSizeBuffer.size() * sizeof(float));
+		s_colorVBO->SetData(colorBuffer.data(), colorBuffer.size() * sizeof(float));
+
+		VertexArray particleVAO;
+		particleVAO.Bind();
+
+		//Here we should stard binding the VBOs (we have the billboard, posSize and color),
+		//applying the glVertexAttribPointer functions and all that, but don't really know how right now
+		//When we do pass the data to the glVertexAttribPointer, we should do it "4 * sizeof(float)" for posSizeData and 4* sizeof(float) for color 
+		//(I think)
+		//After binding material i think we can already use the glDrawArraysInstanced function
 	}
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)
