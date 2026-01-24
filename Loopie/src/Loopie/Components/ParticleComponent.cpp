@@ -1,5 +1,5 @@
 #include "ParticleComponent.h"
-
+#include "Loopie/Components/Transform.h"
 namespace Loopie
 {
 	ParticleComponent::ParticleComponent()
@@ -18,11 +18,30 @@ namespace Loopie
 	{
 
 	}
+	void ParticleComponent::Init()
+	{
+		GetTransform()->m_transformNotifier.AddObserver(this);
+	}
 	void ParticleComponent::Update()
 	{
 
 	}
 	void ParticleComponent::Reset()
+	{
+
+	}
+
+	void ParticleComponent::OnNotify(const TransformNotification& id)
+	{
+	}
+
+	JsonNode ParticleComponent::Serialize(JsonNode& parent) const
+	{
+		JsonNode particleObj = parent.CreateObjectField("particlecomponent");
+		return particleObj;
+	}
+
+	void ParticleComponent::Deserialize(const JsonNode& data)
 	{
 
 	}

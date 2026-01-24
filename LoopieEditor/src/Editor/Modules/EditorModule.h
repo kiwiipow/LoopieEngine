@@ -14,6 +14,7 @@
 #include "Editor/Interfaces/Workspace/TopBarInterface.h"
 
 #include "Loopie/ParticleSystemEn/ParticleSystem.h"  
+#include "Loopie/Components/ParticleComponent.h"
 
 namespace Loopie {
 

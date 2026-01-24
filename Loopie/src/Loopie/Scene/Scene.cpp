@@ -5,6 +5,7 @@
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ParticleComponent.h"
 #include "Loopie/Helpers/LoopieHelpers.h"
 #include "Loopie/Resources/AssetRegistry.h"
 
@@ -342,6 +343,15 @@ namespace Loopie {
 						if (meshRenderer)
 						{
 							meshRenderer->Deserialize(node);
+						}
+					}
+					else if (componentNode.Contains("particlecomponent"))
+					{
+						JsonNode node = componentNode.Child("particlecomponent");
+						auto particleComponent = entity->AddComponent<ParticleComponent>();
+						if (particleComponent)
+						{
+							particleComponent->Deserialize(node);
 						}
 					}
 				}
