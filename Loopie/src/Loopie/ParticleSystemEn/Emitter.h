@@ -30,7 +30,7 @@ namespace Loopie
 	class Emitter
 	{
 		private:
-			const char* m_name;
+			std::string m_name;
 			unsigned int m_spawnRate;
 			unsigned int m_maxParticles;
 			float m_emitterTimer;
@@ -44,19 +44,18 @@ namespace Loopie
 			std::shared_ptr<Billboard> m_billboard;
 			/*Texture* m_texture;*/
 
+			void ParticlePresets(ParticleType type);
+
 		public:
-			//Emitter(unsigned int maxParticles);
-			Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate);
+			
+			Emitter(unsigned int maxParticles, ParticleType type, BillboardType bType, vec3 position, unsigned int spawnRate);
 
 			void OnUpdate(float dt);
 			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam);
 			void Emit(const ParticleProps& particleProps);
-
-			void AddModule(ParticleType type);
 			
-			//getters/setters
-			const char* GetName()const;
-			void SetName(const char* n);
+			std::string GetName()const;
+			void SetName(std::string n);
 
 			unsigned int GetSpawnrate()const;
 			void SetSpawnRate(unsigned int spawnR);

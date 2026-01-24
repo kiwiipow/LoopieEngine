@@ -45,7 +45,11 @@ namespace Loopie
 		{
 			CreateCity();
 			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
-			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "Smoke")->AddComponent<ParticleComponent>();
+			m_currentScene->CreateEntity({ 0,1,-8 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem")->AddComponent<ParticleComponent>();
+			//Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
+			//m_particleSystem->AddElemToEmitterArray(smokeEmitter);
+			//m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
+			
 		}
 		
 
@@ -70,27 +74,10 @@ namespace Loopie
 
 		Application::GetInstance().m_notifier.AddObserver(this);
 
-		// Create particle system
-		m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
-
-		//create emiter
-			//Emitter* smokeEmitter = new Emitter(1000);
-			//smokeEmitter->SetName("Smoke");
-			//smokeEmitter->SetPosition(vec3(0.0f, 1.0f, 0.0f));
-			//smokeEmitter->SetSpawnRate(10);
-
-			////set properties to emiter
-			//ParticleProps& smokeProps = smokeEmitter->GetEmissionProperties();
-			//smokeProps.Velocity = vec3(0.0f, 1.0f, 0.0f);
-			//smokeProps.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
-			//smokeProps.ColorBegin = vec4(0.2f, 0.2f, 0.2f, 1.0f);
-			//smokeProps.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
-			//smokeProps.SizeBegin =2.0f;
-			//smokeProps.SizeEnd = 0.1f;
-			//smokeProps.SizeVariation = 0.5f;
-			//smokeProps.LifeTime = 10.0f;
-		Emitter* smokeEmitter = new Emitter(1000, SMOKE_PARTICLE, vec3(0.0f, 1.0f, 0.0f),50);
-		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
+		// CREATE PARTICLE SYSTEM
+	/*	m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
+		Emitter* smokeEmitter = new Emitter(1000, SMOKE,CAMERA_FACING,vec3(0.0f, 1.0f, 0.0f),50);
+		m_particleSystem->AddElemToEmitterArray(smokeEmitter);*/
 
 	}
 
@@ -111,10 +98,16 @@ namespace Loopie
 		m_scene.Update(inputEvent);
 		m_topBar.Update(inputEvent);
 
-		///////////UPDATE PARTICLE SYSTEM ////////////
+		//UPDATE PARTICLE SYSTEM 
+		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
+		{
+			/*Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
+			m_particleSystem->AddElemToEmitterArray(firework);*/
+		}
+
 		float dt = (float)Time::GetDeltaTime();
-		m_particleSystem->OnUpdate(dt);
-		/////////////////////////////////////
+		//m_particleSystem->OnUpdate(dt);
+		
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
 		{
@@ -142,9 +135,7 @@ namespace Loopie
 			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetHeight());
 			buffer->Bind();
 			RenderWorld(cam);
-			///////////////
 			RenderParticles(cam);
-			///////////////
 			Renderer::EndScene();
 
 			if (buffer) {
@@ -157,9 +148,7 @@ namespace Loopie
 			m_scene.StartScene();
 			Renderer::BeginScene(m_scene.GetCamera()->GetViewMatrix(), m_scene.GetCamera()->GetProjectionMatrix(), true);
 			RenderWorld(m_scene.GetCamera());
-			/////////////
 			RenderParticles(m_scene.GetCamera());
-			/////////////////
 			Renderer::EndScene();
 			m_scene.EndScene();
 		}		
@@ -170,9 +159,7 @@ namespace Loopie
 			if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
 				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
 				RenderWorld(m_game.GetCamera());
-				/////////////////////
 				RenderParticles(m_game.GetCamera());
-				//////////////////
 				Renderer::EndScene();
 			}
 			m_game.EndScene();
@@ -297,10 +284,10 @@ namespace Loopie
 	}
 	void EditorModule::RenderParticles(Camera* cam)
 	{
-		if (!m_particleSystem)
+		/*if (!m_particleSystem)
 		{
 			return;
-		}
+		}*/
 		
 		// Prepare render state
 		Renderer::DisableStencil();
@@ -309,7 +296,7 @@ namespace Loopie
 		Renderer::EnableBlend();           
 		Renderer::BlendFunction();
 
-		m_particleSystem->OnRender(cam);
+		//m_particleSystem->OnRender(cam);
 
 		Renderer::EnableDepthMask();       
 		Renderer::DisableBlend();        

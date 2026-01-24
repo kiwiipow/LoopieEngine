@@ -17,7 +17,7 @@ namespace Loopie
 			void UpdateModules();
 			void DrawParticles();
 
-			//getters/setters
+		
 			ParticleComponent* GetParticleComponent();
 			void SetParticleComponent(ParticleComponent* pc);
 
