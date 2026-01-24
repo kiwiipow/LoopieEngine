@@ -1,14 +1,17 @@
 #include "ParticleComponent.h"
 #include "Loopie/Components/Transform.h"
+#include "Loopie/ParticleSystemEn/ParticleSystem.h"
+#include "Loopie/Core/Time.h"
+#include "Loopie/Core/Log.h"
 namespace Loopie
 {
 	ParticleComponent::ParticleComponent()
 	{
-		partSystem = nullptr;
+		m_partSystem = nullptr;
 	}
 	ParticleComponent::ParticleComponent(ParticleSystem* pSystem)
 	{
-		partSystem = pSystem;
+		m_partSystem = pSystem;
 	}
 	void ParticleComponent::Save()
 	{
@@ -24,7 +27,9 @@ namespace Loopie
 	}
 	void ParticleComponent::Update()
 	{
-
+		Log::Info("particle component is being updated!");
+		float dt = (float)Time::GetDeltaTime();
+		m_partSystem->OnUpdate(dt);
 	}
 	void ParticleComponent::Reset()
 	{
@@ -45,13 +50,20 @@ namespace Loopie
 	{
 
 	}
-
-	std::vector<EmitterInstance*> ParticleComponent::GetEmittersVector()
+	std::vector<Emitter*> ParticleComponent::GetEmittersVector()
 	{
-		return emittersVector;
+		return m_partSystem->GetEmitterArray();
 	}
-	void ParticleComponent::AddElemToEmitterVector(EmitterInstance* eInstance)
+	void ParticleComponent::AddElemToEmitterVector(Emitter* emitter)
 	{
-		emittersVector.push_back(eInstance);
+		m_partSystem->AddElemToEmitterArray(emitter);
+	}
+	ParticleSystem* ParticleComponent::GetParticleSystem()
+	{
+		return m_partSystem;
+	}
+	void ParticleComponent::SetParticleSystem(ParticleSystem* pSystem)
+	{
+		m_partSystem = pSystem;
 	}
 }

@@ -58,6 +58,6 @@ namespace Loopie {
 		Shader* m_selectedObjectShader;
 
 		//particle system
-		std::unique_ptr<Loopie::ParticleSystem> m_particleSystem;
+		//std::unique_ptr<Loopie::ParticleSystem> m_particleSystem;
 	};
 }

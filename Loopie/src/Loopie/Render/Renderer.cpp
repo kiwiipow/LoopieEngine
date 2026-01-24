@@ -214,8 +214,6 @@ namespace Loopie {
 	}
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const matrix4& modelMatrix)
 	{
-		std::cout << "shader using " << material->GetShader().GetFilePath() << std::endl;
-
 		material->GetShader().SetUniformMat4("lp_Transform", modelMatrix);
 	}
 	void Renderer::EnableBlend()

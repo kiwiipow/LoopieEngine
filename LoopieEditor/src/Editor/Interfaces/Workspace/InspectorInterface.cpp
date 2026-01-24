@@ -7,6 +7,7 @@
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Components/Camera.h"
 #include "Loopie/Components/MeshRenderer.h"
+#include "Loopie/Components/ParticleComponent.h"
 #include "Loopie/Resources/AssetRegistry.h"
 
 #include <imgui.h>
@@ -63,6 +64,9 @@ namespace Loopie {
 			}
 			else if (component->GetTypeID() == MeshRenderer::GetTypeIDStatic()) {
 				DrawMeshRenderer(static_cast<MeshRenderer*>(component));
+			}
+			else if (component->GetTypeID() == ParticleComponent::GetTypeIDStatic()) {
+				DrawCamera(static_cast<Camera*>(component));
 			}
 		}
 		AddComponent(entity);
@@ -410,7 +414,12 @@ namespace Loopie {
 				ImGui::EndCombo();
 				return;
 			}
-
+			if (ImGui::Selectable("ParticleSystem"))
+			{
+				entity->AddComponent<ParticleComponent>();
+				ImGui::EndCombo();
+				return;
+			}
 
 			///// How To Add More Components
 			// 

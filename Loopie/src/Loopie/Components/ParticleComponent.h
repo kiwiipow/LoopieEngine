@@ -7,7 +7,7 @@
 
 namespace Loopie
 {   
-	class EmitterInstance;
+	class Emitter;
 	class ParticleSystem;
 
 	struct Particle
@@ -24,8 +24,8 @@ namespace Loopie
 	{
 		
 	private:
-		std::vector<EmitterInstance*> emittersVector;
-		ParticleSystem* partSystem;
+		/*std::vector<EmitterInstance*> emittersVector;*/
+		ParticleSystem* m_partSystem;
 	public:
 		DEFINE_TYPE(ParticleComponent)
 		ParticleComponent();
@@ -33,7 +33,7 @@ namespace Loopie
 		void Save();
 		void Load();
 		void Init() override; 
-		void Update();
+		void Update()override;
 		void Reset();
 
 		void OnNotify(const TransformNotification& id) override;
@@ -42,8 +42,11 @@ namespace Loopie
 		void Deserialize(const JsonNode& data) override;
 
 		//getters/seters
-		std::vector<EmitterInstance*> GetEmittersVector();
-		void AddElemToEmitterVector(EmitterInstance* eInstance);
+		std::vector<Emitter*> GetEmittersVector();
+		void AddElemToEmitterVector(Emitter* emitter);
+
+		ParticleSystem* GetParticleSystem();
+		void SetParticleSystem(ParticleSystem* pSystem);
 
 	};
 }

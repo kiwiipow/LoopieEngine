@@ -45,7 +45,11 @@ namespace Loopie
 		{
 			CreateCity();
 			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
-			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "Smoke")->AddComponent<ParticleComponent>();
+			m_currentScene->CreateEntity({ 0,1,-8 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem")->AddComponent<ParticleComponent>();
+			//Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
+			//m_particleSystem->AddElemToEmitterArray(smokeEmitter);
+			//m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
+			
 		}
 		
 
@@ -71,9 +75,9 @@ namespace Loopie
 		Application::GetInstance().m_notifier.AddObserver(this);
 
 		// CREATE PARTICLE SYSTEM
-		m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
+	/*	m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
 		Emitter* smokeEmitter = new Emitter(1000, SMOKE,CAMERA_FACING,vec3(0.0f, 1.0f, 0.0f),50);
-		m_particleSystem->AddElemToEmitterArray(smokeEmitter);
+		m_particleSystem->AddElemToEmitterArray(smokeEmitter);*/
 
 	}
 
@@ -97,12 +101,12 @@ namespace Loopie
 		//UPDATE PARTICLE SYSTEM 
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
 		{
-			Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 7.0f, 0.0f), 20);
-			m_particleSystem->AddElemToEmitterArray(firework);
+			/*Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
+			m_particleSystem->AddElemToEmitterArray(firework);*/
 		}
 
 		float dt = (float)Time::GetDeltaTime();
-		m_particleSystem->OnUpdate(dt);
+		//m_particleSystem->OnUpdate(dt);
 		
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
@@ -280,10 +284,10 @@ namespace Loopie
 	}
 	void EditorModule::RenderParticles(Camera* cam)
 	{
-		if (!m_particleSystem)
+		/*if (!m_particleSystem)
 		{
 			return;
-		}
+		}*/
 		
 		// Prepare render state
 		Renderer::DisableStencil();
@@ -292,7 +296,7 @@ namespace Loopie
 		Renderer::EnableBlend();           
 		Renderer::BlendFunction();
 
-		m_particleSystem->OnRender(cam);
+		//m_particleSystem->OnRender(cam);
 
 		Renderer::EnableDepthMask();       
 		Renderer::DisableBlend();        
