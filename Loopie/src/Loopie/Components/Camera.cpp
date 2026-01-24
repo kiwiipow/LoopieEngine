@@ -121,7 +121,17 @@ namespace Loopie
 		CalculateMatrices();
 		return m_frustum;
 	}
+	vec3 Camera::GetPosition() const {
+		return GetTransform()->GetPosition();
+	}
 
+	vec3 Camera::GetForward() const {
+		return -GetTransform()->Forward();
+	}
+
+	vec3 Camera::GetUp() const {
+		return GetTransform()->Up();
+	}
 
 	void Camera::CalculateMatrices() const
 	{
@@ -192,17 +202,5 @@ namespace Loopie
 		{
 			SetAsMainCamera();
 		}
-	}
-
-	vec3 Camera::GetPosition() const {
-		return GetTransform()->GetPosition();
-	}
-
-	vec3 Camera::GetForward() const {
-		return -GetTransform()->Forward();
-	}
-
-	vec3 Camera::GetUp() const {
-		return GetTransform()->Up();
 	}
 }

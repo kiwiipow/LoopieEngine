@@ -6,6 +6,9 @@
 #include <glm/gtx/quaternion.hpp> // Seems like it is experimental - Will cause error if uncommented
 #include <glm/gtx/matrix_decompose.hpp>
 
+//need for billboard test only
+#include <glm/gtx/euler_angles.hpp>
+///
 // Might want to use wrappers / inliners to ensure glm can be swapped if necessary
 namespace Loopie
 {

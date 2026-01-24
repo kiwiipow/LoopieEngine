@@ -1,5 +1,7 @@
 #include "Emitter.h"
 #include "Loopie/ParticleSystemEn/ParticleModule.h"
+#include "Loopie/Core/Log.h"
+
 
 namespace Loopie
 {
@@ -8,9 +10,10 @@ namespace Loopie
 	{
 		return min + ((float)rand() / (float)RAND_MAX) * (max - min);
 	}
-
 	Emitter::Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate)
 	{
+		m_billboard = std::make_shared<Billboard>(position, CAMERA_FACING);
+
 		switch (type)
 		{
 		case Loopie::SMOKE_PARTICLE:
@@ -22,20 +25,16 @@ namespace Loopie
 			m_active = true;
 			m_poolIndex = 0;
 
-			m_particleProperties.Velocity = vec3(0.0f, 1.0f, 0.0f);
+			m_particleProperties.Velocity = vec3(0.0f, 4.0f, 0.0f);
 			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
-			m_particleProperties.ColorBegin = vec4(0.2f, 0.2f, 0.2f, 1.0f);
-			m_particleProperties.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
-			m_particleProperties.SizeBegin = 2.0f;
-			m_particleProperties.SizeEnd = 0.1f;
+			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
 			m_particleProperties.SizeVariation = 0.5f;
-			m_particleProperties.LifeTime = 10.0f;
-
+			m_particleProperties.ColorBegin = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+			m_particleProperties.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			m_particleProperties.SizeBegin = 0.7f;
+			m_particleProperties.SizeEnd = 0.2f;
+			m_particleProperties.LifeTime = 2;
 			/*m_texture = nullptr;*/
-
-			m_particlePool.resize(m_maxParticles);
-			m_poolIndex = m_maxParticles - 1;
-
 			break;
 		case Loopie::FIREWORK_1_PARTICLE:
 			break;
@@ -60,18 +59,13 @@ namespace Loopie
 			m_particleProperties.SizeEnd = 0;
 			m_particleProperties.SizeVariation = 0.5;
 			m_particleProperties.LifeTime = 1;
-
 			/*m_texture = nullptr;*/
-
-			m_particlePool.resize(m_maxParticles);
-			m_poolIndex = m_maxParticles - 1;
 			break;
 		}
 
-
-
+		m_particlePool.resize(m_maxParticles);
+		m_poolIndex = m_maxParticles - 1;
 	}
-
 	void Emitter::OnUpdate(float dt)
 	{
 		//update emiting like in old editor to be able to use particle type later
@@ -98,8 +92,16 @@ namespace Loopie
 			}
 		}
 	}
-	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material)
+	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam)
 	{
+		if (!cam)
+		{
+			Log::Error("no camera passed to particle billboard!");
+		}
+
+		m_billboard->SetPosition(m_position);
+		matrix4 billboardTransform = m_billboard->UpdateCalc(cam);
+
 		for (auto it = m_particlePool.rbegin(); it != m_particlePool.rend(); ++it)
 		{
 			auto& particle = *it;
@@ -109,7 +111,7 @@ namespace Loopie
 				continue;
 			}
 				
-			particle.Render(quadVAO, material);
+			particle.Render(quadVAO, material, billboardTransform);
 		}
 	}
 	void Emitter::Emit(const ParticleProps& particleProps)
@@ -120,11 +122,16 @@ namespace Loopie
 		particle.SetActive(true);
 		particle.SetPosition(particleProps.Position);
 		particle.SetRotation(RandomFloat(0, twoPi));
+		//position
+		vec3 position = particleProps.Position;
+		position.x += RandomFloat(-particleProps.PositionVariation.x, particleProps.PositionVariation.x);
+		position.z += RandomFloat(-particleProps.PositionVariation.z, particleProps.PositionVariation.z);
+		particle.SetPosition(position);
 
 		// velocity
 		vec3 finalVelocity = particleProps.Velocity;
-		finalVelocity.x += RandomFloat(-particleProps.VelocityVariation.x * 0.5f, particleProps.VelocityVariation.x * 0.5f);
-		finalVelocity.y += RandomFloat(-particleProps.VelocityVariation.y * 0.5f, particleProps.VelocityVariation.y * 0.5f);
+		finalVelocity.x += RandomFloat(-particleProps.VelocityVariation.x * 1.5, particleProps.VelocityVariation.x * 1.5);
+		finalVelocity.y += RandomFloat(-particleProps.VelocityVariation.y * 1.5, particleProps.VelocityVariation.y * 1.5);
 		particle.SetVelocity(finalVelocity);
 
 		// colors

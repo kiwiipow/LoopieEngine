@@ -6,9 +6,9 @@ namespace Loopie
 	ParticleModule::ParticleModule()
 	{
 		m_partType = SMOKE_PARTICLE;
-		m_position = vec3(0,0,0);
+		m_position = vec3(0, 0, 0);
 		m_rotation = 0;
-		m_velocity = vec3(0,0,0);
+		m_velocity = vec3(0, 0, 0);
 		m_colorBegin = vec4(1, 1, 1, 1);
 		m_colorEnd = vec4(1, 1, 1, 1);
 		m_sizeBegin = 1;
@@ -16,6 +16,9 @@ namespace Loopie
 		m_lifetime = 1;
 		m_lifeRemaining = 0;
 		m_active = false;
+
+		//1 BILLBOARD X PARTICLE OR 1 BILLBOARD X EMITTER?? TUTORIAL TREATS BILLBOARDS 1 X EMITTER I THINK??
+		/*m_billboard.pushback(new Billboard(m_position,CAMERA_FACING));*/
 	}
 	
 	void ParticleModule::Update(float dt)
@@ -35,7 +38,7 @@ namespace Loopie
 		m_rotation += 0.01 * dt;
 			
 	}
-	void ParticleModule::Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material)
+	void ParticleModule::Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, const matrix4& billboardTransform)
 	{
 			if (!m_active)
 			{
@@ -57,55 +60,21 @@ namespace Loopie
 			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
 			
 			// transform 
-			matrix4 transform = translate(matrix4(1.0f), vec3(m_position.x, m_position.y, 0.0f));
+			/*matrix4 transform = translate(matrix4(1.0f), vec3(m_position.x, m_position.y, 0.0f));
+			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
+			transform = scale(transform, vec3(size, size, 1.0f));*/
+
+		    // transform + billboard
+			matrix4 transform = billboardTransform;
+			transform = translate(transform, m_position);
 			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));
 
-			//From HERE until THERE, there is the attemp at billboarding. 
-			// To use it, uncomment it and comment the three lines above that modify transform
 
-			//HERE:
-
-			//TEMPORAL
-			//float vertices[] =
-			//{
-			//	//Position        //UVs
-			//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-			//	0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-			//	0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-			//   -0.5f,  0.5f, 0.0f,  0.0f, 1.0f
-			//};
-			// 
-			//vec3 billboardVertices[4];
-			// 
-			//matrix4 transform = matrix4(1.0f);
-
-			//for (size_t i = 0; i < 4; i++)
-			//{
-			//	billboardVertices[i] = m_billboard->CalcVecOriention(*camera, particle.Position, vec2(1.0f, 1.0f), 
-			//	vec2(vertices[3 * i], vertices[3*i + 1]));
-			//	//Log::Info("Vertex {}, x{}, y{}", i, vertices[3 * i], vertices[3 * i + 1]);
-			//	Log::Info("Vertex {} Before: {}, {}, {}", i, vertices[3 * i], vertices[3 * i + 1], vertices[3 * i + 2]);
-			//	Log::Info("Vertex {} After: {}, {}, {}", i, billboardVertices->x, billboardVertices->y, billboardVertices->z);
-			//}
-			//m_quadVBO->SetData(billboardVertices, sizeof(billboardVertices));
-
-			//THERE
-
-			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
 			UniformValue colorUni;
 			colorUni.type = UniformType_vec4;
 			colorUni.value = color;
 			material->SetShaderVariable("u_Color", colorUni);
-
-
-			//THIS IS AN ATTEMPT AT TEXTURES, the variable m_particleTexture that is now in ParticleSystem should either be passed
-			//as an argument through Update or created in this class
-			
-			//UniformValue texUni;
-			//texUni.type = UniformType_Sampler2D;
-			//texUni.value = m_particleTexture->GetDefault(); //We need some equivalent to this
-			//m_particleMaterial->SetShaderVariable("u_Albedo",texUni );
 			
 			//add to renderqueue
 			// Render the particle

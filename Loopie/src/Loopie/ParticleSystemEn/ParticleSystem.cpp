@@ -30,13 +30,10 @@ namespace Loopie
 	{
 		float vertices[] =
 		{
-				//Position        //UVs (For now it breaks the quads)
-								
-
-		   -0.5f, -0.5f, 0.0f,  //1.0f, 1.0f,
-			0.5f, -0.5f, 0.0f,  //1.0f, 1.0f,
-			0.5f,  0.5f, 0.0f,  //1.0f, 1.0f,
-		   -0.5f,  0.5f, 0.0f,  //1.0f, 1.0f
+			-0.5f, -0.5f, 0.0f,    
+			 0.5f, -0.5f, 0.0f,   
+			 0.5f,  0.5f, 0.0f,   
+			-0.5f,  0.5f, 0.0f,    
 		};
 
 		unsigned int indices[] =
@@ -91,7 +88,7 @@ namespace Loopie
 		}
 		
 	}
-	void ParticleSystem::OnRender()
+	void ParticleSystem::OnRender(Camera* cam)
 	{
 		if (!m_quadVAO || !m_particleMaterial)
 		{
@@ -104,7 +101,7 @@ namespace Loopie
 		{
 			if (emitter)
 			{
-				emitter->OnRender(m_quadVAO, m_particleMaterial);
+				emitter->OnRender(m_quadVAO, m_particleMaterial,cam);
 			}
 		}
 	}

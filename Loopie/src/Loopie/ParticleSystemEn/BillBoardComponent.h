@@ -1,7 +1,6 @@
 #pragma once
 #include "Loopie/Math/MathTypes.h"
 #include "Loopie/Math/AABB.h"
-#include "Loopie/Components/Camera.h"
 namespace Loopie
 {
 	class Camera;
@@ -13,22 +12,30 @@ namespace Loopie
 	class Billboard //determines correct particle orientation vectors given a camera. 
 	{               //Does not Update particles or itself.just calculates vector math
 		
-		private:
-			BillboardType Btype;
+		private:  //ALL CODE FROM TUTORIAL USING EULER ANGLES
+		/*	BillboardType Btype;
 			vec3 axisLimits;
-			AABB Bbox;
+			AABB Bbox;*/
+
+			BillboardType Btype;
+			vec3 m_position;
+			matrix4 m_transform;
 
 		public:
-			Billboard();
-			Billboard(BillboardType t);
+			Billboard(vec3 pos, BillboardType t);
+			matrix4  UpdateCalc(Camera* cam);
+			/*Billboard(BillboardType t);*/
 
-			vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex);
-			void DrawDebug();
+			//vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex);
+			//void DrawDebug();
 
 			//getters/setters
 			BillboardType GetType()const;
 			void SetType(BillboardType t);
-			AABB* GetAABB();
+
+			vec3 GetPosition();
+			void SetPosition(vec3 pos);
+			/*AABB* GetAABB();*/
 			
 	};
 }

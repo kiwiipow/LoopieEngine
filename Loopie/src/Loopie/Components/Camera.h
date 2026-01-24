@@ -35,11 +35,11 @@ namespace Loopie
 		vec4 GetViewport() const { return m_viewport; }
 		const Frustum& GetFrustum() const;
 
-		void SetDirty() const;
-
 		vec3 Camera::GetPosition()const;
 		vec3 Camera::GetForward() const;
 		vec3 Camera::GetUp() const;
+
+		void SetDirty() const;
 
 		const std::shared_ptr<FrameBuffer> GetRenderTarget() const { return m_renderTarget; }
 		void SetRenderTarget(std::shared_ptr<FrameBuffer> buffer) { m_renderTarget = buffer; }

@@ -36,7 +36,7 @@ namespace Loopie {
 		void OnInterfaceRender()override;
 	private:
 		void RenderWorld(Camera* camera);
-		void RenderParticles();
+		void RenderParticles(Camera* cam);
 		/// Test
 		void CreateBakerHouse();
 		void CreateCity();
