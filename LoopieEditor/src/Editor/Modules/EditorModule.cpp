@@ -45,6 +45,7 @@ namespace Loopie
 		{
 			CreateCity();
 			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
+			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "Smoke")->AddComponent<ParticleComponent>();
 		}
 		
 

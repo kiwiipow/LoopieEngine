@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "ParticleComponent.h"
+#include "Loopie/Components/ParticleComponent.h"
 namespace Loopie
 {
 	class ParticleComponent;
