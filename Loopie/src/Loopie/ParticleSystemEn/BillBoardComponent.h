@@ -9,33 +9,27 @@ namespace Loopie
 		AXIS_ALIGNED, 
 		SCREEN_ALIGNED
 	};
-	class Billboard //determines correct particle orientation vectors given a camera. 
-	{               //Does not Update particles or itself.just calculates vector math
+	class Billboard  
+	{               
 		
-		private:  //ALL CODE FROM TUTORIAL USING EULER ANGLES
-		/*	BillboardType Btype;
-			vec3 axisLimits;
-			AABB Bbox;*/
-
-			BillboardType Btype;
+		private: 
+			BillboardType m_Btype;
 			vec3 m_position;
 			matrix4 m_transform;
+			AABB m_Bbox;
 
 		public:
 			Billboard(vec3 pos, BillboardType t);
 			matrix4  UpdateCalc(Camera* cam);
-			/*Billboard(BillboardType t);*/
+			void DrawDebug();
 
-			//vec3 CalcVecOriention(const Camera& camera, const vec3& particleWorldPos, vec2& billboardSize, vec2& vertex);
-			//void DrawDebug();
-
-			//getters/setters
 			BillboardType GetType()const;
 			void SetType(BillboardType t);
 
 			vec3 GetPosition();
 			void SetPosition(vec3 pos);
-			/*AABB* GetAABB();*/
+			AABB* GetAABB();
+			void SetAABB(AABB& box);
 			
 	};
 }

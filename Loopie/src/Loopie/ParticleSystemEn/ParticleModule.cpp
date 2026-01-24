@@ -16,9 +16,6 @@ namespace Loopie
 		m_lifetime = 1;
 		m_lifeRemaining = 0;
 		m_active = false;
-
-		//1 BILLBOARD X PARTICLE OR 1 BILLBOARD X EMITTER?? TUTORIAL TREATS BILLBOARDS 1 X EMITTER I THINK??
-		/*m_billboard.pushback(new Billboard(m_position,CAMERA_FACING));*/
 	}
 	
 	void ParticleModule::Update(float dt)
@@ -36,7 +33,7 @@ namespace Loopie
 		m_lifeRemaining -= dt;
 		m_position += m_velocity * dt;
 		m_rotation += 0.01 * dt;
-			
+
 	}
 	void ParticleModule::Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, const matrix4& billboardTransform)
 	{
@@ -57,20 +54,13 @@ namespace Loopie
 
 			float size = mix(m_sizeEnd, m_sizeBegin, life);
 
-			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
-			
-			// transform 
-			/*matrix4 transform = translate(matrix4(1.0f), vec3(m_position.x, m_position.y, 0.0f));
-			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
-			transform = scale(transform, vec3(size, size, 1.0f));*/
-
-		    // transform + billboard
+		    // transform 
 			matrix4 transform = billboardTransform;
 			transform = translate(transform, m_position);
 			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
 			transform = scale(transform, vec3(size, size, 1.0f));
 
-
+			//material
 			UniformValue colorUni;
 			colorUni.type = UniformType_vec4;
 			colorUni.value = color;
@@ -83,7 +73,7 @@ namespace Loopie
 		
 	}
 	
-	//getters/setters
+	
 	ParticleType ParticleModule::GetParticleType()const
 	{
 		return m_partType;

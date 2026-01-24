@@ -12,9 +12,9 @@ namespace Loopie
 	enum ParticleType
 	{
 		SMOKE_PARTICLE,
-		FIREWORK_1_PARTICLE,
-		FIREWORK_2_PARTICLE,
-		FIREWORK_3_PARTICLE,
+		FIREWORK_1,
+		FIREWORK_2,
+		FIREWORK_3,
 	};
 
 	class ParticleModule
@@ -32,16 +32,13 @@ namespace Loopie
 			float m_lifeRemaining;
 			bool m_active;
 
-			//MAYBE NEED TO MOVE TO EMITER SO BOTH PARTYCLE AND SYSTEM HAVE EASIER ACCES TO PAS THE CAMERA??? 
-			/*std::shared_ptr<Billboard> m_billboard;*/
-
 		public:
 
 			ParticleModule();
 			void Update(float dt);
 			void Render(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, const matrix4& billboardTransform);
 
-			//getters/setters
+			
 			ParticleType GetParticleType()const;
 			void SetParticleType(ParticleType t);
 

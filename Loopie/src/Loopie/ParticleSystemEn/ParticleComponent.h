@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
 #include "Loopie/Math/MathTypes.h"
-//#include "Loopie/Components/Component.h"
-//#include "Loopie/Events/EventTypes.h"
 
 namespace Loopie
 {   

@@ -44,17 +44,16 @@ namespace Loopie
 			std::shared_ptr<Billboard> m_billboard;
 			/*Texture* m_texture;*/
 
+			void ParticlePresets(ParticleType type);
+
 		public:
-			//Emitter(unsigned int maxParticles);
-			Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate);
+			
+			Emitter(unsigned int maxParticles, ParticleType type, BillboardType bType, vec3 position, unsigned int spawnRate);
 
 			void OnUpdate(float dt);
 			void OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam);
 			void Emit(const ParticleProps& particleProps);
-
-			void AddModule(ParticleType type);
 			
-			//getters/setters
 			const char* GetName()const;
 			void SetName(const char* n);
 

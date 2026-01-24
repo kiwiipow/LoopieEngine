@@ -5,70 +5,29 @@
 
 namespace Loopie
 {
-	//rand number generator
+	
 	float RandomFloat(float min, float max)
 	{
 		return min + ((float)rand() / (float)RAND_MAX) * (max - min);
 	}
-	Emitter::Emitter(unsigned int maxParticles, ParticleType type, vec3 position, unsigned int spawnRate)
+
+	Emitter::Emitter(unsigned int maxParticles, ParticleType type, BillboardType bType, vec3 position, unsigned int spawnRate)
 	{
-		m_billboard = std::make_shared<Billboard>(position, CAMERA_FACING);
+		m_billboard = std::make_shared<Billboard>(position, bType);
+		m_spawnRate = spawnRate;
+	    m_maxParticles = maxParticles;
+		m_emitterTimer = 0;
+		m_position = position;
+		m_active = true;
+		m_poolIndex = 0;
 
-		switch (type)
-		{
-		case Loopie::SMOKE_PARTICLE:
-			m_name = "Smoke";
-			m_spawnRate = spawnRate;
-			m_maxParticles = maxParticles;
-			m_emitterTimer = 0;
-			m_position = position;
-			m_active = true;
-			m_poolIndex = 0;
-
-			m_particleProperties.Velocity = vec3(0.0f, 4.0f, 0.0f);
-			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
-			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
-			m_particleProperties.SizeVariation = 0.5f;
-			m_particleProperties.ColorBegin = vec4(0.1f, 0.1f, 0.1f, 1.0f);
-			m_particleProperties.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
-			m_particleProperties.SizeBegin = 0.7f;
-			m_particleProperties.SizeEnd = 0.2f;
-			m_particleProperties.LifeTime = 2;
-			/*m_texture = nullptr;*/
-			break;
-		case Loopie::FIREWORK_1_PARTICLE:
-			break;
-		case Loopie::FIREWORK_2_PARTICLE:
-			break;
-		case Loopie::FIREWORK_3_PARTICLE:
-			break;
-		default:
-			m_name = "DefaultName";
-			m_spawnRate = 10;
-			m_maxParticles = maxParticles;
-			m_emitterTimer = 0;
-			m_position = vec3(0, 0, 0);
-			m_active = true;
-			m_poolIndex = 0;
-
-			m_particleProperties.Velocity = vec3(0, 0, 0);
-			m_particleProperties.VelocityVariation = vec3(1, 1, 0);
-			m_particleProperties.ColorBegin = vec4(1, 1, 1, 1);
-			m_particleProperties.ColorEnd = vec4(1, 1, 1, 0);
-			m_particleProperties.SizeBegin = 1;
-			m_particleProperties.SizeEnd = 0;
-			m_particleProperties.SizeVariation = 0.5;
-			m_particleProperties.LifeTime = 1;
-			/*m_texture = nullptr;*/
-			break;
-		}
-
+		ParticlePresets(type);
+		
 		m_particlePool.resize(m_maxParticles);
 		m_poolIndex = m_maxParticles - 1;
 	}
 	void Emitter::OnUpdate(float dt)
 	{
-		//update emiting like in old editor to be able to use particle type later
 		for (auto& particle : m_particlePool)
 		{
 			if (!particle.GetActive())
@@ -77,20 +36,30 @@ namespace Loopie
 			}
 			particle.Update(dt);
 		}
-		if (m_active && m_spawnRate > 0)
+		if (m_name = "Smoke")
 		{
-			m_emitterTimer += dt;
-			float emissionInterval = 1.0f / m_spawnRate;
-
-			while (m_emitterTimer >= emissionInterval)
+			if (m_active && m_spawnRate > 0)
 			{
-				ParticleProps props = m_particleProperties;
-				props.Position = m_position;
+				m_emitterTimer += dt;
+				float emissionInterval = 1.0f / m_spawnRate;
 
-				Emit(props);
-				m_emitterTimer -= emissionInterval;
+				while (m_emitterTimer >= emissionInterval)
+				{
+					ParticleProps props = m_particleProperties;
+					props.Position = m_position;
+
+					Emit(props);
+					m_emitterTimer -= emissionInterval;
+				}
 			}
+
 		}
+		else if (m_name = "Firework_1")
+		{
+
+
+		}
+		
 	}
 	void Emitter::OnRender(std::shared_ptr<VertexArray> quadVAO, std::shared_ptr<Material> material, Camera* cam)
 	{
@@ -122,6 +91,7 @@ namespace Loopie
 		particle.SetActive(true);
 		particle.SetPosition(particleProps.Position);
 		particle.SetRotation(RandomFloat(0, twoPi));
+
 		//position
 		vec3 position = particleProps.Position;
 		position.x += RandomFloat(-particleProps.PositionVariation.x, particleProps.PositionVariation.x);
@@ -147,23 +117,7 @@ namespace Loopie
 		
 		m_poolIndex = (m_poolIndex - 1) % m_particlePool.size();
 	}
-	void Emitter::AddModule(ParticleType type)
-	{
-		switch (type)
-		{
-		case Loopie::SMOKE_PARTICLE:
 
-			break;
-		case Loopie::FIREWORK_1_PARTICLE:
-			break;
-		case Loopie::FIREWORK_2_PARTICLE:
-			break;
-		case Loopie::FIREWORK_3_PARTICLE:
-			break;
-		default:
-			break;
-		}
-	}
 	const char* Emitter::GetName()const
 	{
 		return m_name;
@@ -224,5 +178,76 @@ namespace Loopie
 	ParticleProps& Emitter::GetEmissionProperties()
 	{ 
 		return m_particleProperties;
+	}
+
+	void Emitter::ParticlePresets(ParticleType type)
+	{
+		switch (type)
+		{
+		case Loopie::SMOKE_PARTICLE:
+			m_name = "Smoke";
+			m_particleProperties.Velocity = vec3(0.0f, 4.0f, 0.0f);
+			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
+			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
+			m_particleProperties.SizeVariation = 0.5f;
+			m_particleProperties.ColorBegin = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+			m_particleProperties.ColorEnd = vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			m_particleProperties.SizeBegin = 0.7f;
+			m_particleProperties.SizeEnd = 0.2f;
+			m_particleProperties.LifeTime = 2;
+			/*m_texture = nullptr;*/
+			break;
+		case Loopie::FIREWORK_1:
+			m_name = "Firework_1";
+			m_particleProperties.Velocity = vec3(0.0f, 10.0f, 0.0f);
+			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
+			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
+			m_particleProperties.SizeVariation = 0.5f;
+			m_particleProperties.ColorBegin = vec4(1.0f, 0.1f, 0.0f, 1.0f); 
+			m_particleProperties.ColorEnd = vec4(1.0f, 0.8f, 0.0f, 0.0f); 
+			m_particleProperties.SizeBegin = 0.6f;
+			m_particleProperties.SizeEnd = 0.0f;
+			m_particleProperties.LifeTime = 1;
+			/*m_texture = nullptr;*/
+			break;
+		case Loopie::FIREWORK_2:
+			m_name = "Firework_2";
+			m_particleProperties.Velocity = vec3(0.0f, 10.0f, 0.0f);
+			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
+			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
+			m_particleProperties.SizeVariation = 0.5f;
+			m_particleProperties.ColorBegin = vec4(0.0f, 0.1f, 0.4f, 1.0f);
+			m_particleProperties.ColorEnd = vec4(0.6f, 0.8f, 1.0f, 0.0f);
+			m_particleProperties.SizeBegin = 0.6f;
+			m_particleProperties.SizeEnd = 0.0f;
+			m_particleProperties.LifeTime = 1;
+			/*m_texture = nullptr;*/
+			break;
+		case Loopie::FIREWORK_3:
+			m_name = "Firework_3";
+			m_particleProperties.Velocity = vec3(0.0f, 10.0f, 0.0f);
+			m_particleProperties.VelocityVariation = vec3(0.5f, 0.3f, 0.0f);
+			m_particleProperties.PositionVariation = vec3(0.8f, 0.0f, 0.8f);
+			m_particleProperties.SizeVariation = 0.5f;
+			m_particleProperties.ColorBegin = vec4(0.1f, 0.9f, 0.1f, 1.0f);
+			m_particleProperties.ColorEnd = vec4(0.2f, 1.0f, 1.0f, 0.0f);
+			m_particleProperties.SizeBegin = 0.6f;
+			m_particleProperties.SizeEnd = 0.0f;
+			m_particleProperties.LifeTime = 1;
+			/*m_texture = nullptr;*/
+			break;
+		default:
+			m_name = "DefaultParticle";
+			m_particleProperties.Velocity = vec3(0, 0, 0);
+			m_particleProperties.VelocityVariation = vec3(1, 1, 0);
+			m_particleProperties.ColorBegin = vec4(1, 1, 1, 1);
+			m_particleProperties.ColorEnd = vec4(1, 1, 1, 1);
+			m_particleProperties.SizeBegin = 1;
+			m_particleProperties.SizeEnd = 1;
+			m_particleProperties.SizeVariation = 0.5;
+			m_particleProperties.LifeTime = 1;
+			/*m_texture = nullptr;*/
+			break;
+		}
 	}
 }

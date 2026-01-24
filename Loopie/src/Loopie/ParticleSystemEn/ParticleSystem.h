@@ -28,7 +28,7 @@ namespace Loopie
 			~ParticleSystem();
 	
 
-			void OnUpdate(float dt);//time step
+			void OnUpdate(float dt);
 			void OnRender(Camera* cam);
 
 			void AddElemToEmitterArray(Emitter* em);
