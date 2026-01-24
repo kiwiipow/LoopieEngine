@@ -66,7 +66,7 @@ namespace Loopie {
 				DrawMeshRenderer(static_cast<MeshRenderer*>(component));
 			}
 			else if (component->GetTypeID() == ParticleComponent::GetTypeIDStatic()) {
-				DrawCamera(static_cast<Camera*>(component));
+				DrawParticleSystem(static_cast<ParticleComponent*>(component));
 			}
 		}
 		AddComponent(entity);
@@ -172,7 +172,42 @@ namespace Loopie {
 		}
 		ImGui::PopID();
 	}
+	void InspectorInterface::DrawParticleSystem(ParticleComponent* partComponent)
+	{
+		ImGui::PushID(partComponent);
+		bool open = ImGui::CollapsingHeader("ParticleSystem");
 
+		if (RemoveComponent(partComponent)) 
+		{
+			ImGui::PopID();
+			return;
+		}
+		if (open) 
+		{
+			bool active = partComponent->GetIsActive();
+			if (ImGui::Checkbox("Active", &active)) 
+			{
+				if (active) { partComponent->SetIsActive(true); }		
+			}
+			//modifiable particlesystem values
+			/*if (ImGui::DragFloat("Name", &fov, 1.0f, 1.0f, 179.0f))
+				camera->SetFov(fov);
+
+			if (ImGui::DragFloat("", &nearPlane, 0.01f, 0.01f, farPlane - 0.01f))
+				camera->SetNearPlane(nearPlane);
+
+			if (ImGui::DragFloat("Far Plane", &farPlane, 1.0f, nearPlane + 0.1f, 10000.0f))
+				camera->SetFarPlane(farPlane);
+
+			if (ImGui::Checkbox("Main Camera", &isMainCamera)) {
+				if (isMainCamera)
+					camera->SetAsMainCamera();
+			}*/
+		}
+
+		ImGui::PopID();
+
+	}
 	void InspectorInterface::DrawMeshRenderer(MeshRenderer* meshRenderer)
 	{
 		ImGui::PushID(meshRenderer);

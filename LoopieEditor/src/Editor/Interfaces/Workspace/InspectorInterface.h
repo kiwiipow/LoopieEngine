@@ -8,7 +8,7 @@ namespace Loopie {
 	class Transform;
 	class Camera;
 	class MeshRenderer;
-
+	class ParticleComponent;
 
 	class InspectorInterface : public Interface , public IObserver<OnEntityOrFileNotification>{
 	public:
@@ -32,6 +32,7 @@ namespace Loopie {
 		void DrawEntityConfig(const std::shared_ptr<Entity>& entity);
 		void DrawTransform(Transform* transform);
 		void DrawCamera(Camera* camera);
+		void DrawParticleSystem(ParticleComponent* partComponent);
 		void DrawMeshRenderer(MeshRenderer* meshRenderer);
 		void AddComponent(const std::shared_ptr<Entity>& entity);
 		bool RemoveComponent(Component* component);
