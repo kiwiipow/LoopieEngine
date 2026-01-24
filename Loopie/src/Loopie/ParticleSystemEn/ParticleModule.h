@@ -32,6 +32,7 @@ namespace Loopie
 			float m_lifeRemaining;
 			bool m_active;
 
+			//MAYBE NEED TO MOVE TO EMITER SO BOTH PARTYCLE AND SYSTEM HAVE EASIER ACCES TO PAS THE CAMERA??? 
 			std::shared_ptr<Billboard> m_billboard;
 
 		public:

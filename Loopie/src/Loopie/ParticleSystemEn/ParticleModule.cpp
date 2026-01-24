@@ -16,6 +16,9 @@ namespace Loopie
 		m_lifetime = 1;
 		m_lifeRemaining = 0;
 		m_active = false;
+
+		//1 BILLBOARD X PARTICLE OR 1 BILLBOARD X EMITTER?? TUTORIAL TREATS BILLBOARDS 1 X EMITTER I THINK??
+		m_billboard.pushback(new Billboard(m_position,CAMERA_FACING));
 	}
 	
 	void ParticleModule::Update(float dt)
@@ -57,9 +60,13 @@ namespace Loopie
 			Log::Info("Particle color: r={}, g={}, b={}, a={}", color.r, color.g, color.b, color.a);
 			
 			// transform 
-			matrix4 transform = translate(matrix4(1.0f), vec3(m_position.x, m_position.y, 0.0f));
+			/*matrix4 transform = translate(matrix4(1.0f), vec3(m_position.x, m_position.y, 0.0f));
 			transform = rotate(transform, m_rotation, vec3(0.0f, 0.0f, 1.0f));
-			transform = scale(transform, vec3(size, size, 1.0f));
+			transform = scale(transform, vec3(size, size, 1.0f));*/
+
+			//I SUPOUSE THIS TRANSFORM IS THE ONE TO PASS TO RENDER BECAUSE IT CALCULATES USING CAMERA POSITION ??
+			//HOW TO PUT CAMERA IN HERE??
+			matrix4 transform = m_billboard.get()->UpdateCalc(camera pos);
 
 			// Set color USE ENGINE UNIFORM TYPES DONT SET MANUALLY
 			UniformValue colorUni;
