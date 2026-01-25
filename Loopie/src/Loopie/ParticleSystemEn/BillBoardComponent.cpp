@@ -10,36 +10,8 @@ namespace Loopie
 		m_transform = matrix4(1.0f);
 	}
 	matrix4  Billboard::UpdateCalc(Camera* cam)
-	{/*
-		switch (m_Btype)
-		{
-		case Loopie::CAMERA_FACING:*/
-
-			/*vec3 billboardPos = m_position;
-			vec3 cameraPos = cam->GetPosition();
-			vec3 cameraUp = cam->GetUp();
-
-			matrix4 lookAtMatrix = glm::lookAt(billboardPos, cameraPos, cameraUp);
-
-			m_transform = glm::inverse(lookAtMatrix);*/
-
-		//	break;
-		//case Loopie::AXIS_ALIGNED:
-
-		//	//vec3 billboardPos = m_position;
-		//	//vec3 cameraPos = cam->GetPosition();
-		//	//vec3 cameraUp = cam->GetUp();
-
-		//	//matrix4 lookAtMatrix = glm::lookAt(billboardPos, cameraPos, cameraUp);
-
-		//	//m_transform = glm::inverse(lookAtMatrix);
-
-		//	break;
-		//case Loopie::SCREEN_ALIGNED:
-		//	break;
-		//default:
-		//	break;
-		//}
+	{
+		//camera aligned
 		vec3 billboardPos = m_position;
 		vec3 cameraPos = cam->GetPosition();
 		vec3 cameraUp = cam->GetUp();

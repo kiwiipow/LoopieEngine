@@ -217,7 +217,7 @@ namespace Loopie
 			m_particleProperties.SizeBegin = 0.7f;
 			m_particleProperties.SizeEnd = 0.2f;
 			m_particleProperties.LifeTime = 2;
-			/*m_texture = nullptr;*/
+			
 			break;
 		case Loopie::FIREWORK:
 			m_name = "Firework";
@@ -234,7 +234,7 @@ namespace Loopie
 			m_particleProperties.SizeBegin = 0.6f;
 			m_particleProperties.SizeEnd = 0.0f;
 			m_particleProperties.LifeTime = 2.0f;
-			/*m_texture = nullptr;*/
+			
 			break;
 		default:
 			m_name = "DefaultParticle";
@@ -246,7 +246,7 @@ namespace Loopie
 			m_particleProperties.SizeEnd = 1;
 			m_particleProperties.SizeVariation = 0.5;
 			m_particleProperties.LifeTime = 1;
-			/*m_texture = nullptr;*/
+			
 			break;
 		}
 	}

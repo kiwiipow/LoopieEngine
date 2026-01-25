@@ -10,21 +10,12 @@ namespace Loopie
 	class Emitter;
 	class ParticleSystem;
 	class Camera;
-	struct Particle
-	{
-		vec3 position;
-		quaternion worldRotation;
-		float age;
-		float lifetime;
-		float velocity;
-		int spriteIndex;
-
-	};
+	
 	class ParticleComponent :public Component, public IObserver<TransformNotification>
 	{
 		
 	private:
-		/*std::vector<EmitterInstance*> emittersVector;*/
+		
 		ParticleSystem* m_partSystem;
 	public:
 		DEFINE_TYPE(ParticleComponent)
@@ -42,7 +33,6 @@ namespace Loopie
 		JsonNode Serialize(JsonNode& parent) const override;
 		void Deserialize(const JsonNode& data) override;
 
-		//getters/seters
 		std::vector<Emitter*> GetEmittersVector();
 		void AddElemToEmitterVector(Emitter* emitter);
 

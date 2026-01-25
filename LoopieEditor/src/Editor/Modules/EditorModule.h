@@ -57,7 +57,5 @@ namespace Loopie {
 		std::shared_ptr<Material> m_selectedObjectMaterial;
 		Shader* m_selectedObjectShader;
 
-		//particle system
-		//std::unique_ptr<Loopie::ParticleSystem> m_particleSystem;
 	};
 }
