@@ -94,8 +94,8 @@ namespace Loopie
 		//UPDATE PARTICLE SYSTEM 
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
 		{
-			/*Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
-			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(firework);*/
+			Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
+			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(firework);
 			
 		}
 
