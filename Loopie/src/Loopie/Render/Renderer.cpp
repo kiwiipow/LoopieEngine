@@ -159,11 +159,15 @@ namespace Loopie {
 
 	void Renderer::AddParticleItem(vec3& position, float size, vec4& color)
 	{
+		//item que ibas a meter a la queue
 		if (s_ParticlesData.count >= s_ParticlesData.maxInstances) 
 		{
-			return;
+			//flushparticleitem() 
+			//reset particledata, position and color queues etc
+			
 		}
 
+		//add item que se quedo sin meter porque estaba llena y empiezas otra vez con la queues etc
 		RenderParticlesData::PosSizeData_ posSize(position, size);
 		s_ParticlesData.PosSizeData.push_back(posSize);
 
@@ -175,6 +179,12 @@ namespace Loopie {
 
 	void Renderer::FlushParticleItems(std::shared_ptr<Material> material)
 	{
+		Renderer::DisableStencil();
+		Renderer::EnableDepth();
+		Renderer::EnableDepthMask();
+		Renderer::EnableBlend();
+		Renderer::BlendFunction();
+
 		std::vector<float> posSizeBuffer;
 
 		for (size_t i = 0; i < s_ParticlesData.PosSizeData.size(); i++)
@@ -200,12 +210,13 @@ namespace Loopie {
 
 		VertexArray particleVAO;
 		particleVAO.Bind();
-
 		//Here we should stard binding the VBOs (we have the billboard, posSize and color),
 		//applying the glVertexAttribPointer functions and all that, but don't really know how right now
 		//When we do pass the data to the glVertexAttribPointer, we should do it "4 * sizeof(float)" for posSizeData and 4* sizeof(float) for color 
 		//(I think)
 		//After binding material i think we can already use the glDrawArraysInstanced function
+		Renderer::EnableDepthMask();
+		Renderer::DisableBlend();
 	}
 
 	void Renderer::SetRenderUniforms(std::shared_ptr<Material> material, const Transform* transform)

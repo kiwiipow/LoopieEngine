@@ -11,8 +11,12 @@
 
 #include <unordered_set>
 
+#include "Loopie/ParticleSystemEn/ParticleSystem.h"
+#include "Loopie/ParticleSystemEn/Emitter.h"
 
 namespace Loopie {
+	enum ParticleType;
+	enum BillboardType;
 	Scene::Scene(const std::string& filePath)
 	{
 		m_filePath = filePath;
@@ -348,11 +352,14 @@ namespace Loopie {
 					else if (componentNode.Contains("particlecomponent"))
 					{
 						JsonNode node = componentNode.Child("particlecomponent");
+						ParticleSystem* partSystem = new(ParticleSystem);
 						auto particleComponent = entity->AddComponent<ParticleComponent>();
-						if (particleComponent)
+						Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
+						entity->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
+						/*if (particleComponent)
 						{
 							particleComponent->Deserialize(node);
-						}
+						}*/
 					}
 				}
 			}

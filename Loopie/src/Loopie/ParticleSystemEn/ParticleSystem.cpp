@@ -72,37 +72,37 @@ namespace Loopie
 
 	void ParticleSystem::OnUpdate(float dt)
 	{
-		//if (!m_emittersArray.empty())
-		//{
-		//	
-		//	for (auto* emitter : m_emittersArray)
-		//	{
-		//		if (emitter)
-		//		{
-		//			emitter->OnUpdate(dt);
-		//		}
-		//	}
-		//	auto it = m_emittersArray.begin();
-		//	while (it != m_emittersArray.end())
-		//	{
-		//		Emitter* emitter = *it;
-		//		if ((emitter->GetName() == "Firework") && (emitter->IsActive() == false))
-		//		{
-		//			if (emitter->GetActiveParticles() == 0)
-		//			{
-		//				delete emitter; // Free memory
-		//				it = m_emittersArray.erase(it); // Remove from array
-		//				continue;
-		//			}
-		//		}
-		//		++it;
-		//	}
-		//}
-		//else
-		//{ 
-		//	Log::Info("emitter array empty"); 
-		//}
-		//
+		if (!m_emittersArray.empty())
+		{
+			
+			for (auto* emitter : m_emittersArray)
+			{
+				if (emitter)
+				{
+					emitter->OnUpdate(dt);
+				}
+			}
+			auto it = m_emittersArray.begin();
+			while (it != m_emittersArray.end())
+			{
+				Emitter* emitter = *it;
+				if ((emitter->GetName() == "Firework") && (emitter->IsActive() == false))
+				{
+					if (emitter->GetActiveParticles() == 0)
+					{
+						delete emitter; 
+						it = m_emittersArray.erase(it); 
+						continue;
+					}
+				}
+				++it;
+			}
+		}
+		else
+		{ 
+			Log::Info("emitter array empty"); 
+		}
+		
 		//Flush Here
 	}
 	void ParticleSystem::OnRender(Camera* cam)
