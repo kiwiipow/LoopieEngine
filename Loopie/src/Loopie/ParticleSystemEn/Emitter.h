@@ -42,7 +42,6 @@ namespace Loopie
 
 			ParticleProps m_particleProperties;
 			std::shared_ptr<Billboard> m_billboard;
-			/*Texture* m_texture;*/
 
 			void ParticlePresets(ParticleType type);
 
