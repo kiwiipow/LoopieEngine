@@ -3,6 +3,10 @@
 #include "Loopie/ParticleSystemEn/ParticleSystem.h"
 #include "Loopie/Core/Time.h"
 #include "Loopie/Core/Log.h"
+
+//TEMPORARY
+#include <iostream>
+using namespace std;
 namespace Loopie
 {
 	ParticleComponent::ParticleComponent()
@@ -27,9 +31,14 @@ namespace Loopie
 	}
 	void ParticleComponent::Update()
 	{
+		//std::cout << "particle update"<<endl;
 		Log::Info("particle component is being updated!");
 		float dt = (float)Time::GetDeltaTime();
 		m_partSystem->OnUpdate(dt);
+	}
+	void ParticleComponent::Render(Camera* cam)
+	{
+		m_partSystem->OnRender(cam);
 	}
 	void ParticleComponent::Reset()
 	{
@@ -43,12 +52,17 @@ namespace Loopie
 	JsonNode ParticleComponent::Serialize(JsonNode& parent) const
 	{
 		JsonNode particleObj = parent.CreateObjectField("particlecomponent");
+		/*particleObj.CreateField<Material>("material", m_partSystem->GetMaterial());
+		particleObj.CreateField<float>("fov", m_fov);
+		particleObj.CreateField<float>("near_plane", m_nearPlane);
+		particleObj.CreateField<float>("far_plane", m_farPlane);
+		m_partSystem->GetMaterial();*/
 		return particleObj;
 	}
 
 	void ParticleComponent::Deserialize(const JsonNode& data)
 	{
-
+		
 	}
 	std::vector<Emitter*> ParticleComponent::GetEmittersVector()
 	{
@@ -56,7 +70,10 @@ namespace Loopie
 	}
 	void ParticleComponent::AddElemToEmitterVector(Emitter* emitter)
 	{
-		m_partSystem->AddElemToEmitterArray(emitter);
+		if (m_partSystem != nullptr || emitter != nullptr)
+		{
+			m_partSystem->AddElemToEmitterArray(emitter);
+		}
 	}
 	ParticleSystem* ParticleComponent::GetParticleSystem()
 	{

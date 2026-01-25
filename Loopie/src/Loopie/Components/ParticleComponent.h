@@ -9,7 +9,7 @@ namespace Loopie
 {   
 	class Emitter;
 	class ParticleSystem;
-
+	class Camera;
 	struct Particle
 	{
 		vec3 position;
@@ -34,6 +34,7 @@ namespace Loopie
 		void Load();
 		void Init() override; 
 		void Update()override;
+		void Render(Camera* cam);
 		void Reset();
 
 		void OnNotify(const TransformNotification& id) override;

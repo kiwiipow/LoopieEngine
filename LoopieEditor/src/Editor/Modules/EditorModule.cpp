@@ -45,10 +45,10 @@ namespace Loopie
 		{
 			CreateCity();
 			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
-			m_currentScene->CreateEntity({ 0,1,-8 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem")->AddComponent<ParticleComponent>();
-			//Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
-			//m_particleSystem->AddElemToEmitterArray(smokeEmitter);
-			//m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
+			ParticleSystem* partSystem = new(ParticleSystem);
+			m_currentScene->CreateEntity({ 0,1,-8 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem")->AddComponent<ParticleComponent>(partSystem);
+			Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
+			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
 			
 		}
 		
@@ -59,8 +59,7 @@ namespace Loopie
 		m_selectedObjectShader = new Shader("assets/shaders/SelectionOutline.shader");
 		m_selectedObjectMaterial->SetShader(*m_selectedObjectShader);
 
-		////
-
+		
 		m_assetsExplorer.Init();
 		m_topBar.Init();
 		m_hierarchy.Init();
@@ -73,12 +72,6 @@ namespace Loopie
 		m_hierarchy.SetScene(m_currentScene);
 
 		Application::GetInstance().m_notifier.AddObserver(this);
-
-		// CREATE PARTICLE SYSTEM
-	/*	m_particleSystem = std::make_unique<Loopie::ParticleSystem>();
-		Emitter* smokeEmitter = new Emitter(1000, SMOKE,CAMERA_FACING,vec3(0.0f, 1.0f, 0.0f),50);
-		m_particleSystem->AddElemToEmitterArray(smokeEmitter);*/
-
 	}
 
 	void EditorModule::OnUnload()
@@ -102,10 +95,11 @@ namespace Loopie
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
 		{
 			/*Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
-			m_particleSystem->AddElemToEmitterArray(firework);*/
+			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(firework);*/
+			
 		}
 
-		float dt = (float)Time::GetDeltaTime();
+		//float dt = (float)Time::GetDeltaTime();
 		//m_particleSystem->OnUpdate(dt);
 		
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
@@ -159,7 +153,7 @@ namespace Loopie
 			if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
 				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
 				RenderWorld(m_game.GetCamera());
-				RenderParticles(m_game.GetCamera());
+				//RenderParticles(m_game.GetCamera());
 				Renderer::EndScene();
 			}
 			m_game.EndScene();
@@ -238,6 +232,20 @@ namespace Loopie
 					if(renderer->GetMesh())
 						renderers.push_back(renderer);
 				}
+				/*if (component->GetTypeID() == ParticleComponent::GetTypeIDStatic()) {
+					ParticleComponent* particleSystem = static_cast<ParticleComponent*>(component);
+
+					Renderer::DisableStencil();
+					Renderer::EnableDepth();
+					Renderer::EnableDepthMask();
+					Renderer::EnableBlend();
+					Renderer::BlendFunction();
+
+					particleSystem->Render(camera);
+
+					Renderer::EnableDepthMask();
+					Renderer::DisableBlend();
+				}*/
 
 				if (Renderer::IsGizmoActive()) {
 					if(component->GetTypeID() != Camera::GetTypeIDStatic())
@@ -270,7 +278,6 @@ namespace Loopie
 				}
 			}
 		}
-		Renderer::DisableStencil();
 
 		if (Renderer::IsGizmoActive()) {
 			if (selectedEntity)
@@ -281,23 +288,34 @@ namespace Loopie
 			}
 			m_currentScene->GetOctree().DebugDraw(Color::GREEN);
 		}
+
 	}
 	void EditorModule::RenderParticles(Camera* cam)
 	{
-		/*if (!m_particleSystem)
-		{
-			return;
-		}*/
-		
-		// Prepare render state
+		//// Prepare render state
 		Renderer::DisableStencil();
 		Renderer::EnableDepth(); 
 		Renderer::EnableDepthMask();
 		Renderer::EnableBlend();           
 		Renderer::BlendFunction();
 
-		//m_particleSystem->OnRender(cam);
-
+		auto& particleEntities = m_currentScene->GetAllEntities();
+		for (const auto& [id, entity] : particleEntities) 
+		{
+			const std::vector<Component*>& components = entity->GetComponents();
+			for (size_t i = 0; i < components.size(); i++)
+			{
+				Component* component = components[i];
+				if (!component->GetIsActive())
+					continue;
+				if (component->GetTypeID() == ParticleComponent::GetTypeIDStatic()) 
+				{
+					ParticleComponent* particleSystem = static_cast<ParticleComponent*>(component);
+					particleSystem->Render(cam);
+				}
+			}
+			
+		}
 		Renderer::EnableDepthMask();       
 		Renderer::DisableBlend();        
 	}
