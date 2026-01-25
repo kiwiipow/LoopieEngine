@@ -103,7 +103,6 @@ namespace Loopie
 			Log::Info("emitter array empty"); 
 		}
 		
-		//Flush Here
 	}
 	void ParticleSystem::OnRender(Camera* cam)
 	{

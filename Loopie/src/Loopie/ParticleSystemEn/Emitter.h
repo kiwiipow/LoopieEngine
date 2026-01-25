@@ -71,8 +71,6 @@ namespace Loopie
 			int GetActiveParticles() const;
 			bool IsActive() const;
 
-			/*Texture* GetTexture();
-			void SetTexture(Texture* tex);*/
 
 	};
 }

@@ -92,7 +92,6 @@ namespace Loopie
 
 	void EditorModule::OnUpdate()
 	{
-
 		Application& app = Application::GetInstance();
 		InputEventManager& inputEvent = app.GetInputEvent();
 

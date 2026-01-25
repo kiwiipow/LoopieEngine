@@ -5,8 +5,6 @@
 #include "Loopie/Core/Time.h"
 #include "Loopie/Core/Log.h"
 
-//TEMPORARY
-#include <iostream>
 using namespace std;
 namespace Loopie
 {
@@ -38,8 +36,7 @@ namespace Loopie
 		{
 			GetEmittersVector()[i]->SetPosition(pos);
 		}
-		std::cout << "particle update"<<endl;
-		Log::Info("particle component is being updated!");
+		
 		float dt = (float)Time::GetDeltaTime();
 		m_partSystem->OnUpdate(dt);
 	}
@@ -59,11 +56,6 @@ namespace Loopie
 	JsonNode ParticleComponent::Serialize(JsonNode& parent) const
 	{
 		JsonNode particleObj = parent.CreateObjectField("particlecomponent");
-		/*particleObj.CreateField<Material>("material", m_partSystem->GetMaterial());
-		particleObj.CreateField<float>("fov", m_fov);
-		particleObj.CreateField<float>("near_plane", m_nearPlane);
-		particleObj.CreateField<float>("far_plane", m_farPlane);
-		m_partSystem->GetMaterial();*/
 		return particleObj;
 	}
 
