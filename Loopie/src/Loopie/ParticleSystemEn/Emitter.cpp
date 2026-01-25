@@ -28,6 +28,7 @@ namespace Loopie
 	}
 	void Emitter::OnUpdate(float dt)
 	{
+		
 		for (auto& particle : m_particlePool)
 		{
 			if (particle.GetActive() == false)
@@ -111,7 +112,7 @@ namespace Loopie
 		particle.SetRotation(RandomFloat(0, (2 *Math::PI)));
 
 		//position
-		vec3 position = particleProps.Position;
+		vec3 position = vec3(0.0f);
 		position.x += RandomFloat(-particleProps.PositionVariation.x, particleProps.PositionVariation.x);
 		position.z += RandomFloat(-particleProps.PositionVariation.z, particleProps.PositionVariation.z);
 		particle.SetPosition(position);

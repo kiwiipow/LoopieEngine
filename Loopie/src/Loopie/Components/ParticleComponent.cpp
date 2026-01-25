@@ -1,6 +1,7 @@
 #include "ParticleComponent.h"
 #include "Loopie/Components/Transform.h"
 #include "Loopie/ParticleSystemEn/ParticleSystem.h"
+#include "Loopie/ParticleSystemEn/Emitter.h"
 #include "Loopie/Core/Time.h"
 #include "Loopie/Core/Log.h"
 
@@ -31,7 +32,13 @@ namespace Loopie
 	}
 	void ParticleComponent::Update()
 	{
-		//std::cout << "particle update"<<endl;
+		vec3 pos = GetOwner()->GetComponent<Transform>()->GetPosition();
+		vec3 localPos = GetOwner()->GetComponent<Transform>()->GetLocalPosition();
+		for (size_t i = 0; i < GetEmittersVector().size(); i++)
+		{
+			GetEmittersVector()[i]->SetPosition(pos);
+		}
+		std::cout << "particle update"<<endl;
 		Log::Info("particle component is being updated!");
 		float dt = (float)Time::GetDeltaTime();
 		m_partSystem->OnUpdate(dt);
