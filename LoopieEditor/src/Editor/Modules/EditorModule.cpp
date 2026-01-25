@@ -18,13 +18,9 @@
 #include "Loopie/Components/MeshRenderer.h"
 #include "Loopie/Components/Transform.h"
 #include "Loopie/Resources/Types/Material.h"
-///
-//temporal!
+
 #include "Loopie/ParticleSystemEn/Emitter.h"
-
 #include <glad/glad.h>
-
-//particles
 #include "Loopie/Core/Time.h"
 
 namespace Loopie
@@ -45,10 +41,19 @@ namespace Loopie
 		{
 			CreateCity();
 			m_currentScene->CreateEntity({ 0,1,-10 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "MainCamera")->AddComponent<Camera>();
+
 			ParticleSystem* partSystem = new(ParticleSystem);
-			m_currentScene->CreateEntity({ 0,1,-8 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem")->AddComponent<ParticleComponent>(partSystem);
-			Emitter* smokeEmitter = new Emitter(1000, SMOKE, CAMERA_FACING, vec3(0.0f, 1.0f, 0.0f), 50);
-			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter);
+
+			std::shared_ptr<Entity> e1 = m_currentScene->CreateEntity({ 16,8,16 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem");
+			e1->AddComponent<ParticleComponent>(partSystem);
+			Emitter* smokeEmitter1 = new Emitter(1000, SMOKE, CAMERA_FACING, e1->GetTransform()->GetPosition(), 50);
+			e1->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter1);
+
+
+			std::shared_ptr<Entity> e2 = m_currentScene->CreateEntity({ -20,8,16 }, { 1,0,0,0 }, { 1,1,1 }, nullptr, "ParticleSystem");
+			e2->AddComponent<ParticleComponent>(partSystem);
+			Emitter* smokeEmitter2 = new Emitter(1000, SMOKE, CAMERA_FACING, e2->GetTransform()->GetPosition(), 50);
+			e2->GetComponent<ParticleComponent>()->AddElemToEmitterVector(smokeEmitter2);
 			
 		}
 		
@@ -91,16 +96,13 @@ namespace Loopie
 		m_scene.Update(inputEvent);
 		m_topBar.Update(inputEvent);
 
-		//UPDATE PARTICLE SYSTEM 
+		//Launch Firework
 		if (inputEvent.GetKeyStatus(SDL_SCANCODE_1) == KeyState::DOWN)
 		{
-			Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 10.0f, 0.0f), 20);
+			Emitter* firework = new Emitter(1000, FIREWORK, CAMERA_FACING, vec3(0.0f, 5.0f,10.0f), 20);
 			m_currentScene->GetEntity("ParticleSystem")->GetComponent<ParticleComponent>()->AddElemToEmitterVector(firework);
 			
 		}
-
-		//float dt = (float)Time::GetDeltaTime();
-		//m_particleSystem->OnUpdate(dt);
 		
 		const std::vector<Camera*>& cameras = Renderer::GetRendererCameras();
 		for (const auto cam : cameras)
@@ -125,7 +127,6 @@ namespace Loopie
 				continue;
 
 			Renderer::BeginScene(cam->GetViewMatrix(), cam->GetProjectionMatrix(), false);
-			//Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetWidth()); //why with 2 times??
 			Renderer::SetViewport(0, 0, buffer->GetWidth(), buffer->GetHeight());
 			buffer->Bind();
 			RenderWorld(cam);
@@ -153,7 +154,7 @@ namespace Loopie
 			if (m_game.GetCamera() && m_game.GetCamera()->GetIsActive()) {
 				Renderer::BeginScene(m_game.GetCamera()->GetViewMatrix(), m_game.GetCamera()->GetProjectionMatrix(), false);
 				RenderWorld(m_game.GetCamera());
-				//RenderParticles(m_game.GetCamera());
+				RenderParticles(m_game.GetCamera());
 				Renderer::EndScene();
 			}
 			m_game.EndScene();
@@ -232,21 +233,6 @@ namespace Loopie
 					if(renderer->GetMesh())
 						renderers.push_back(renderer);
 				}
-				/*if (component->GetTypeID() == ParticleComponent::GetTypeIDStatic()) {
-					ParticleComponent* particleSystem = static_cast<ParticleComponent*>(component);
-
-					Renderer::DisableStencil();
-					Renderer::EnableDepth();
-					Renderer::EnableDepthMask();
-					Renderer::EnableBlend();
-					Renderer::BlendFunction();
-
-					particleSystem->Render(camera);
-
-					Renderer::EnableDepthMask();
-					Renderer::DisableBlend();
-				}*/
-
 				if (Renderer::IsGizmoActive()) {
 					if(component->GetTypeID() != Camera::GetTypeIDStatic())
 						component->RenderGizmo();
@@ -292,7 +278,6 @@ namespace Loopie
 	}
 	void EditorModule::RenderParticles(Camera* cam)
 	{
-		//// Prepare render state
 		Renderer::DisableStencil();
 		Renderer::EnableDepth(); 
 		Renderer::EnableDepthMask();
